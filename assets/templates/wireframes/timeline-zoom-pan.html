@@ -1,0 +1,69 @@
+<!-- Timeline × Zoom-pan wireframe -->
+<!-- Interactions: drag to pan, scroll to zoom, corner minimap, fit-to-screen. See interaction/zoom-pan.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timeline × Zoom-pan</title>
+<style>
+  :root { --bg: #f5f5f5; --card: #fff; --border: #d0d0d0; --muted: #999; --text: #444; --line: #ccc; --canvas: #fafafa; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font: 12px/1.5 ui-monospace, SFMono-Regular, monospace; background: var(--bg); color: var(--text); padding: 16px; }
+  h1 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  /* <!-- canvas: drag to pan, scroll wheel to zoom in/out --> */
+  .canvas { position: relative; border: 2px solid var(--border); background: var(--canvas); padding: 30px 24px; min-height: 160px; }
+  .canvas-label { position: absolute; top: 4px; left: 8px; font-size: 9px; color: var(--muted); }
+  .milestone-bands { display: flex; gap: 0; margin-bottom: 8px; }
+  .milestone-band { flex: 1; padding: 2px 10px; font-size: 10px; color: var(--muted); border: 1px solid var(--border); background: var(--card); text-align: center; }
+  .timeline { position: relative; display: flex; align-items: center; height: 40px; }
+  .timeline-line { position: absolute; top: 50%; left: 20px; right: 20px; height: 1px; background: var(--line); }
+  .nodes { display: flex; justify-content: space-between; width: 100%; padding: 0 20px; position: relative; }
+  .node { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .node-circle { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--card); }
+  .node-label { font-size: 10px; color: var(--muted); }
+  /* Zoom controls: +/- buttons and fit-to-screen -->  */
+  .zoom-controls { position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column; gap: 2px; }
+  .zoom-btn { width: 22px; height: 22px; border: 1px solid var(--border); background: var(--card); text-align: center; font-size: 12px; color: var(--muted); line-height: 20px; }
+  /* Corner minimap: shows full extent with viewport rectangle -->  */
+  .minimap-rect { position: absolute; bottom: 8px; right: 8px; width: 80px; height: 30px; border: 1px solid var(--border); background: var(--card); }
+  .minimap-viewport { position: absolute; top: 4px; left: 10px; width: 30px; height: 22px; border: 1px dashed var(--muted); }
+  .minimap-label { position: absolute; bottom: 1px; left: 2px; font-size: 7px; color: var(--muted); }
+</style>
+</head>
+<body>
+<h1>Timeline &times; Zoom-pan</h1>
+
+<div class="canvas">
+  <span class="canvas-label">drag to pan &middot; scroll to zoom</span>
+
+  <div class="zoom-controls">
+    <div class="zoom-btn">+</div>
+    <div class="zoom-btn">&minus;</div>
+    <div class="zoom-btn" title="fit to screen" style="font-size:9px;">fit</div>
+  </div>
+
+  <div class="milestone-bands">
+    <div class="milestone-band">Milestone A</div>
+    <div class="milestone-band">Milestone B</div>
+  </div>
+  <div class="timeline">
+    <div class="timeline-line"></div>
+    <div class="nodes">
+      <div class="node"><span class="node-circle"></span><span class="node-label">S1</span></div>
+      <div class="node"><span class="node-circle"></span><span class="node-label">S2</span></div>
+      <div class="node"><span class="node-circle"></span><span class="node-label">S3</span></div>
+      <div class="node"><span class="node-circle"></span><span class="node-label">S4</span></div>
+      <div class="node"><span class="node-circle"></span><span class="node-label">S5</span></div>
+      <div class="node"><span class="node-circle"></span><span class="node-label">S6</span></div>
+    </div>
+  </div>
+
+  <!-- Corner minimap with viewport rectangle -->
+  <div class="minimap-rect">
+    <div class="minimap-viewport"></div>
+    <span class="minimap-label">minimap</span>
+  </div>
+</div>
+</body>
+</html>

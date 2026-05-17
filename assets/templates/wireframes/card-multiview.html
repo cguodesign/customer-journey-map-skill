@@ -1,0 +1,63 @@
+<!-- Card Grid × Multi-view wireframe -->
+<!-- Interactions: tab switching between views, shared filters. See interaction/multi-view.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Card Grid × Multi-view</title>
+<style>
+  :root { --bg: #f5f5f5; --card: #fff; --border: #d0d0d0; --muted: #999; --text: #444; --tab-active: #fff; --tab-inactive: #e8e8e8; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font: 12px/1.5 ui-monospace, SFMono-Regular, monospace; background: var(--bg); color: var(--text); padding: 16px; }
+  h1 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  /* Tab bar: switching between Cards / Emotion Curve / Table views -->  */
+  .tab-bar { display: flex; gap: 0; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .tab { padding: 6px 14px; font-size: 11px; border: 1px solid var(--border); border-bottom: none; background: var(--tab-inactive); color: var(--muted); }
+  .tab.active { background: var(--tab-active); color: var(--text); font-weight: 600; }
+  /* <!-- shared filters persist across tab switches --> */
+  .filter-bar { border: 1px dashed var(--border); padding: 6px 10px; margin-bottom: 12px; color: var(--muted); font-size: 11px; }
+  .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .card { border: 1px solid var(--border); background: var(--card); padding: 10px; min-height: 60px; }
+  .card-title { font-weight: 600; margin-bottom: 4px; }
+  .card-desc { color: var(--muted); font-size: 11px; }
+  .emotion { display: inline-block; border: 1px dashed var(--border); padding: 2px 6px; font-size: 10px; color: var(--muted); margin-top: 6px; }
+</style>
+</head>
+<body>
+<h1>Card Grid &times; Multi-view</h1>
+
+<!-- Tab switching: clicking a tab swaps the view; filters/selection state is shared -->
+<div class="tab-bar">
+  <div class="tab active">Cards</div>
+  <div class="tab">Emotion Curve</div>
+  <div class="tab">Table</div>
+</div>
+
+<div class="filter-bar">[ Search ] [ Filter tags ] — shared across all views</div>
+
+<!-- Active view: Cards -->
+<div class="cards">
+  <div class="card">
+    <div class="card-title">Task 1</div>
+    <div class="card-desc">Placeholder description for task one.</div>
+    <span class="emotion">[emotion]</span>
+  </div>
+  <div class="card">
+    <div class="card-title">Task 2</div>
+    <div class="card-desc">Placeholder description for task two.</div>
+    <span class="emotion">[emotion]</span>
+  </div>
+  <div class="card">
+    <div class="card-title">Task 3</div>
+    <div class="card-desc">Placeholder description for task three.</div>
+    <span class="emotion">[emotion]</span>
+  </div>
+  <div class="card">
+    <div class="card-title">Task 4</div>
+    <div class="card-desc">Placeholder description for task four.</div>
+    <span class="emotion">[emotion]</span>
+  </div>
+</div>
+</body>
+</html>

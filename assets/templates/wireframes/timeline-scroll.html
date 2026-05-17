@@ -1,0 +1,62 @@
+<!-- Timeline × Scroll-driven wireframe -->
+<!-- Interactions: click node for detail, horizontal scroll, filter. See interaction/scroll-driven.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timeline × Scroll-driven</title>
+<style>
+  :root { --bg: #f5f5f5; --card: #fff; --border: #d0d0d0; --muted: #999; --text: #444; --line: #ccc; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font: 12px/1.5 ui-monospace, SFMono-Regular, monospace; background: var(--bg); color: var(--text); padding: 16px; }
+  h1 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  .filter-bar { border: 1px dashed var(--border); padding: 6px 10px; margin-bottom: 12px; color: var(--muted); font-size: 11px; }
+  /* <!-- horizontal scroll container for timeline --> */
+  .timeline-wrap { overflow-x: auto; padding: 12px 0; }
+  .milestone-bands { display: flex; gap: 0; margin-bottom: 4px; }
+  .milestone-band { padding: 2px 10px; font-size: 10px; color: var(--muted); border: 1px solid var(--border); background: var(--card); flex: 1; text-align: center; min-width: 180px; }
+  .timeline { position: relative; display: flex; align-items: center; min-width: 660px; height: 40px; }
+  .timeline-line { position: absolute; top: 50%; left: 20px; right: 20px; height: 1px; background: var(--line); }
+  .nodes { display: flex; justify-content: space-between; width: 100%; padding: 0 20px; position: relative; }
+  .node { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .node-circle { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--card); }
+  .node-circle.active { background: var(--border); }
+  .node-label { font-size: 10px; color: var(--muted); }
+  /* <!-- detail panel: appears below timeline when a node is clicked --> */
+  .detail-panel { border: 1px solid var(--border); background: var(--card); padding: 12px; margin-top: 16px; max-width: 300px; }
+  .detail-title { font-weight: 600; margin-bottom: 4px; }
+  .detail-desc { color: var(--muted); font-size: 11px; }
+  .detail-meta { font-size: 10px; color: var(--muted); margin-top: 6px; border-top: 1px dashed var(--border); padding-top: 6px; }
+</style>
+</head>
+<body>
+<h1>Timeline &times; Scroll-driven</h1>
+<div class="filter-bar">[ Filter ] [ Search ]</div>
+
+<div class="timeline-wrap">
+  <div class="milestone-bands">
+    <div class="milestone-band">Milestone A</div>
+    <div class="milestone-band">Milestone B</div>
+  </div>
+  <div class="timeline">
+    <div class="timeline-line"></div>
+    <div class="nodes">
+      <div class="node"><span class="node-circle"></span><span class="node-label">S1</span></div>
+      <div class="node"><span class="node-circle"></span><span class="node-label">S2</span></div>
+      <div class="node"><span class="node-circle active"></span><span class="node-label">S3</span></div>
+      <div class="node"><span class="node-circle"></span><span class="node-label">S4</span></div>
+      <div class="node"><span class="node-circle"></span><span class="node-label">S5</span></div>
+      <div class="node"><span class="node-circle"></span><span class="node-label">S6</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Expanded detail for S3 (click-to-show) -->
+<div class="detail-panel">
+  <div class="detail-title">S3 — Task 3</div>
+  <div class="detail-desc">Placeholder detail description for step three.</div>
+  <div class="detail-meta">Phase: Milestone A &bull; Emotion: [neutral] &bull; Touchpoint: [placeholder]</div>
+</div>
+</body>
+</html>

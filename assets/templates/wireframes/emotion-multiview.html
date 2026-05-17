@@ -1,0 +1,68 @@
+<!-- Emotion Curve × Multi-view wireframe -->
+<!-- Interactions: tab switching, shared state across views. See interaction/multi-view.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emotion Curve × Multi-view</title>
+<style>
+  :root { --bg: #f5f5f5; --card: #fff; --border: #d0d0d0; --muted: #999; --text: #444; --line: #aaa; --tab-active: #fff; --tab-inactive: #e8e8e8; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font: 12px/1.5 ui-monospace, SFMono-Regular, monospace; background: var(--bg); color: var(--text); padding: 16px; }
+  h1 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  /* Tab bar: switching between Emotion Curve / Cards / Table -->  */
+  .tab-bar { display: flex; gap: 0; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .tab { padding: 6px 14px; font-size: 11px; border: 1px solid var(--border); border-bottom: none; background: var(--tab-inactive); color: var(--muted); }
+  .tab.active { background: var(--tab-active); color: var(--text); font-weight: 600; }
+  /* <!-- shared state: selection and filters persist when switching tabs --> */
+  .filter-bar { border: 1px dashed var(--border); padding: 6px 10px; margin-bottom: 12px; color: var(--muted); font-size: 11px; }
+  .chart-area { border: 1px solid var(--border); background: var(--card); padding: 16px 12px 8px; }
+  .chart-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+  svg { display: block; }
+  .axis-label { font-size: 9px; fill: var(--muted); font-family: ui-monospace, SFMono-Regular, monospace; }
+</style>
+</head>
+<body>
+<h1>Emotion Curve &times; Multi-view</h1>
+
+<!-- Tab switching: clicking a tab swaps view; selected point/filters carry over -->
+<div class="tab-bar">
+  <div class="tab active">Emotion Curve</div>
+  <div class="tab">Cards</div>
+  <div class="tab">Table</div>
+</div>
+
+<div class="filter-bar">[ Search ] [ Filter tags ] — shared across all views</div>
+
+<!-- Active view: Emotion Curve -->
+<div class="chart-area">
+  <div class="chart-label">Emotion over journey steps</div>
+  <svg width="100%" height="120" viewBox="0 0 400 120" preserveAspectRatio="xMidYMid meet">
+    <!-- Y-axis -->
+    <text x="2" y="18" class="axis-label">+</text>
+    <text x="2" y="65" class="axis-label">0</text>
+    <text x="2" y="112" class="axis-label">-</text>
+    <!-- Baseline -->
+    <line x1="20" y1="60" x2="380" y2="60" stroke="#e0e0e0" stroke-width="0.5" stroke-dasharray="4"/>
+    <!-- Emotion curve: valley shape (up, down, up) -->
+    <polyline points="40,30 110,40 180,95 250,100 320,45 380,25"
+      fill="none" stroke="var(--line)" stroke-width="1.5"/>
+    <!-- Data points -->
+    <circle cx="40" cy="30" r="4" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+    <circle cx="110" cy="40" r="4" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+    <circle cx="180" cy="95" r="4" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+    <circle cx="250" cy="100" r="4" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+    <circle cx="320" cy="45" r="4" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+    <circle cx="380" cy="25" r="4" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+    <!-- X-axis step labels -->
+    <text x="40" y="118" class="axis-label" text-anchor="middle">S1</text>
+    <text x="110" y="118" class="axis-label" text-anchor="middle">S2</text>
+    <text x="180" y="118" class="axis-label" text-anchor="middle">S3</text>
+    <text x="250" y="118" class="axis-label" text-anchor="middle">S4</text>
+    <text x="320" y="118" class="axis-label" text-anchor="middle">S5</text>
+    <text x="380" y="118" class="axis-label" text-anchor="middle">S6</text>
+  </svg>
+</div>
+</body>
+</html>

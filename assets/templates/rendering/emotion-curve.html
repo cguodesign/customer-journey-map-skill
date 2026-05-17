@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emotion Curve Rendering Reference</title>
+<!--
+  RENDERING: Emotion Curve
+  SVG line chart plotting emotional valence across journey steps.
+  Best for: emotional arc visibility, identifying pain points and peaks.
+  Combine with: detail-on-demand, focus+context, or scroll-driven interaction.
+-->
+<!-- DATA: Replace placeholder content with journey data. See references/html-rendering-guide.md for field mapping. -->
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1a1a1a;
+    --text-muted: #666666;
+    --border: #e0e0e0;
+    --axis-color: #cccccc;
+    --curve-stroke: #555555;
+    --point-stroke: #444444;
+    --milestone-line: #cccccc;
+
+    /* Valence colors: -2 #fecaca, -1 #fed7aa, 0 #e5e7eb, +1 #bbf7d0, +2 #86efac -->  */
+    --valence-neg2: #fecaca;
+    --valence-neg1: #fed7aa;
+    --valence-neutral: #e5e7eb;
+    --valence-pos1: #bbf7d0;
+    --valence-pos2: #86efac;
+
+    --detail-bg: #fafafa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 32px 24px; max-width: 720px; margin: 0 auto; }
+
+  .chart-container { margin-bottom: 20px; }
+
+  svg { display: block; width: 100%; height: auto; }
+  svg text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+
+  /* Detail card below chart for selected step -->  */
+  .detail-card { background: var(--detail-bg); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; max-width: 360px; }
+  .detail-card h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
+  .detail-card p { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
+  .detail-card .meta { font-size: 0.75rem; color: var(--text-muted); padding-top: 8px; border-top: 1px solid var(--border); margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="chart-container">
+  <!--
+    SVG emotion curve chart.
+    viewBox: 0 0 700 300 — provides space for axes, labels, and curve.
+    Data points: cx derived from step index, cy derived from emotionValence.
+    Valence range: -2 (bottom) to +2 (top).
+    Placeholder data pattern (valley-and-rise): 1, 1, -1, -2, 0, 2, 2
+  -->
+  <svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Gradient fill for area under curve: green (top/positive) to red (bottom/negative) -->
+      <linearGradient id="valenceGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#86efac" stop-opacity="0.4"/>
+        <stop offset="40%" stop-color="#bbf7d0" stop-opacity="0.25"/>
+        <stop offset="50%" stop-color="#e5e7eb" stop-opacity="0.15"/>
+        <stop offset="70%" stop-color="#fed7aa" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="#fecaca" stop-opacity="0.4"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Y-axis labels: +2 to -2 -->
+    <text x="55" y="55" text-anchor="end" font-size="9" fill="#666">+2 Very Positive</text>
+    <text x="55" y="115" text-anchor="end" font-size="9" fill="#666">+1</text>
+    <text x="55" y="175" text-anchor="end" font-size="9" fill="#666">0 Neutral</text>
+    <text x="55" y="235" text-anchor="end" font-size="9" fill="#666">-1</text>
+    <text x="55" y="280" text-anchor="end" font-size="9" fill="#666">-2 Very Negative</text>
+
+    <!-- Y-axis gridlines -->
+    <line x1="65" y1="50" x2="670" y2="50" stroke="#eee" stroke-width="1"/>
+    <line x1="65" y1="110" x2="670" y2="110" stroke="#eee" stroke-width="1"/>
+    <line x1="65" y1="170" x2="670" y2="170" stroke="#ddd" stroke-width="1"/>
+    <line x1="65" y1="230" x2="670" y2="230" stroke="#eee" stroke-width="1"/>
+    <line x1="65" y1="280" x2="670" y2="280" stroke="#eee" stroke-width="1"/>
+
+    <!-- Axes -->
+    <line x1="65" y1="50" x2="65" y2="285" stroke="#ccc" stroke-width="1.5"/>
+    <line x1="65" y1="170" x2="670" y2="170" stroke="#ccc" stroke-width="1"/>
+
+    <!-- Milestone boundary lines (vertical dashed) -->
+    <!-- Milestone A | Milestone B boundary between S3 and S4 -->
+    <line x1="340" y1="40" x2="340" y2="285" stroke="#ccc" stroke-width="1" stroke-dasharray="5,4"/>
+    <text x="200" y="38" text-anchor="middle" font-size="10" fill="#999" font-weight="600">Milestone A</text>
+    <text x="505" y="38" text-anchor="middle" font-size="10" fill="#999" font-weight="600">Milestone B</text>
+
+    <!--
+      Area fill below curve with valence gradient.
+      The area path closes down to the baseline (y=170 neutral) then back.
+    -->
+    <path d="M 100,110 C 140,110 160,110 190,110 C 220,110 240,200 280,230 C 310,260 330,270 370,280 C 400,280 420,220 460,170 C 490,120 510,60 550,50 C 580,45 610,50 640,50 L 640,170 L 100,170 Z"
+          fill="url(#valenceGradient)" stroke="none"/>
+
+    <!--
+      Smooth bezier curve connecting data points.
+      Data: S1=+1(110), S2=+1(110), S3=-1(230), S4=-2(280), S5=0(170), S6=+2(50), S7=+2(50)
+      Y mapping: +2=50, +1=110, 0=170, -1=230, -2=280
+    -->
+    <!-- Data points: cx from step index, cy from emotionValence. Fill color from valence palette -->
+    <path d="M 100,110 C 140,110 160,110 190,110 C 220,110 240,200 280,230 C 310,260 330,270 370,280 C 400,280 420,220 460,170 C 490,120 510,60 550,50 C 580,45 610,50 640,50"
+          fill="none" stroke="#555" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Data point circles at each step position -->
+    <circle cx="100" cy="110" r="6" fill="#bbf7d0" stroke="#444" stroke-width="1.5"/>
+    <circle cx="190" cy="110" r="6" fill="#bbf7d0" stroke="#444" stroke-width="1.5"/>
+    <circle cx="280" cy="230" r="6" fill="#fed7aa" stroke="#444" stroke-width="1.5"/>
+    <circle cx="370" cy="280" r="6" fill="#fecaca" stroke="#444" stroke-width="1.5"/>
+    <circle cx="460" cy="170" r="6" fill="#e5e7eb" stroke="#444" stroke-width="1.5"/>
+    <circle cx="550" cy="50" r="6" fill="#86efac" stroke="#444" stroke-width="1.5"/>
+    <circle cx="640" cy="50" r="6" fill="#86efac" stroke="#444" stroke-width="1.5"/>
+
+    <!-- X-axis step labels -->
+    <text x="100" y="298" text-anchor="middle" font-size="10" fill="#666">S1</text>
+    <text x="190" y="298" text-anchor="middle" font-size="10" fill="#666">S2</text>
+    <text x="280" y="298" text-anchor="middle" font-size="10" fill="#666">S3</text>
+    <text x="370" y="298" text-anchor="middle" font-size="10" fill="#666">S4</text>
+    <text x="460" y="298" text-anchor="middle" font-size="10" fill="#666">S5</text>
+    <text x="550" y="298" text-anchor="middle" font-size="10" fill="#666">S6</text>
+    <text x="640" y="298" text-anchor="middle" font-size="10" fill="#666">S7</text>
+  </svg>
+</div>
+
+<!-- Placeholder detail card area for selected step detail -->
+<div class="detail-card">
+  <h3>Step 4 (Selected)</h3>
+  <p>Description placeholder for the lowest-valence step.</p>
+  <p>Emotion: Very Negative (-2)</p>
+  <div class="meta">
+    Channel: placeholder &middot; Duration: placeholder &middot; Touchpoint: placeholder
+  </div>
+</div>
+
+</body>
+</html>

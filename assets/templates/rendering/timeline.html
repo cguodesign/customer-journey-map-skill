@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timeline Rendering Reference</title>
+<!--
+  RENDERING: Timeline
+  Horizontal axis with step nodes positioned along a time axis.
+  Best for: chronological flow, duration visibility, sequential processes.
+  Combine with: focus+context, scroll-driven, or detail-on-demand interaction.
+-->
+<!-- DATA: Replace placeholder content with journey data. See references/html-rendering-guide.md for field mapping. -->
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1a1a1a;
+    --text-muted: #666666;
+    --border: #e0e0e0;
+    --axis-color: #cccccc;
+    --node-size: 36px;
+    --node-border: #999999;
+    --selected-ring: #3b82f6;
+
+    /* Milestone band colors */
+    --milestone-a: #e8e4f0;
+    --milestone-b: #dbeafe;
+
+    /* Emotion valence palette: -2 to +2 */
+    /* Node fill color uses --valence-color per node */
+    --valence-neg2: #fecaca;
+    --valence-neg1: #fed7aa;
+    --valence-neutral: #e5e7eb;
+    --valence-pos1: #bbf7d0;
+    --valence-pos2: #86efac;
+
+    --detail-bg: #fafafa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 32px 24px; }
+
+  .timeline-container { position: relative; overflow-x: auto; min-width: 600px; padding: 0 20px; }
+
+  /* Milestone bands across the top */
+  .milestone-bands { display: flex; margin-bottom: 4px; gap: 2px; }
+  .milestone-band { flex: 1; text-align: center; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); padding: 6px 0; border-radius: 4px 4px 0 0; }
+  .milestone-band.a { background: var(--milestone-a); }
+  .milestone-band.b { background: var(--milestone-b); }
+
+  /* Axis and nodes row */
+  .axis-row { position: relative; display: flex; align-items: center; justify-content: space-between; padding: 24px 0; }
+  /* Horizontal axis line */
+  .axis-row::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: var(--axis-color); z-index: 0; }
+
+  /* Step node */
+  .node { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; flex: 1; }
+  .node-circle { width: var(--node-size); height: var(--node-size); border-radius: 50%; border: 2px solid var(--node-border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 600; cursor: default;
+    /* Set --valence-color per node for fill */
+    background: var(--valence-color, var(--valence-neutral));
+  }
+  .node-label { margin-top: 8px; font-size: 0.75rem; font-weight: 500; text-align: center; }
+
+  /* Duration labels below nodes -->  */
+  .duration-row { display: flex; justify-content: space-between; }
+  .duration-label { flex: 1; text-align: center; font-size: 0.65rem; color: var(--text-muted); padding-top: 2px; }
+
+  /* Connector lines: solid between sequential steps, dashed for failure/recovery paths -->  */
+  /* (Connectors are part of the axis line; dashed segments would override with border-style: dashed) -->  */
+
+  /* Selected node state -->  */
+  .node.selected .node-circle { border-color: var(--selected-ring); border-width: 3px; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+
+  /* Detail panel expanding below selected node -->  */
+  .detail-panel { background: var(--detail-bg); border: 1px solid var(--border); border-radius: 6px; margin-top: 16px; padding: 16px; max-width: 400px; }
+  .detail-panel h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; }
+  .detail-panel p { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
+  .detail-panel .detail-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; gap: 12px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<div class="timeline-container">
+  <!-- Milestone labels above as colored bands -->
+  <div class="milestone-bands">
+    <div class="milestone-band a" style="flex: 3;">Milestone A</div>
+    <div class="milestone-band b" style="flex: 4;">Milestone B</div>
+  </div>
+
+  <!-- Step nodes along the horizontal axis -->
+  <div class="axis-row">
+    <!-- Node: set --valence-color inline per step's emotion valence -->
+    <div class="node">
+      <div class="node-circle" style="--valence-color: var(--valence-pos1);">S1</div>
+      <div class="node-label">Step 1</div>
+    </div>
+    <div class="node">
+      <div class="node-circle" style="--valence-color: var(--valence-pos1);">S2</div>
+      <div class="node-label">Step 2</div>
+    </div>
+    <div class="node">
+      <div class="node-circle" style="--valence-color: var(--valence-neg1);">S3</div>
+      <div class="node-label">Step 3</div>
+    </div>
+    <!-- Selected node: demonstrates active/focus state -->
+    <div class="node selected">
+      <div class="node-circle" style="--valence-color: var(--valence-neg2);">S4</div>
+      <div class="node-label">Step 4</div>
+    </div>
+    <div class="node">
+      <div class="node-circle" style="--valence-color: var(--valence-neutral);">S5</div>
+      <div class="node-label">Step 5</div>
+    </div>
+    <div class="node">
+      <div class="node-circle" style="--valence-color: var(--valence-pos2);">S6</div>
+      <div class="node-label">Step 6</div>
+    </div>
+    <div class="node">
+      <div class="node-circle" style="--valence-color: var(--valence-pos2);">S7</div>
+      <div class="node-label">Step 7</div>
+    </div>
+  </div>
+
+  <!-- Duration labels below nodes -->
+  <div class="duration-row">
+    <div class="duration-label">2 min</div>
+    <div class="duration-label">5 min</div>
+    <div class="duration-label">1 min</div>
+    <div class="duration-label">10 min</div>
+    <div class="duration-label">3 min</div>
+    <div class="duration-label">2 min</div>
+    <div class="duration-label">1 min</div>
+  </div>
+</div>
+
+<!-- Detail panel for selected step (Step 4) -->
+<div class="detail-panel">
+  <h3>Step 4</h3>
+  <p>Description placeholder for the selected step.</p>
+  <p>Touchpoint: placeholder channel</p>
+  <div class="detail-meta">
+    <span>Emotion: Negative</span>
+    <span>Duration: 10 min</span>
+    <span>Channel: placeholder</span>
+  </div>
+</div>
+
+</body>
+</html>

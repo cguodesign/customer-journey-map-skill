@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- INTERACTION: Zoom + Pan. Canvas-style free navigation for large content.
+     Best for: complex maps, large diagrams, spatial layouts. Combine with: any rendering mode. -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interaction: Zoom + Pan</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#f5f5f5;color:#333;overflow:hidden;height:100vh}
+/* --- Canvas Viewport --- */
+.viewport{width:100%;height:100vh;overflow:hidden;cursor:grab;position:relative}
+.viewport.grabbing{cursor:grabbing}
+/* INTEGRATE: Place any rendering mode's content inside .canvas-content. The zoom-pan system wraps it. */
+.canvas-content{position:absolute;top:0;left:0;width:1600px;height:1200px;transform-origin:0 0}
+.canvas-content.smooth{transition:transform .25s ease-out}
+/* --- Placeholder Blocks --- */
+.node{position:absolute;background:#e0e0e0;border-radius:6px;padding:12px;font-size:12px;color:#666;border:1px solid #ccc}
+/* --- Zoom Controls --- */
+.zoom-controls{position:fixed;top:12px;right:12px;z-index:20;display:flex;flex-direction:column;gap:4px}
+.zoom-controls button{width:32px;height:32px;border:1px solid #ccc;border-radius:4px;background:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.zoom-controls button:hover{background:#eee}
+.zoom-level{position:fixed;top:12px;right:56px;z-index:20;padding:4px 8px;background:#fff;border:1px solid #ccc;border-radius:4px;font-size:11px;color:#888}
+/* --- Corner Minimap --- */
+/* MINIMAP: Draws a scaled-down representation. Update when content changes. */
+.minimap{position:fixed;bottom:12px;right:12px;z-index:20;width:160px;height:120px;background:#fff;border:1px solid #ccc;border-radius:4px;overflow:hidden;cursor:crosshair}
+.minimap-content{position:absolute;top:0;left:0;width:100%;height:100%}
+.minimap .mini-node{position:absolute;background:#d0d0d0;border-radius:2px}
+.minimap-viewport{position:absolute;border:2px solid #888;border-radius:2px;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="viewport" id="viewport">
+  <div class="canvas-content" id="canvas">
+    <div class="node" style="left:50px;top:50px;width:200px;height:100px">Block A</div>
+    <div class="node" style="left:350px;top:80px;width:180px;height:120px">Block B</div>
+    <div class="node" style="left:100px;top:250px;width:220px;height:90px">Block C</div>
+    <div class="node" style="left:600px;top:50px;width:200px;height:140px">Block D</div>
+    <div class="node" style="left:450px;top:300px;width:240px;height:100px">Block E</div>
+    <div class="node" style="left:800px;top:200px;width:180px;height:110px">Block F</div>
+    <div class="node" style="left:200px;top:450px;width:200px;height:100px">Block G</div>
+    <div class="node" style="left:650px;top:500px;width:220px;height:120px">Block H</div>
+  </div>
+</div>
+<div class="zoom-controls">
+  <button id="zIn" title="Zoom in">+</button>
+  <button id="zOut" title="Zoom out">&minus;</button>
+  <button id="zFit" title="Fit to screen">&#x2922;</button>
+</div>
+<div class="zoom-level" id="zoomLevel">100%</div>
+<div class="minimap" id="minimap"> <!-- Corner minimap showing viewport position -->
+  <div class="minimap-content" id="minimapContent"></div>
+  <div class="minimap-viewport" id="minimapVp"></div>
+</div>
+
+<script>
+const viewport = document.getElementById('viewport');
+const canvas = document.getElementById('canvas');
+const zoomLabel = document.getElementById('zoomLevel');
+const minimap = document.getElementById('minimap');
+const minimapVp = document.getElementById('minimapVp');
+const minimapContent = document.getElementById('minimapContent');
+let scale = 1, panX = 0, panY = 0;
+let dragging = false, startX, startY, startPanX, startPanY;
+const CONTENT_W = 1600, CONTENT_H = 1200, MIN_SCALE = 0.1, MAX_SCALE = 3;
+
+// --- Apply Transform ---
+function apply(smooth) {
+  canvas.classList.toggle('smooth', !!smooth);
+  canvas.style.transform = `translate(${panX}px,${panY}px) scale(${scale})`;
+  zoomLabel.textContent = `${Math.round(scale * 100)}%`;
+  updateMinimap();
+}
+
+// --- Mouse Drag to Pan ---
+// Mousedown starts grab, mousemove translates, mouseup releases
+viewport.addEventListener('mousedown', e => {
+  if (e.target.closest('.zoom-controls,.minimap')) return;
+  dragging = true; startX = e.clientX; startY = e.clientY;
+  startPanX = panX; startPanY = panY;
+  viewport.classList.add('grabbing');
+});
+window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  panX = startPanX + (e.clientX - startX);
+  panY = startPanY + (e.clientY - startY);
+  apply(false);
+});
+window.addEventListener('mouseup', () => { dragging = false; viewport.classList.remove('grabbing'); });
+
+// --- Scroll Wheel to Zoom ---
+// Zoom centered on cursor position; ctrlKey handles trackpad pinch
+viewport.addEventListener('wheel', e => {
+  e.preventDefault();
+  const delta = e.ctrlKey ? -e.deltaY * 0.01 : -e.deltaY * 0.002;
+  const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale * (1 + delta)));
+  // Zoom toward cursor position
+  const rect = viewport.getBoundingClientRect();
+  const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
+  panX = cx - (cx - panX) * (newScale / scale);
+  panY = cy - (cy - panY) * (newScale / scale);
+  scale = newScale;
+  apply(false);
+}, { passive: false });
+
+// --- Zoom Buttons ---
+// Smooth zoom from button controls
+function zoomBy(factor) {
+  const rect = viewport.getBoundingClientRect();
+  const cx = rect.width / 2, cy = rect.height / 2;
+  const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale * factor));
+  panX = cx - (cx - panX) * (newScale / scale);
+  panY = cy - (cy - panY) * (newScale / scale);
+  scale = newScale;
+  apply(true);
+}
+document.getElementById('zIn').addEventListener('click', () => zoomBy(1.3));
+document.getElementById('zOut').addEventListener('click', () => zoomBy(0.7));
+
+// --- Fit to Screen ---
+// Calculate scale to fit all content in viewport
+document.getElementById('zFit').addEventListener('click', () => {
+  const rect = viewport.getBoundingClientRect();
+  scale = Math.min(rect.width / CONTENT_W, rect.height / CONTENT_H) * 0.9;
+  panX = (rect.width - CONTENT_W * scale) / 2;
+  panY = (rect.height - CONTENT_H * scale) / 2;
+  apply(true);
+});
+
+// --- Minimap ---
+// Build minimap nodes and update viewport rectangle
+function buildMinimap() {
+  const sx = 160 / CONTENT_W, sy = 120 / CONTENT_H;
+  canvas.querySelectorAll('.node').forEach(n => {
+    const d = document.createElement('div');
+    d.className = 'mini-node';
+    d.style.left = `${parseInt(n.style.left) * sx}px`;
+    d.style.top = `${parseInt(n.style.top) * sy}px`;
+    d.style.width = `${parseInt(n.style.width) * sx}px`;
+    d.style.height = `${parseInt(n.style.height) * sy}px`;
+    minimapContent.appendChild(d);
+  });
+}
+// Update viewport indicator on minimap
+function updateMinimap() {
+  const rect = viewport.getBoundingClientRect();
+  const sx = 160 / CONTENT_W, sy = 120 / CONTENT_H;
+  const vw = rect.width / scale * sx, vh = rect.height / scale * sy;
+  const vx = -panX / scale * sx, vy = -panY / scale * sy;
+  minimapVp.style.left = `${vx}px`; minimapVp.style.top = `${vy}px`;
+  minimapVp.style.width = `${vw}px`; minimapVp.style.height = `${vh}px`;
+}
+// Click/drag on minimap to navigate
+minimap.addEventListener('mousedown', e => {
+  const nav = ev => {
+    const r = minimap.getBoundingClientRect();
+    const mx = (ev.clientX - r.left) / 160 * CONTENT_W;
+    const my = (ev.clientY - r.top) / 120 * CONTENT_H;
+    const vr = viewport.getBoundingClientRect();
+    panX = -(mx - vr.width / scale / 2) * scale;
+    panY = -(my - vr.height / scale / 2) * scale;
+    apply(false);
+  };
+  nav(e);
+  const move = ev => nav(ev);
+  const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); };
+  window.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', up);
+});
+
+buildMinimap();
+apply(false);
+</script>
+</body>
+</html>

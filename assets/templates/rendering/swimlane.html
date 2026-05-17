@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swimlane Rendering Reference</title>
+<!--
+  RENDERING: Swimlane (Service Blueprint)
+  CSS grid with horizontal phases and vertical swim lanes.
+  Best for: service blueprints, multi-layer process views, org alignment.
+  Combine with: scroll-driven, focus+context, or multi-view interaction.
+  Style reference: j-clegg/service-blueprint-skill
+-->
+<!-- DATA: Replace placeholder content with journey data. See references/html-rendering-guide.md for field mapping. -->
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1a1a1a;
+    --text-muted: #666666;
+    --border: #e0e0e0;
+
+    /* Lane colors: background / accent */
+    --customer-bg: #fff9e6;
+    --customer-accent: #c9a227;
+    --frontstage-bg: #fff9e6;
+    --frontstage-accent: #c9a227;
+    --backstage-bg: #ffffff;
+    --backstage-accent: #aaaaaa;
+    --support-bg: #f3f3f3;
+    --support-accent: #999999;
+
+    /* Phase header */
+    --phase-bg: #f5f5f5;
+
+    /* Divider lines */
+    --divider-color: #999999;
+
+    /* Marker colors */
+    --mot-color: #dc2626;
+    --fail-color: #eab308;
+
+    /* Arrow */
+    --arrow-color: #cccccc;
+
+    --label-width: 140px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 24px; overflow-x: auto; }
+
+  /* Blueprint grid: label column + N phase columns */
+  .blueprint { display: grid; grid-template-columns: var(--label-width) repeat(3, 1fr); min-width: 600px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+
+  /* Top-left corner cell */
+  .corner { background: var(--phase-bg); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); padding: 10px; font-size: 0.7rem; color: var(--text-muted); }
+
+  /* Phase headers across top -->  */
+  .phase-header { background: var(--phase-bg); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); padding: 10px 12px; font-size: 0.8rem; font-weight: 600; text-align: center; }
+  .phase-header:last-child { border-right: none; }
+
+  /* Lane label column on the left -->  */
+  .lane-label { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 12px 10px; font-size: 0.75rem; font-weight: 600; writing-mode: horizontal-tb; display: flex; align-items: center; }
+
+  /* Cell in the grid -->  */
+  .cell { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px; display: flex; align-items: center; gap: 6px; min-height: 56px; }
+  .cell:last-child { border-right: none; }
+
+  /* Lane background colors */
+  .lane-customer .lane-label { background: var(--customer-bg); border-left: 3px solid var(--customer-accent); }
+  .lane-customer .cell { background: var(--customer-bg); }
+  .lane-frontstage .lane-label { background: var(--frontstage-bg); border-left: 3px solid var(--frontstage-accent); }
+  .lane-frontstage .cell { background: var(--frontstage-bg); }
+  .lane-backstage .lane-label { background: var(--backstage-bg); border-left: 3px solid var(--backstage-accent); }
+  .lane-backstage .cell { background: var(--backstage-bg); }
+  .lane-support .lane-label { background: var(--support-bg); border-left: 3px solid var(--support-accent); }
+  .lane-support .cell { background: var(--support-bg); }
+
+  /* Action box inside a cell -->  */
+  .box { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; font-size: 0.75rem; position: relative; flex: 1; text-align: center; }
+  /* Each box can carry markers: .mot (red dot top-right), .fail (yellow dot top-left) -->  */
+  .box .marker { position: absolute; width: 7px; height: 7px; border-radius: 50%; }
+  .box .marker.mot { background: var(--mot-color); top: -3px; right: -3px; }
+  .box .marker.fail { background: var(--fail-color); top: -3px; left: -3px; }
+
+  /* Horizontal arrow between phases (CSS-only) -->  */
+  .arrow { color: var(--arrow-color); font-size: 0.9rem; flex-shrink: 0; }
+
+  /* Divider row: spans all columns, dashed line with label -->  */
+  .divider { grid-column: 1 / -1; border-bottom: 2px dashed var(--divider-color); padding: 2px 12px; font-size: 0.65rem; font-weight: 500; color: var(--divider-color); text-transform: uppercase; letter-spacing: 0.05em; background: var(--bg); }
+
+  /* Legend at bottom -->  */
+  .legend { margin-top: 16px; display: flex; gap: 20px; font-size: 0.7rem; color: var(--text-muted); align-items: center; }
+  .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+
+  /* Remove bottom border on last lane row */
+  .blueprint > :last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+
+<div class="blueprint">
+  <!-- Header row: corner + phase headers -->
+  <div class="corner">Lanes / Phases</div>
+  <div class="phase-header">Phase 1</div>
+  <div class="phase-header">Phase 2</div>
+  <div class="phase-header">Phase 3</div>
+
+  <!-- Customer Actions lane -->
+  <div class="lane-label lane-customer"><span>Customer Actions</span></div>
+  <div class="cell lane-customer"><div class="box">Action 1 <span class="marker mot"></span></div></div>
+  <div class="cell lane-customer"><div class="box">Action 2</div></div>
+  <div class="cell lane-customer"><div class="box">Action 3 <span class="marker fail"></span></div></div>
+
+  <!-- Line of Interaction -->
+  <div class="divider">Line of Interaction</div>
+
+  <!-- Frontstage lane -->
+  <div class="lane-label lane-frontstage"><span>Frontstage</span></div>
+  <div class="cell lane-frontstage"><div class="box">Touchpoint A</div></div>
+  <div class="cell lane-frontstage"><div class="box">Touchpoint B</div></div>
+  <div class="cell lane-frontstage"><div class="box">Touchpoint C</div></div>
+
+  <!-- Line of Visibility -->
+  <div class="divider">Line of Visibility</div>
+
+  <!-- Backstage lane -->
+  <div class="lane-label lane-backstage"><span>Backstage</span></div>
+  <div class="cell lane-backstage"><div class="box">Process A</div></div>
+  <div class="cell lane-backstage"><div class="box">Process B</div></div>
+  <div class="cell lane-backstage"><div class="box">Process C</div></div>
+
+  <!-- Line of Internal Interaction -->
+  <div class="divider">Line of Internal Interaction</div>
+
+  <!-- Support Processes lane -->
+  <div class="lane-label lane-support"><span>Support Processes</span></div>
+  <div class="cell lane-support"><div class="box">System X</div></div>
+  <div class="cell lane-support"><div class="box">System Y</div></div>
+  <div class="cell lane-support"><div class="box">System Z</div></div>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <span><span class="legend-dot" style="background: var(--mot-color);"></span> Moment of Truth</span>
+  <span><span class="legend-dot" style="background: var(--fail-color);"></span> Failure Point</span>
+  <span><span class="legend-dot" style="background: var(--customer-accent);"></span> Customer / Frontstage</span>
+  <span><span class="legend-dot" style="background: var(--backstage-accent);"></span> Backstage</span>
+  <span><span class="legend-dot" style="background: var(--support-accent);"></span> Support</span>
+</div>
+
+</body>
+</html>

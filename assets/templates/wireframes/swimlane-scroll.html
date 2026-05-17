@@ -1,0 +1,74 @@
+<!-- Swimlane × Scroll-driven wireframe -->
+<!-- Interactions: horizontal scroll, click box for detail drawer, lane collapse. See interaction/scroll-driven.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swimlane × Scroll-driven</title>
+<style>
+  :root { --bg: #f5f5f5; --card: #fff; --border: #d0d0d0; --muted: #999; --text: #444; --lane-bg: #fafafa; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font: 12px/1.5 ui-monospace, SFMono-Regular, monospace; background: var(--bg); color: var(--text); padding: 16px; }
+  h1 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  /* <!-- horizontal scroll for wide blueprint --> */
+  .blueprint-wrap { overflow-x: auto; }
+  .blueprint { display: grid; grid-template-columns: 90px repeat(3, 140px); min-width: 520px; }
+  /* Phase headers */
+  .phase-header { padding: 4px 8px; font-size: 10px; font-weight: 600; color: var(--muted); border: 1px solid var(--border); background: var(--card); text-align: center; }
+  .corner { border: 1px solid var(--border); background: var(--card); }
+  /* Lane labels: click to collapse/expand lane -->  */
+  .lane-label { padding: 8px 6px; font-size: 10px; font-weight: 600; color: var(--text); border: 1px solid var(--border); background: var(--card); writing-mode: horizontal-tb; display: flex; align-items: center; }
+  .lane-label .toggle { color: var(--muted); margin-right: 4px; font-size: 9px; }
+  /* Cells: click box for detail drawer -->  */
+  .cell { border: 1px solid var(--border); background: var(--lane-bg); padding: 6px; min-height: 44px; }
+  .cell-box { border: 1px solid var(--border); background: var(--card); padding: 4px 6px; font-size: 10px; color: var(--text); }
+  /* Dashed divider between frontstage and backstage -->  */
+  .divider-label { padding: 4px 6px; font-size: 9px; color: var(--muted); border: 1px solid var(--border); background: var(--card); }
+  .divider-cell { border: 1px solid var(--border); border-top: 2px dashed var(--muted); background: var(--lane-bg); padding: 0; height: 4px; }
+</style>
+</head>
+<body>
+<h1>Swimlane &times; Scroll-driven</h1>
+
+<div class="blueprint-wrap">
+<div class="blueprint">
+  <!-- Header row -->
+  <div class="corner"></div>
+  <div class="phase-header">Phase 1</div>
+  <div class="phase-header">Phase 2</div>
+  <div class="phase-header">Phase 3</div>
+
+  <!-- Lane 1: Actions -->
+  <div class="lane-label"><span class="toggle">&#9662;</span> Actions</div>
+  <div class="cell"><div class="cell-box">Task 1</div></div>
+  <div class="cell"><div class="cell-box">Task 2</div></div>
+  <div class="cell"><div class="cell-box">Task 3</div></div>
+
+  <!-- Lane 2: Frontstage -->
+  <div class="lane-label"><span class="toggle">&#9662;</span> Frontstage</div>
+  <div class="cell"><div class="cell-box">Touchpoint A</div></div>
+  <div class="cell"><div class="cell-box">Touchpoint B</div></div>
+  <div class="cell"><div class="cell-box">Touchpoint C</div></div>
+
+  <!-- Dashed line of visibility -->
+  <div class="divider-label">- - -</div>
+  <div class="divider-cell"></div>
+  <div class="divider-cell"></div>
+  <div class="divider-cell"></div>
+
+  <!-- Lane 3: Backstage -->
+  <div class="lane-label"><span class="toggle">&#9662;</span> Backstage</div>
+  <div class="cell"><div class="cell-box">Process X</div></div>
+  <div class="cell"><div class="cell-box">Process Y</div></div>
+  <div class="cell"><div class="cell-box">Process Z</div></div>
+
+  <!-- Lane 4: Support -->
+  <div class="lane-label"><span class="toggle">&#9662;</span> Support</div>
+  <div class="cell"><div class="cell-box">System 1</div></div>
+  <div class="cell"><div class="cell-box">System 2</div></div>
+  <div class="cell"><div class="cell-box">System 3</div></div>
+</div>
+</div>
+</body>
+</html>

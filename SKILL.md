@@ -98,7 +98,7 @@ Transform journey understanding into audience-appropriate output.
    - \> 60 steps → Zoom-pan
    - Multiple audiences → Multi-view (tabs between rendering modes)
 
-   Use the matching template from `assets/templates/` as base. Inject journey data into the template's `journeyData` object. Consult `references/html-rendering-guide.md` for color system and data mapping.
+   Consult `assets/templates/rendering/` for HTML structure, `assets/templates/interaction/` for JS behavior, and `assets/templates/wireframes/` for combined layout reference. See `references/html-rendering-guide.md` for color system and data mapping.
 
 4. Render from journey file data. Include only active categories and filled fields.
 5. Show provenance in output:
@@ -159,6 +159,8 @@ For detailed field vocabulary, format syntax, and rules:
 - **`references/journey.format.md`** — Canonical markdown format: preamble structure, milestone/step syntax, provenance notation, cross-references, complete example.
 
 - **`references/html-rendering-guide.md`** — Interactive HTML rendering: M×N combination matrix, selection logic, color system, data-to-visual mapping.
-- **`assets/templates/*.html`** — 11 self-contained HTML templates (one per valid rendering × interaction combination). Inject journey data into the `journeyData` JS object.
+- **`assets/templates/rendering/`** — 4 rendering mode references (card-grid, timeline, swimlane, emotion-curve). HTML structure + CSS, no JS.
+- **`assets/templates/interaction/`** — 4 interaction mode references (scroll-driven, focus+context, zoom-pan, multi-view). JS behavior patterns.
+- **`assets/templates/wireframes/`** — 11 wireframes (one per valid M×N combination). Minimal layout sketches with integration comments.
 
 Consult these when reading or writing journey files. Do not memorize field lists — reference the schema document when suggesting fields.

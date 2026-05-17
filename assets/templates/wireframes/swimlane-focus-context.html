@@ -1,0 +1,79 @@
+<!-- Swimlane × Focus+Context wireframe -->
+<!-- Interactions: phase minimap at top, viewport indicator, breadcrumb. See interaction/focus-context.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swimlane × Focus+Context</title>
+<style>
+  :root { --bg: #f5f5f5; --card: #fff; --border: #d0d0d0; --muted: #999; --text: #444; --lane-bg: #fafafa; --active: #bbb; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font: 12px/1.5 ui-monospace, SFMono-Regular, monospace; background: var(--bg); color: var(--text); padding: 16px; }
+  h1 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  /* Phase minimap: compressed overview of all phases with viewport highlight -->  */
+  .minimap { display: flex; align-items: center; padding: 6px 10px; border: 1px solid var(--border); background: var(--card); margin-bottom: 6px; gap: 4px; }
+  .minimap-phase { flex: 1; height: 10px; border: 1px solid var(--border); background: var(--bg); }
+  .minimap-phase.in-view { background: var(--active); }
+  .minimap-label { font-size: 9px; color: var(--muted); margin-left: 6px; white-space: nowrap; }
+  .breadcrumb { font-size: 11px; color: var(--muted); margin-bottom: 10px; padding: 4px 0; }
+  .breadcrumb span { color: var(--text); font-weight: 600; }
+  .blueprint-wrap { overflow-x: auto; }
+  .blueprint { display: grid; grid-template-columns: 90px repeat(3, 140px); min-width: 520px; }
+  .phase-header { padding: 4px 8px; font-size: 10px; font-weight: 600; color: var(--muted); border: 1px solid var(--border); background: var(--card); text-align: center; }
+  .corner { border: 1px solid var(--border); background: var(--card); }
+  .lane-label { padding: 8px 6px; font-size: 10px; font-weight: 600; color: var(--text); border: 1px solid var(--border); background: var(--card); }
+  .cell { border: 1px solid var(--border); background: var(--lane-bg); padding: 6px; min-height: 44px; }
+  .cell-box { border: 1px solid var(--border); background: var(--card); padding: 4px 6px; font-size: 10px; }
+  .divider-label { padding: 4px 6px; font-size: 9px; color: var(--muted); border: 1px solid var(--border); background: var(--card); }
+  .divider-cell { border: 1px solid var(--border); border-top: 2px dashed var(--muted); height: 4px; }
+</style>
+</head>
+<body>
+<h1>Swimlane &times; Focus+Context</h1>
+
+<!-- Phase minimap: scroll spy highlights current phase -->
+<div class="minimap">
+  <div class="minimap-phase in-view"></div>
+  <div class="minimap-phase in-view"></div>
+  <div class="minimap-phase"></div>
+  <span class="minimap-label">viewing Phase 1–2 of 3</span>
+</div>
+
+<div class="breadcrumb">Frontstage &gt; <span>Phase 2</span> &gt; Touchpoint B</div>
+
+<div class="blueprint-wrap">
+<div class="blueprint">
+  <div class="corner"></div>
+  <div class="phase-header">Phase 1</div>
+  <div class="phase-header">Phase 2</div>
+  <div class="phase-header">Phase 3</div>
+
+  <div class="lane-label">Actions</div>
+  <div class="cell"><div class="cell-box">Task 1</div></div>
+  <div class="cell"><div class="cell-box">Task 2</div></div>
+  <div class="cell"><div class="cell-box">Task 3</div></div>
+
+  <div class="lane-label">Frontstage</div>
+  <div class="cell"><div class="cell-box">Touchpoint A</div></div>
+  <div class="cell"><div class="cell-box">Touchpoint B</div></div>
+  <div class="cell"><div class="cell-box">Touchpoint C</div></div>
+
+  <div class="divider-label">- - -</div>
+  <div class="divider-cell"></div>
+  <div class="divider-cell"></div>
+  <div class="divider-cell"></div>
+
+  <div class="lane-label">Backstage</div>
+  <div class="cell"><div class="cell-box">Process X</div></div>
+  <div class="cell"><div class="cell-box">Process Y</div></div>
+  <div class="cell"><div class="cell-box">Process Z</div></div>
+
+  <div class="lane-label">Support</div>
+  <div class="cell"><div class="cell-box">System 1</div></div>
+  <div class="cell"><div class="cell-box">System 2</div></div>
+  <div class="cell"><div class="cell-box">System 3</div></div>
+</div>
+</div>
+</body>
+</html>

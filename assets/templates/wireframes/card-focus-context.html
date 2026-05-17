@@ -1,0 +1,63 @@
+<!-- Card Grid × Focus+Context wireframe -->
+<!-- Interactions: sticky minimap, scroll spy, breadcrumb, density toggle. See interaction/focus-context.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Card Grid × Focus+Context</title>
+<style>
+  :root { --bg: #f5f5f5; --card: #fff; --border: #d0d0d0; --muted: #999; --text: #444; --active: #bbb; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font: 12px/1.5 ui-monospace, SFMono-Regular, monospace; background: var(--bg); color: var(--text); padding: 16px; }
+  h1 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  /* Minimap: row of dots representing all cards; scroll-spy highlights current */
+  .minimap { display: flex; gap: 6px; align-items: center; padding: 8px 10px; border: 1px solid var(--border); background: var(--card); margin-bottom: 8px; }
+  .minimap-dot { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg); }
+  .minimap-dot.active { background: var(--active); }
+  .minimap-label { font-size: 10px; color: var(--muted); margin-left: 4px; }
+  /* Breadcrumb: shows current position in hierarchy -->  */
+  .breadcrumb { font-size: 11px; color: var(--muted); margin-bottom: 12px; padding: 4px 0; }
+  .breadcrumb span { color: var(--text); font-weight: 600; }
+  /* <!-- density toggle placeholder: compact / normal / expanded --> */
+  .density { font-size: 10px; color: var(--muted); border: 1px dashed var(--border); display: inline-block; padding: 2px 8px; margin-bottom: 12px; }
+  h2 { font-size: 12px; font-weight: 600; color: var(--muted); margin: 12px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .card { border: 1px solid var(--border); background: var(--card); padding: 10px; min-height: 60px; }
+  .card-title { font-weight: 600; margin-bottom: 4px; }
+  .card-desc { color: var(--muted); font-size: 11px; }
+  .emotion { display: inline-block; border: 1px dashed var(--border); padding: 2px 6px; font-size: 10px; color: var(--muted); margin-top: 6px; }
+</style>
+</head>
+<body>
+<h1>Card Grid &times; Focus+Context</h1>
+
+<!-- Sticky minimap: stays at top during scroll, dots highlight via scroll spy -->
+<div class="minimap">
+  <div class="minimap-dot active"></div>
+  <div class="minimap-dot active"></div>
+  <div class="minimap-dot"></div>
+  <div class="minimap-dot"></div>
+  <div class="minimap-dot"></div>
+  <div class="minimap-dot"></div>
+  <span class="minimap-label">Milestone A &bull; Milestone B</span>
+</div>
+
+<div class="breadcrumb">Milestone A &gt; <span>Task 2</span></div>
+<div class="density">[ Density: compact | normal | expanded ]</div>
+
+<h2>Milestone A</h2>
+<div class="cards">
+  <div class="card"><div class="card-title">Task 1</div><div class="card-desc">Placeholder description.</div><span class="emotion">[emotion]</span></div>
+  <div class="card"><div class="card-title">Task 2</div><div class="card-desc">Placeholder description.</div><span class="emotion">[emotion]</span></div>
+  <div class="card"><div class="card-title">Task 3</div><div class="card-desc">Placeholder description.</div><span class="emotion">[emotion]</span></div>
+</div>
+
+<h2>Milestone B</h2>
+<div class="cards">
+  <div class="card"><div class="card-title">Task 4</div><div class="card-desc">Placeholder description.</div><span class="emotion">[emotion]</span></div>
+  <div class="card"><div class="card-title">Task 5</div><div class="card-desc">Placeholder description.</div><span class="emotion">[emotion]</span></div>
+  <div class="card"><div class="card-title">Task 6</div><div class="card-desc">Placeholder description.</div><span class="emotion">[emotion]</span></div>
+</div>
+</body>
+</html>

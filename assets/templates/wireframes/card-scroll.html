@@ -1,0 +1,73 @@
+<!-- Card Grid × Scroll-driven wireframe -->
+<!-- Interactions: click-to-expand cards, filter bar, sort, search. See interaction/scroll-driven.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Card Grid × Scroll-driven</title>
+<style>
+  :root { --bg: #f5f5f5; --card: #fff; --border: #d0d0d0; --muted: #999; --text: #444; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font: 12px/1.5 ui-monospace, SFMono-Regular, monospace; background: var(--bg); color: var(--text); padding: 16px; }
+  h1 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  h2 { font-size: 12px; font-weight: 600; color: var(--muted); margin: 16px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  /* <!-- filter bar placeholder: search input + sort dropdown + tag filters --> */
+  .filter-bar { border: 1px dashed var(--border); padding: 6px 10px; margin-bottom: 12px; color: var(--muted); font-size: 11px; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .card { border: 1px solid var(--border); background: var(--card); padding: 10px; min-height: 70px; }
+  .card-title { font-weight: 600; margin-bottom: 4px; }
+  .card-desc { color: var(--muted); font-size: 11px; }
+  .emotion { display: inline-block; border: 1px dashed var(--border); padding: 2px 6px; font-size: 10px; color: var(--muted); margin-top: 6px; }
+  /* Expanded card spans full width */
+  .card.expanded { grid-column: 1 / -1; }
+  .backstage, .frontstage { border: 1px dashed var(--border); padding: 6px; margin-top: 6px; font-size: 11px; color: var(--muted); }
+</style>
+</head>
+<body>
+<h1>Card Grid &times; Scroll-driven</h1>
+<div class="filter-bar">[ Search ] [ Sort: A-Z ] [ Filter tags ]</div>
+
+<h2>Milestone A</h2>
+<div class="cards">
+  <!-- click-to-expand: clicking a card toggles expanded state -->
+  <div class="card">
+    <div class="card-title">Task 1</div>
+    <div class="card-desc">Placeholder description for task one.</div>
+    <span class="emotion">[emotion]</span>
+  </div>
+  <div class="card">
+    <div class="card-title">Task 2</div>
+    <div class="card-desc">Placeholder description for task two.</div>
+    <span class="emotion">[emotion]</span>
+  </div>
+  <div class="card expanded">
+    <!-- Expanded state showing backstage / frontstage sections -->
+    <div class="card-title">Task 3 (expanded)</div>
+    <div class="card-desc">Placeholder description for task three.</div>
+    <span class="emotion">[emotion]</span>
+    <div class="frontstage">Frontstage: visible user actions placeholder</div>
+    <div class="backstage">Backstage: internal processes placeholder</div>
+  </div>
+</div>
+
+<h2>Milestone B</h2>
+<div class="cards">
+  <div class="card">
+    <div class="card-title">Task 4</div>
+    <div class="card-desc">Placeholder description for task four.</div>
+    <span class="emotion">[emotion]</span>
+  </div>
+  <div class="card">
+    <div class="card-title">Task 5</div>
+    <div class="card-desc">Placeholder description for task five.</div>
+    <span class="emotion">[emotion]</span>
+  </div>
+  <div class="card">
+    <div class="card-title">Task 6</div>
+    <div class="card-desc">Placeholder description for task six.</div>
+    <span class="emotion">[emotion]</span>
+  </div>
+</div>
+</body>
+</html>

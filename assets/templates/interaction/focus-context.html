@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  INTERACTION: Focus + Context
+  Navigation for longer content: minimap + scroll spy + breadcrumb.
+  Best for: 15-50 steps, grouped milestones, deep journeys.
+  Combine with: any rendering mode.
+-->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interaction: Focus + Context</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#f5f5f5;color:#333}
+/* --- Minimap Bar --- */
+/* MINIMAP: One dot per step. Group dots by milestone with spacing. Color dots by emotion valence if available. */
+.minimap{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:center;gap:4px;padding:10px 16px;background:#fff;border-bottom:1px solid #ddd}
+.minimap .group{display:flex;gap:4px;margin:0 8px}
+.dot{width:10px;height:10px;border-radius:50%;background:#ccc;cursor:pointer;transition:background .2s}
+.dot.active{background:#666}
+/* --- Breadcrumb --- */
+.breadcrumb{position:sticky;top:42px;z-index:9;padding:6px 16px;background:#fafafa;border-bottom:1px solid #eee;font-size:12px;color:#888}
+/* --- Density Toggle --- */
+.density-toggle{position:sticky;top:68px;z-index:8;padding:4px 16px;background:#fafafa;border-bottom:1px solid #eee;text-align:right}
+.density-toggle button{padding:3px 8px;margin-left:4px;border:1px solid #ccc;border-radius:3px;background:#fff;font-size:11px;cursor:pointer}
+.density-toggle button.active{background:#ddd}
+/* --- Content Blocks --- */
+.content{max-width:720px;margin:0 auto;padding:16px}
+.group-label{font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:1px;margin:20px 0 8px;padding-top:8px}
+.block{background:#e0e0e0;border-radius:6px;padding:16px;margin-bottom:10px;font-size:13px;color:#555;transition:padding .2s,min-height .2s;min-height:80px}
+.density-compact .block{padding:8px;min-height:40px}
+.density-expanded .block{padding:24px;min-height:140px}
+/* --- Back to Top --- */
+.back-top{position:fixed;bottom:20px;right:20px;width:36px;height:36px;border-radius:50%;background:#888;color:#fff;border:none;font-size:18px;cursor:pointer;opacity:0;transition:opacity .2s;display:flex;align-items:center;justify-content:center}
+.back-top.visible{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- MINIMAP: One dot per step. Group dots by milestone with spacing. Color dots by emotion valence if available. -->
+<nav class="minimap" id="minimap">
+  <div class="group"><span class="dot" data-idx="0"></span><span class="dot" data-idx="1"></span><span class="dot" data-idx="2"></span><span class="dot" data-idx="3"></span></div>
+  <div class="group"><span class="dot" data-idx="4"></span><span class="dot" data-idx="5"></span><span class="dot" data-idx="6"></span><span class="dot" data-idx="7"></span></div>
+  <div class="group"><span class="dot" data-idx="8"></span><span class="dot" data-idx="9"></span><span class="dot" data-idx="10"></span><span class="dot" data-idx="11"></span></div>
+</nav>
+<div class="breadcrumb" id="breadcrumb">Group A &rsaquo; Block 1</div>
+<div class="density-toggle"><button data-d="compact">Compact</button><button data-d="normal" class="active">Normal</button><button data-d="expanded">Expanded</button></div>
+
+<div class="content" id="content">
+  <div class="group-label" data-group="Group A">Group A</div>
+  <div class="block" data-idx="0" data-group="Group A" id="b0">Block 1</div>
+  <div class="block" data-idx="1" data-group="Group A" id="b1">Block 2</div>
+  <div class="block" data-idx="2" data-group="Group A" id="b2">Block 3</div>
+  <div class="block" data-idx="3" data-group="Group A" id="b3">Block 4</div>
+  <div class="group-label" data-group="Group B">Group B</div>
+  <div class="block" data-idx="4" data-group="Group B" id="b4">Block 5</div>
+  <div class="block" data-idx="5" data-group="Group B" id="b5">Block 6</div>
+  <div class="block" data-idx="6" data-group="Group B" id="b6">Block 7</div>
+  <div class="block" data-idx="7" data-group="Group B" id="b7">Block 8</div>
+  <div class="group-label" data-group="Group C">Group C</div>
+  <div class="block" data-idx="8" data-group="Group C" id="b8">Block 9</div>
+  <div class="block" data-idx="9" data-group="Group C" id="b9">Block 10</div>
+  <div class="block" data-idx="10" data-group="Group C" id="b10">Block 11</div>
+  <div class="block" data-idx="11" data-group="Group C" id="b11">Block 12</div>
+</div>
+
+<button class="back-top" id="backTop">&uarr;</button>
+
+<script>
+const blocks = document.querySelectorAll('.block');
+const dots = document.querySelectorAll('.dot');
+const breadcrumb = document.getElementById('breadcrumb');
+const backTop = document.getElementById('backTop');
+
+// --- Scroll Spy ---
+// SCROLL SPY: Uses IntersectionObserver for performance. Updates minimap, breadcrumb, and URL hash.
+// Track which block is currently most visible
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    const idx = entry.target.dataset.idx;
+    const dot = dots[idx];
+    if (entry.isIntersecting) {
+      dot.classList.add('active');
+      // Update breadcrumb with group and block info
+      breadcrumb.textContent = `${entry.target.dataset.group} › ${entry.target.textContent}`;
+      // Update URL hash for bookmarking
+      history.replaceState(null, '', `#b${idx}`);
+    } else {
+      dot.classList.remove('active');
+    }
+  });
+}, { threshold: 0.5 });
+blocks.forEach(b => observer.observe(b));
+
+// --- Dot Click ---
+// Smooth scroll to the block corresponding to the clicked dot
+document.getElementById('minimap').addEventListener('click', e => {
+  if (!e.target.classList.contains('dot')) return;
+  const idx = e.target.dataset.idx;
+  document.getElementById(`b${idx}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+// --- Back to Top ---
+// Show button after scrolling 300px, click scrolls to top
+window.addEventListener('scroll', () => backTop.classList.toggle('visible', window.scrollY > 300));
+backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// --- Density Toggle ---
+// Switch between compact/normal/expanded block sizing
+document.querySelector('.density-toggle').addEventListener('click', e => {
+  if (e.target.tagName !== 'BUTTON') return;
+  const d = e.target.dataset.d;
+  document.querySelectorAll('.density-toggle button').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  const content = document.getElementById('content');
+  content.classList.remove('density-compact', 'density-expanded');
+  if (d !== 'normal') content.classList.add(`density-${d}`);
+});
+
+// --- Hash Navigation ---
+// On load, scroll to block if URL has a hash
+if (location.hash) { const el = document.querySelector(location.hash); if (el) el.scrollIntoView({ block: 'center' }); }
+</script>
+</body>
+</html>

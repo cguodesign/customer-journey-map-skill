@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Card Grid Rendering Reference</title>
+<!--
+  RENDERING: Card Grid
+  Cards stacked vertically, grouped under milestone headings.
+  Best for: default view, mobile-friendly, most versatile.
+  Combine with: scroll-driven, focus+context, or multi-view interaction.
+-->
+<!-- DATA: Replace placeholder content with journey data. See references/html-rendering-guide.md for field mapping. -->
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1a1a1a;
+    --text-muted: #666666;
+    --border: #e0e0e0;
+    --card-bg: #ffffff;
+    --card-shadow: rgba(0,0,0,0.06);
+    --milestone-bg: #f5f5f5;
+    --milestone-text: #333333;
+
+    /* Semantic layer colors */
+    --frontstage-bg: #fff9e6;
+    --backstage-bg: #f9f9f9;
+    --support-bg: #f3f3f3;
+
+    /* Emotion valence palette: -2 to +2 */
+    --valence-neg2: #fecaca;
+    --valence-neg1: #fed7aa;
+    --valence-neutral: #e5e7eb;
+    --valence-pos1: #bbf7d0;
+    --valence-pos2: #86efac;
+
+    /* Marker colors */
+    --mot-color: #dc2626;
+    --fail-color: #eab308;
+
+    --arrow-color: #cccccc;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 24px; max-width: 640px; margin: 0 auto; }
+
+  /* Journey title area */
+  .journey-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .journey-title span { display: block; font-size: 0.8rem; font-weight: 400; color: var(--text-muted); margin-top: 4px; }
+
+  /* Milestone heading */
+  .milestone { background: var(--milestone-bg); color: var(--milestone-text); font-size: 0.85rem; font-weight: 600; padding: 8px 12px; border-radius: 4px; margin: 20px 0 12px; }
+
+  /* Step card */
+  .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 14px 14px 14px 18px; margin-bottom: 4px; position: relative; box-shadow: 0 1px 3px var(--card-shadow); border-left: 4px solid var(--valence-neutral); /* left border bar: set to valence color */ }
+  .card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+  .card .desc { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+  .card .meta { display: flex; gap: 12px; font-size: 0.75rem; color: var(--text-muted); }
+  .card .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 500; }
+
+  /* MARKER: moment-of-truth (red dot top-right), failure-point (yellow dot top-left) -->  */
+  .card .marker { position: absolute; width: 8px; height: 8px; border-radius: 50%; }
+  .card .marker.mot { background: var(--mot-color); top: 8px; right: 8px; }
+  .card .marker.fail { background: var(--fail-color); top: 8px; left: 8px; }
+
+  /* Flow arrow between cards */
+  .flow-arrow { text-align: center; color: var(--arrow-color); font-size: 1.2rem; line-height: 1; padding: 2px 0; }
+
+  /* Expanded card: layer sections */
+  .card.expanded { padding-bottom: 0; }
+  .card .layer { padding: 10px 14px; margin: 8px -14px 0 -18px; border-top: 1px dashed var(--border); font-size: 0.8rem; }
+  .card .layer:last-child { border-radius: 0 0 6px 6px; margin-bottom: 0; }
+  .card .layer-label { font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; color: var(--text-muted); }
+  .card .layer.frontstage { background: var(--frontstage-bg); }
+  .card .layer.backstage { background: var(--backstage-bg); }
+  .card .layer.support { background: var(--support-bg); }
+
+  /* Valence-specific left borders (applied per card) */
+  .card.v-neg2 { border-left-color: var(--valence-neg2); }
+  .card.v-neg1 { border-left-color: var(--valence-neg1); }
+  .card.v-neutral { border-left-color: var(--valence-neutral); }
+  .card.v-pos1 { border-left-color: var(--valence-pos1); }
+  .card.v-pos2 { border-left-color: var(--valence-pos2); }
+</style>
+</head>
+<body>
+
+<!-- Journey title: inject journey name and subtitle -->
+<div class="journey-title">
+  Journey Title Placeholder
+  <span>Subtitle or persona context placeholder</span>
+</div>
+
+<!-- Milestone A -->
+<div class="milestone">Milestone A</div>
+
+<!-- Step card: inject step data, set .v-* class for valence -->
+<div class="card v-pos1">
+  <h3>Task 1</h3>
+  <p class="desc">One-line description placeholder for this step.</p>
+  <div class="meta">
+    <span class="badge" style="background: var(--valence-pos1);">Positive</span>
+    <span>Duration: placeholder</span>
+  </div>
+</div>
+<div class="flow-arrow">&darr;</div>
+
+<div class="card v-neutral">
+  <h3>Task 2</h3>
+  <p class="desc">One-line description placeholder for this step.</p>
+  <div class="meta">
+    <span class="badge" style="background: var(--valence-neutral);">Neutral</span>
+    <span>Duration: placeholder</span>
+  </div>
+  <!-- MARKER: moment-of-truth (red dot top-right), failure-point (yellow dot top-left) -->
+  <span class="marker mot"></span>
+</div>
+<div class="flow-arrow">&darr;</div>
+
+<!-- Expanded card state: shows frontstage, backstage, support layers -->
+<div class="card expanded v-neg1">
+  <h3>Task 3</h3>
+  <p class="desc">One-line description placeholder for this step.</p>
+  <div class="meta">
+    <span class="badge" style="background: var(--valence-neg1);">Slightly Negative</span>
+    <span>Duration: placeholder</span>
+  </div>
+  <span class="marker fail"></span>
+  <!-- Frontstage: visible touchpoint actions -->
+  <div class="layer frontstage">
+    <div class="layer-label">Frontstage</div>
+    Touchpoint action placeholder
+  </div>
+  <!-- Backstage: behind-the-scenes processes -->
+  <div class="layer backstage">
+    <div class="layer-label">Backstage</div>
+    Internal process placeholder
+  </div>
+  <!-- Support: supporting systems -->
+  <div class="layer support">
+    <div class="layer-label">Support Processes</div>
+    System or tool placeholder
+  </div>
+</div>
+
+<!-- Milestone B -->
+<div class="milestone">Milestone B</div>
+
+<div class="card v-neg2">
+  <h3>Task 4</h3>
+  <p class="desc">One-line description placeholder for this step.</p>
+  <div class="meta">
+    <span class="badge" style="background: var(--valence-neg2);">Negative</span>
+    <span>Duration: placeholder</span>
+  </div>
+</div>
+<div class="flow-arrow">&darr;</div>
+
+<div class="card v-pos2">
+  <h3>Task 5</h3>
+  <p class="desc">One-line description placeholder for this step.</p>
+  <div class="meta">
+    <span class="badge" style="background: var(--valence-pos2);">Very Positive</span>
+    <span>Duration: placeholder</span>
+  </div>
+</div>
+
+</body>
+</html>
