@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Journey Map — Timeline with Focus+Context</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --color-valence-n2: #fecaca;
+  --color-valence-n1: #fed7aa;
+  --color-valence-0: #e5e7eb;
+  --color-valence-p1: #bbf7d0;
+  --color-valence-p2: #86efac;
+  --color-milestone-1: #f8fafc;
+  --color-milestone-2: #f1f5f9;
+  --color-mot-ring: #dc2626;
+  --color-failure-border: #eab308;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-bg: #ffffff;
+  --color-surface: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-accent: #3b82f6;
+  --color-search-highlight: #fbbf24;
+  --minimap-height: 64px;
+  --header-height: 140px;
+  --node-width: 160px;
+  --node-height: 80px;
+  --node-gap: 48px;
+  --timeline-padding-y: 40px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header area: title + pills + minimap + breadcrumb */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px 8px;
+}
+
+.title-bar h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.search-container {
+  position: relative;
+  width: 240px;
+}
+
+.search-container input {
+  width: 100%;
+  padding: 6px 12px 6px 32px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.search-container input:focus {
+  border-color: var(--color-accent);
+}
+
+.search-container .search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.search-results-count {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Milestone jump pills */
+.milestone-pills {
+  display: flex;
+  gap: 6px;
+  padding: 0 24px 8px;
+  flex-wrap: wrap;
+}
+
+.milestone-pill {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.milestone-pill:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.milestone-pill.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+/* Minimap */
+.minimap-container {
+  position: relative;
+  height: var(--minimap-height);
+  margin: 0 24px 8px;
+  background: var(--color-surface);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+}
+
+.minimap-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.minimap-milestone-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  height: 100%;
+  position: relative;
+}
+
+.minimap-milestone-group::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  border-radius: 4px;
+  opacity: 0.5;
+}
+
+.minimap-milestone-group:nth-child(odd)::before {
+  background: var(--color-milestone-1);
+}
+
+.minimap-milestone-group:nth-child(even)::before {
+  background: var(--color-milestone-2);
+}
+
+.minimap-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 3px;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.15s;
+}
+
+.minimap-dot.search-match {
+  box-shadow: 0 0 0 3px var(--color-search-highlight);
+  transform: scale(1.4);
+}
+
+.minimap-dot.mot {
+  box-shadow: 0 0 0 2px var(--color-mot-ring);
+}
+
+.minimap-viewport {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 2px solid rgba(59, 130, 246, 0.4);
+  border-radius: 6px;
+  pointer-events: none;
+  transition: left 0.1s ease-out, width 0.1s ease-out;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  padding: 4px 24px 8px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.breadcrumb .separator {
+  color: var(--color-border);
+}
+
+.breadcrumb .current {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+/* Main timeline area */
+.timeline-viewport {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
+  position: relative;
+}
+
+.timeline-scroll-content {
+  display: flex;
+  align-items: flex-start;
+  min-height: 100%;
+  padding: var(--timeline-padding-y) 48px;
+  position: relative;
+}
+
+/* Milestone bands */
+.milestone-band {
+  display: flex;
+  align-items: flex-start;
+  padding: 0 24px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.milestone-band::before {
+  content: '';
+  position: absolute;
+  top: -var(--timeline-padding-y);
+  bottom: -200px;
+  left: 0;
+  right: 0;
+  border-radius: 0;
+}
+
+.milestone-band:nth-child(odd)::before {
+  background: var(--color-milestone-1);
+}
+
+.milestone-band:nth-child(even)::before {
+  background: var(--color-milestone-2);
+}
+
+.milestone-band-label {
+  position: absolute;
+  top: -28px;
+  left: 24px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* Timeline nodes */
+.timeline-nodes {
+  display: flex;
+  align-items: center;
+  gap: var(--node-gap);
+  position: relative;
+  z-index: 2;
+}
+
+.node-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.timeline-node {
+  width: var(--node-width);
+  height: var(--node-height);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  position: relative;
+  text-align: center;
+}
+
+.timeline-node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.timeline-node:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.timeline-node.selected {
+  border-color: var(--color-accent);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+}
+
+.timeline-node.mot {
+  box-shadow: 0 0 0 3px var(--color-mot-ring), 0 2px 8px rgba(220, 38, 38, 0.15);
+}
+
+.timeline-node.failure {
+  border: 2px dashed var(--color-failure-border);
+}
+
+.timeline-node.search-match {
+  box-shadow: 0 0 0 3px var(--color-search-highlight);
+}
+
+.node-emotion {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  opacity: 0.8;
+}
+
+.node-description {
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--color-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.node-duration {
+  margin-top: 8px;
+  font-size: 10px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* Connecting lines */
+.connector-line {
+  position: absolute;
+  top: 50%;
+  height: 2px;
+  background: var(--color-border);
+  z-index: 1;
+  transform: translateY(-50%);
+}
+
+.connector-line.dashed {
+  background: none;
+  border-top: 2px dashed var(--color-failure-border);
+  height: 0;
+}
+
+/* Detail panel */
+.detail-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.08);
+  padding: 20px 32px;
+  transform: translateY(100%);
+  transition: transform 0.25s ease-out;
+  z-index: 200;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.detail-panel.visible {
+  transform: translateY(0);
+}
+
+.detail-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.detail-panel-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.detail-panel-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  transition: background 0.1s;
+}
+
+.detail-panel-close:hover {
+  background: var(--color-border);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.detail-value {
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.detail-value.pain-point {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.detail-value.opportunity {
+  color: #059669;
+  font-weight: 500;
+}
+
+/* Keyboard hint */
+.keyboard-hint {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  z-index: 50;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.keyboard-hint:hover {
+  opacity: 1;
+}
+
+kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  background: var(--color-bg);
+  font-family: inherit;
+  font-size: 10px;
+  margin: 0 2px;
+}
+
+/* Scrollbar styling */
+.timeline-viewport::-webkit-scrollbar {
+  height: 8px;
+}
+
+.timeline-viewport::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+.timeline-viewport::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.timeline-viewport::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="title-bar">
+    <h1 id="journey-title"></h1>
+    <div class="search-container">
+      <span class="search-icon">&#x1F50D;</span>
+      <input type="text" id="search-input" placeholder="Search steps..." aria-label="Search steps">
+      <span class="search-results-count" id="search-count"></span>
+    </div>
+  </div>
+  <div class="milestone-pills" id="milestone-pills"></div>
+  <div class="minimap-container" id="minimap">
+    <div class="minimap-content" id="minimap-content"></div>
+    <div class="minimap-viewport" id="minimap-viewport"></div>
+  </div>
+  <div class="breadcrumb" id="breadcrumb"></div>
+</div>
+
+<div class="timeline-viewport" id="timeline-viewport">
+  <div class="timeline-scroll-content" id="timeline-content"></div>
+</div>
+
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-panel-header">
+    <span class="detail-panel-title" id="detail-title"></span>
+    <button class="detail-panel-close" id="detail-close" aria-label="Close detail panel">&times;</button>
+  </div>
+  <div class="detail-grid" id="detail-grid"></div>
+</div>
+
+<div class="keyboard-hint">
+  <kbd>&larr;</kbd><kbd>&rarr;</kbd> navigate &nbsp; <kbd>Enter</kbd> expand &nbsp; <kbd>Esc</kbd> collapse
+</div>
+
+<script>
+// === DATA ===
+const journeyData = {
+  title: "E-commerce Purchase Journey — Timeline",
+  personas: ["Shopper", "Repeat Customer"],
+  milestones: [
+    {
+      id: "browse", title: "Browse & Discover",
+      steps: [
+        { id: "land-homepage", description: "Lands on homepage from ad", emotion: "Curious", emotionValence: 1, persona: "Shopper", duration: "10 sec", channel: "Web" },
+        { id: "browse-categories", description: "Browses product categories", emotion: "Exploring", emotionValence: 1, persona: "Shopper", duration: "3 min", channel: "Web" },
+        { id: "search-product", description: "Searches for specific item", emotion: "Focused", emotionValence: 0, persona: "Shopper", duration: "1 min", channel: "Web" },
+        { id: "view-results", description: "Reviews search results", emotion: "Evaluating", emotionValence: 0, persona: "Shopper", duration: "2 min", channel: "Web" }
+      ]
+    },
+    {
+      id: "evaluate", title: "Evaluate",
+      steps: [
+        { id: "product-page", description: "Views product detail page", emotion: "Interested", emotionValence: 1, persona: "Shopper", duration: "4 min", channel: "Web", momentOfTruth: true },
+        { id: "read-reviews", description: "Reads customer reviews", emotion: "Cautious", emotionValence: 0, persona: "Shopper", duration: "5 min", channel: "Web" },
+        { id: "compare-options", description: "Compares with similar products", emotion: "Analytical", emotionValence: 0, persona: "Shopper", duration: "8 min", channel: "Web" },
+        { id: "check-stock", description: "Checks availability and shipping", emotion: "Anxious", emotionValence: -1, persona: "Shopper", duration: "30 sec", channel: "Web", painPoint: "Out of stock message unclear" }
+      ]
+    },
+    {
+      id: "purchase", title: "Purchase",
+      steps: [
+        { id: "add-cart", description: "Adds item to cart", emotion: "Decided", emotionValence: 1, persona: "Shopper", duration: "5 sec", channel: "Web" },
+        { id: "view-cart", description: "Reviews cart contents", emotion: "Calculating", emotionValence: 0, persona: "Shopper", duration: "1 min", channel: "Web" },
+        { id: "checkout-start", description: "Begins checkout process", emotion: "Committed", emotionValence: 1, persona: "Shopper", duration: "30 sec", channel: "Web", momentOfTruth: true },
+        { id: "enter-shipping", description: "Enters shipping information", emotion: "Tedious", emotionValence: -1, persona: "Shopper", duration: "3 min", channel: "Web", painPoint: "Too many required fields" },
+        { id: "payment", description: "Enters payment and confirms", emotion: "Nervous", emotionValence: -1, persona: "Shopper", duration: "2 min", channel: "Web", failureMode: "Payment declined, unclear error" },
+        { id: "confirmation", description: "Receives order confirmation", emotion: "Relieved", emotionValence: 2, persona: "Shopper", duration: "10 sec", channel: "Web + Email" }
+      ]
+    },
+    {
+      id: "fulfill", title: "Fulfillment",
+      steps: [
+        { id: "shipping-update", description: "Gets shipping notification", emotion: "Anticipating", emotionValence: 1, persona: "Shopper", duration: "—", channel: "Email" },
+        { id: "track-package", description: "Tracks package delivery", emotion: "Impatient", emotionValence: 0, persona: "Shopper", duration: "varies", channel: "App" },
+        { id: "receive-package", description: "Receives and opens package", emotion: "Excited", emotionValence: 2, persona: "Shopper", duration: "—", channel: "Physical", momentOfTruth: true }
+      ]
+    },
+    {
+      id: "post-purchase", title: "Post-Purchase",
+      steps: [
+        { id: "use-product", description: "Uses product for first time", emotion: "Satisfied", emotionValence: 2, persona: "Shopper", duration: "varies", channel: "Physical" },
+        { id: "leave-review", description: "Leaves product review", emotion: "Generous", emotionValence: 1, persona: "Repeat Customer", duration: "5 min", channel: "Web", opportunity: "Incentivize reviews with points" },
+        { id: "reorder", description: "Returns to reorder or buy related items", emotion: "Loyal", emotionValence: 2, persona: "Repeat Customer", duration: "3 min", channel: "App" }
+      ]
+    }
+  ]
+};
+
+// === STATE ===
+let allSteps = [];
+let selectedStepIndex = -1;
+let focusedStepIndex = -1;
+let searchMatches = new Set();
+let currentMilestoneIndex = 0;
+
+// === HELPERS ===
+function getValenceColor(valence) {
+  const map = { '-2': '#fecaca', '-1': '#fed7aa', '0': '#e5e7eb', '1': '#bbf7d0', '2': '#86efac' };
+  return map[String(valence)] || map['0'];
+}
+
+function flattenSteps(data) {
+  const steps = [];
+  data.milestones.forEach((m, mi) => {
+    m.steps.forEach((s, si) => {
+      steps.push({ ...s, milestoneIndex: mi, milestoneId: m.id, milestoneTitle: m.title, stepIndex: si });
+    });
+  });
+  return steps;
+}
+
+// === RENDER ===
+function render() {
+  allSteps = flattenSteps(journeyData);
+
+  // Title
+  document.getElementById('journey-title').textContent = journeyData.title;
+
+  // Milestone pills
+  renderPills();
+
+  // Minimap
+  renderMinimap();
+
+  // Timeline
+  renderTimeline();
+
+  // Breadcrumb
+  updateBreadcrumb();
+
+  // Events
+  bindEvents();
+}
+
+function renderPills() {
+  const container = document.getElementById('milestone-pills');
+  container.innerHTML = journeyData.milestones.map((m, i) =>
+    `<button class="milestone-pill${i === 0 ? ' active' : ''}" data-index="${i}">${m.title}</button>`
+  ).join('');
+}
+
+function renderMinimap() {
+  const container = document.getElementById('minimap-content');
+  const totalSteps = allSteps.length;
+
+  container.innerHTML = journeyData.milestones.map((m, mi) => {
+    const dots = m.steps.map((s, si) => {
+      const globalIdx = allSteps.findIndex(a => a.id === s.id);
+      const isMot = s.momentOfTruth;
+      return `<div class="minimap-dot${isMot ? ' mot' : ''}" data-step-index="${globalIdx}" style="background:${getValenceColor(s.emotionValence)}"></div>`;
+    }).join('');
+    return `<div class="minimap-milestone-group" data-milestone="${mi}">${dots}</div>`;
+  }).join('');
+}
+
+function renderTimeline() {
+  const container = document.getElementById('timeline-content');
+  let html = '';
+
+  journeyData.milestones.forEach((m, mi) => {
+    html += `<div class="milestone-band" data-milestone-index="${mi}">`;
+    html += `<div class="milestone-band-label">${m.title}</div>`;
+    html += `<div class="timeline-nodes">`;
+
+    m.steps.forEach((step, si) => {
+      const globalIdx = allSteps.findIndex(a => a.id === step.id);
+      const isMot = step.momentOfTruth;
+      const isFailure = !!step.failureMode;
+      const classes = ['timeline-node'];
+      if (isMot) classes.push('mot');
+      if (isFailure) classes.push('failure');
+
+      html += `<div class="node-wrapper" data-step-index="${globalIdx}">`;
+      html += `<div class="${classes.join(' ')}" tabindex="0" role="button" aria-label="${step.description}" style="background:${getValenceColor(step.emotionValence)}">`;
+      html += `<span class="node-emotion">${step.emotion}</span>`;
+      html += `<span class="node-description">${step.description}</span>`;
+      html += `</div>`;
+      html += `<span class="node-duration">${step.duration}</span>`;
+      html += `</div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  container.innerHTML = html;
+
+  // Draw connector lines after DOM is ready
+  requestAnimationFrame(() => drawConnectors());
+}
+
+function drawConnectors() {
+  // Remove existing connectors
+  document.querySelectorAll('.connector-line').forEach(el => el.remove());
+
+  const content = document.getElementById('timeline-content');
+  const wrappers = content.querySelectorAll('.node-wrapper');
+
+  for (let i = 0; i < wrappers.length - 1; i++) {
+    const curr = wrappers[i];
+    const next = wrappers[i + 1];
+    const currNode = curr.querySelector('.timeline-node');
+    const nextNode = next.querySelector('.timeline-node');
+
+    const currRect = currNode.getBoundingClientRect();
+    const nextRect = nextNode.getBoundingClientRect();
+    const contentRect = content.getBoundingClientRect();
+
+    const startX = currRect.right - contentRect.left;
+    const endX = nextRect.left - contentRect.left;
+    const topY = currRect.top + currRect.height / 2 - contentRect.top;
+
+    const line = document.createElement('div');
+    line.className = 'connector-line';
+
+    // Check if next step has failure mode — use dashed
+    const nextStepData = allSteps[i + 1];
+    if (nextStepData && nextStepData.failureMode) {
+      line.classList.add('dashed');
+    }
+
+    line.style.left = startX + 'px';
+    line.style.top = topY + 'px';
+    line.style.width = Math.max(0, endX - startX) + 'px';
+    content.appendChild(line);
+  }
+}
+
+function updateBreadcrumb() {
+  const bc = document.getElementById('breadcrumb');
+  const milestone = journeyData.milestones[currentMilestoneIndex];
+  bc.innerHTML = `<span>${journeyData.title}</span><span class="separator">/</span><span class="current">${milestone ? milestone.title : ''}</span>`;
+}
+
+function updateMinimapViewport() {
+  const viewport = document.getElementById('timeline-viewport');
+  const content = document.getElementById('timeline-content');
+  const minimapEl = document.getElementById('minimap');
+  const viewportIndicator = document.getElementById('minimap-viewport');
+
+  const scrollLeft = viewport.scrollLeft;
+  const scrollWidth = content.scrollWidth;
+  const clientWidth = viewport.clientWidth;
+  const minimapWidth = minimapEl.clientWidth;
+
+  if (scrollWidth <= clientWidth) {
+    viewportIndicator.style.left = '0px';
+    viewportIndicator.style.width = minimapWidth + 'px';
+    return;
+  }
+
+  const ratio = minimapWidth / scrollWidth;
+  const vpLeft = scrollLeft * ratio;
+  const vpWidth = clientWidth * ratio;
+
+  viewportIndicator.style.left = Math.round(vpLeft) + 'px';
+  viewportIndicator.style.width = Math.round(vpWidth) + 'px';
+}
+
+function updateCurrentMilestone() {
+  const viewport = document.getElementById('timeline-viewport');
+  const bands = document.querySelectorAll('.milestone-band');
+  const viewportRect = viewport.getBoundingClientRect();
+  const centerX = viewportRect.left + viewportRect.width / 2;
+
+  let closestIdx = 0;
+  let closestDist = Infinity;
+
+  bands.forEach((band, i) => {
+    const rect = band.getBoundingClientRect();
+    const bandCenter = rect.left + rect.width / 2;
+    const dist = Math.abs(bandCenter - centerX);
+    if (dist < closestDist) {
+      closestDist = dist;
+      closestIdx = i;
+    }
+  });
+
+  if (closestIdx !== currentMilestoneIndex) {
+    currentMilestoneIndex = closestIdx;
+    updateBreadcrumb();
+    updateActivePill();
+  }
+}
+
+function updateActivePill() {
+  document.querySelectorAll('.milestone-pill').forEach((pill, i) => {
+    pill.classList.toggle('active', i === currentMilestoneIndex);
+  });
+}
+
+function selectStep(index) {
+  if (index < 0 || index >= allSteps.length) return;
+
+  // Deselect previous
+  document.querySelectorAll('.timeline-node.selected').forEach(el => el.classList.remove('selected'));
+
+  selectedStepIndex = index;
+  const wrapper = document.querySelector(`.node-wrapper[data-step-index="${index}"]`);
+  if (!wrapper) return;
+
+  const node = wrapper.querySelector('.timeline-node');
+  node.classList.add('selected');
+  node.focus();
+
+  showDetailPanel(allSteps[index]);
+  scrollNodeIntoView(wrapper);
+}
+
+function scrollNodeIntoView(wrapper) {
+  const viewport = document.getElementById('timeline-viewport');
+  const nodeRect = wrapper.getBoundingClientRect();
+  const viewportRect = viewport.getBoundingClientRect();
+
+  if (nodeRect.left < viewportRect.left + 60 || nodeRect.right > viewportRect.right - 60) {
+    const nodeCenter = wrapper.offsetLeft + wrapper.offsetWidth / 2;
+    const targetScroll = nodeCenter - viewport.clientWidth / 2;
+    viewport.scrollTo({ left: targetScroll, behavior: 'smooth' });
+  }
+}
+
+function showDetailPanel(step) {
+  const panel = document.getElementById('detail-panel');
+  const title = document.getElementById('detail-title');
+  const grid = document.getElementById('detail-grid');
+
+  title.textContent = step.description;
+
+  let items = `
+    <div class="detail-item"><span class="detail-label">Emotion</span><span class="detail-value">${step.emotion} (${step.emotionValence > 0 ? '+' : ''}${step.emotionValence})</span></div>
+    <div class="detail-item"><span class="detail-label">Duration</span><span class="detail-value">${step.duration}</span></div>
+    <div class="detail-item"><span class="detail-label">Channel</span><span class="detail-value">${step.channel}</span></div>
+    <div class="detail-item"><span class="detail-label">Persona</span><span class="detail-value">${step.persona}</span></div>
+    <div class="detail-item"><span class="detail-label">Milestone</span><span class="detail-value">${step.milestoneTitle}</span></div>
+  `;
+
+  if (step.momentOfTruth) {
+    items += `<div class="detail-item"><span class="detail-label">Marker</span><span class="detail-value" style="color:var(--color-mot-ring);font-weight:600;">Moment of Truth</span></div>`;
+  }
+  if (step.painPoint) {
+    items += `<div class="detail-item"><span class="detail-label">Pain Point</span><span class="detail-value pain-point">${step.painPoint}</span></div>`;
+  }
+  if (step.failureMode) {
+    items += `<div class="detail-item"><span class="detail-label">Failure Mode</span><span class="detail-value pain-point">${step.failureMode}</span></div>`;
+  }
+  if (step.opportunity) {
+    items += `<div class="detail-item"><span class="detail-label">Opportunity</span><span class="detail-value opportunity">${step.opportunity}</span></div>`;
+  }
+
+  grid.innerHTML = items;
+  panel.classList.add('visible');
+}
+
+function hideDetailPanel() {
+  document.getElementById('detail-panel').classList.remove('visible');
+  document.querySelectorAll('.timeline-node.selected').forEach(el => el.classList.remove('selected'));
+  selectedStepIndex = -1;
+}
+
+function jumpToMilestone(index) {
+  const bands = document.querySelectorAll('.milestone-band');
+  if (!bands[index]) return;
+
+  const viewport = document.getElementById('timeline-viewport');
+  const band = bands[index];
+  const targetScroll = band.offsetLeft - 48;
+  viewport.scrollTo({ left: targetScroll, behavior: 'smooth' });
+}
+
+function performSearch(query) {
+  searchMatches.clear();
+  document.querySelectorAll('.timeline-node.search-match').forEach(el => el.classList.remove('search-match'));
+  document.querySelectorAll('.minimap-dot.search-match').forEach(el => el.classList.remove('search-match'));
+
+  const countEl = document.getElementById('search-count');
+
+  if (!query.trim()) {
+    countEl.textContent = '';
+    return;
+  }
+
+  const q = query.toLowerCase();
+  allSteps.forEach((step, i) => {
+    const text = `${step.description} ${step.emotion} ${step.channel} ${step.persona} ${step.painPoint || ''} ${step.failureMode || ''} ${step.opportunity || ''}`.toLowerCase();
+    if (text.includes(q)) {
+      searchMatches.add(i);
+    }
+  });
+
+  countEl.textContent = searchMatches.size > 0 ? `${searchMatches.size} found` : 'No results';
+
+  // Highlight nodes
+  searchMatches.forEach(idx => {
+    const wrapper = document.querySelector(`.node-wrapper[data-step-index="${idx}"]`);
+    if (wrapper) wrapper.querySelector('.timeline-node').classList.add('search-match');
+
+    const dot = document.querySelector(`.minimap-dot[data-step-index="${idx}"]`);
+    if (dot) dot.classList.add('search-match');
+  });
+}
+
+// === EVENTS ===
+function bindEvents() {
+  const viewport = document.getElementById('timeline-viewport');
+  const minimap = document.getElementById('minimap');
+  const searchInput = document.getElementById('search-input');
+
+  // Scroll spy
+  viewport.addEventListener('scroll', () => {
+    updateMinimapViewport();
+    updateCurrentMilestone();
+  });
+
+  // Resize
+  window.addEventListener('resize', () => {
+    updateMinimapViewport();
+    drawConnectors();
+  });
+
+  // Minimap click
+  let minimapDragging = false;
+
+  minimap.addEventListener('mousedown', (e) => {
+    minimapDragging = true;
+    handleMinimapInteraction(e);
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (minimapDragging) handleMinimapInteraction(e);
+  });
+
+  document.addEventListener('mouseup', () => {
+    minimapDragging = false;
+  });
+
+  function handleMinimapInteraction(e) {
+    const rect = minimap.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const ratio = x / rect.width;
+    const content = document.getElementById('timeline-content');
+    const targetScroll = ratio * content.scrollWidth - viewport.clientWidth / 2;
+    viewport.scrollTo({ left: Math.max(0, targetScroll), behavior: minimapDragging ? 'auto' : 'smooth' });
+  }
+
+  // Milestone pills
+  document.getElementById('milestone-pills').addEventListener('click', (e) => {
+    const pill = e.target.closest('.milestone-pill');
+    if (!pill) return;
+    const idx = parseInt(pill.dataset.index);
+    jumpToMilestone(idx);
+  });
+
+  // Node clicks
+  document.getElementById('timeline-content').addEventListener('click', (e) => {
+    const node = e.target.closest('.timeline-node');
+    if (!node) return;
+    const wrapper = node.closest('.node-wrapper');
+    const idx = parseInt(wrapper.dataset.stepIndex);
+    if (selectedStepIndex === idx) {
+      hideDetailPanel();
+    } else {
+      selectStep(idx);
+    }
+  });
+
+  // Detail close
+  document.getElementById('detail-close').addEventListener('click', hideDetailPanel);
+
+  // Search
+  let searchTimeout;
+  searchInput.addEventListener('input', (e) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => performSearch(e.target.value), 150);
+  });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    // Skip if focused on search
+    if (document.activeElement === searchInput) return;
+
+    switch (e.key) {
+      case 'ArrowRight':
+        e.preventDefault();
+        focusedStepIndex = Math.min(allSteps.length - 1, (focusedStepIndex < 0 ? 0 : focusedStepIndex + 1));
+        focusStep(focusedStepIndex);
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        focusedStepIndex = Math.max(0, (focusedStepIndex < 0 ? 0 : focusedStepIndex - 1));
+        focusStep(focusedStepIndex);
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (focusedStepIndex >= 0) selectStep(focusedStepIndex);
+        break;
+      case 'Escape':
+        e.preventDefault();
+        hideDetailPanel();
+        break;
+    }
+  });
+
+  // Initial viewport update
+  requestAnimationFrame(() => updateMinimapViewport());
+}
+
+function focusStep(index) {
+  const wrapper = document.querySelector(`.node-wrapper[data-step-index="${index}"]`);
+  if (!wrapper) return;
+  const node = wrapper.querySelector('.timeline-node');
+  node.focus();
+  scrollNodeIntoView(wrapper);
+}
+
+// === INIT ===
+document.addEventListener('DOMContentLoaded', render);
+</script>
+</body>
+</html>

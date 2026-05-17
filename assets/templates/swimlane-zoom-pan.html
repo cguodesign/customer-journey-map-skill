@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Service Blueprint — Zoom & Pan</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --lane-customer-bg: #fff9e6;
+  --lane-customer-border: #c9a227;
+  --lane-frontstage-bg: #fff9e6;
+  --lane-frontstage-border: #c9a227;
+  --lane-backstage-bg: #ffffff;
+  --lane-backstage-border: #aaaaaa;
+  --lane-support-bg: #f3f3f3;
+  --lane-support-border: #999999;
+  --marker-mot: #ef4444;
+  --marker-failure: #8b6914;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+  --radius: 8px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font);
+  background: #f0f2f5;
+  color: #1a1a2e;
+}
+
+/* Viewport container */
+.viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: grab;
+}
+.viewport.grabbing { cursor: grabbing; }
+
+/* Canvas that gets transformed */
+.canvas {
+  position: absolute;
+  top: 0; left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+.canvas.animating {
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Blueprint layout */
+.blueprint {
+  padding: 60px 40px 40px;
+  display: inline-block;
+}
+
+.blueprint-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #1a1a2e;
+}
+.blueprint-personas {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.grid {
+  display: grid;
+  position: relative;
+}
+
+/* Phase headers */
+.phase-header {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #444;
+  padding: 12px 8px;
+  border-bottom: 2px solid #ddd;
+}
+
+/* Lane labels */
+.lane-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 6px;
+  border-right: 3px solid;
+  min-height: 80px;
+}
+.lane-label--customer { background: var(--lane-customer-bg); border-color: var(--lane-customer-border); color: var(--lane-customer-border); }
+.lane-label--frontstage { background: var(--lane-frontstage-bg); border-color: var(--lane-frontstage-border); color: var(--lane-frontstage-border); }
+.lane-label--backstage { background: var(--lane-backstage-bg); border-color: var(--lane-backstage-border); color: var(--lane-backstage-border); }
+.lane-label--support { background: var(--lane-support-bg); border-color: var(--lane-support-border); color: var(--lane-support-border); }
+
+/* Cells */
+.cell {
+  padding: 12px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+}
+.cell--customer { background: var(--lane-customer-bg); }
+.cell--frontstage { background: var(--lane-frontstage-bg); }
+.cell--backstage { background: var(--lane-backstage-bg); }
+.cell--support { background: var(--lane-support-bg); }
+
+/* Dashed lane dividers */
+.lane-divider {
+  position: absolute;
+  left: 0; right: 0;
+  border-top: 2px dashed #ccc;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Phase dividers (vertical) */
+.phase-divider {
+  position: absolute;
+  top: 0; bottom: 0;
+  border-left: 1px dashed #ddd;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Step boxes */
+.step-box {
+  position: relative;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.15s;
+  user-select: none;
+}
+.step-box:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+  z-index: 10;
+}
+
+/* Markers */
+.marker {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.marker--mot {
+  top: 4px;
+  right: 4px;
+  background: var(--marker-mot);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
+}
+.marker--failure {
+  top: 4px;
+  left: 4px;
+  background: var(--marker-failure);
+  box-shadow: 0 0 0 2px rgba(139, 105, 20, 0.25);
+}
+
+/* Persona badge */
+.persona-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  background: #eef;
+  color: #555;
+  border-radius: 3px;
+  padding: 2px 5px;
+  margin-top: 4px;
+}
+
+/* Arrows (horizontal between phases) */
+.arrow-overlay {
+  position: absolute;
+  pointer-events: none;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 2;
+}
+.arrow-overlay svg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Controls */
+.controls {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 1000;
+}
+.ctrl-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  box-shadow: var(--shadow-sm);
+  transition: background 0.12s, box-shadow 0.12s;
+  user-select: none;
+}
+.ctrl-btn:hover { background: #f5f5f5; box-shadow: var(--shadow-md); }
+.ctrl-btn:active { background: #eee; }
+
+.zoom-level {
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  color: #666;
+  padding: 4px 0;
+  user-select: none;
+}
+
+/* Legend */
+.legend {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 11px;
+  box-shadow: var(--shadow-sm);
+  z-index: 1000;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.legend-dot--mot { background: var(--marker-mot); }
+.legend-dot--failure { background: var(--marker-failure); }
+
+/* Minimap */
+.minimap {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  width: 200px;
+  height: 120px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  z-index: 1000;
+  overflow: hidden;
+  cursor: pointer;
+}
+.minimap-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.minimap-canvas {
+  position: absolute;
+  top: 0; left: 0;
+}
+.minimap-viewport {
+  position: absolute;
+  border: 2px solid #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* Tooltip / Popover */
+.popover {
+  position: fixed;
+  z-index: 2000;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  padding: 16px 20px;
+  max-width: 320px;
+  font-size: 13px;
+  line-height: 1.5;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.popover.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.popover-title {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #1a1a2e;
+}
+.popover-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.popover-label {
+  font-weight: 600;
+  color: #888;
+  min-width: 72px;
+  flex-shrink: 0;
+}
+.popover-value {
+  color: #333;
+}
+.popover-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #999;
+  line-height: 1;
+}
+.popover-close:hover { color: #333; }
+</style>
+</head>
+<body>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot legend-dot--mot"></div><span>Moment of Truth</span></div>
+  <div class="legend-item"><div class="legend-dot legend-dot--failure"></div><span>Failure Point</span></div>
+</div>
+
+<div class="controls">
+  <button class="ctrl-btn" id="btn-zoom-in" title="Zoom in">+</button>
+  <button class="ctrl-btn" id="btn-zoom-out" title="Zoom out">&minus;</button>
+  <div class="zoom-level" id="zoom-level">100%</div>
+  <button class="ctrl-btn" id="btn-fit" title="Fit to screen" style="font-size:13px;">&#x2922;</button>
+</div>
+
+<div class="minimap" id="minimap">
+  <div class="minimap-content" id="minimap-content">
+    <canvas class="minimap-canvas" id="minimap-canvas"></canvas>
+    <div class="minimap-viewport" id="minimap-viewport"></div>
+  </div>
+</div>
+
+<div class="viewport" id="viewport">
+  <div class="canvas" id="canvas">
+    <div class="blueprint" id="blueprint"></div>
+  </div>
+</div>
+
+<div class="popover" id="popover">
+  <button class="popover-close" id="popover-close">&times;</button>
+  <div id="popover-body"></div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const journeyData = {
+  title: "Enterprise Client Onboarding — Service Blueprint",
+  personas: ["Buyer (decision maker)", "End User", "IT Admin"],
+  milestones: [
+    {
+      id: "discovery", title: "Discovery",
+      steps: [
+        { id: "research", customerAction: "Researches solutions online", frontstage: "Marketing site, case studies", backstage: "Content marketing, SEO", supportProcess: "CMS, analytics", persona: "Buyer (decision maker)" },
+        { id: "demo-request", customerAction: "Requests product demo", frontstage: "Demo request form, confirmation", backstage: "Lead routing, CRM update", supportProcess: "CRM, calendar API", persona: "Buyer (decision maker)", momentOfTruth: true }
+      ]
+    },
+    {
+      id: "evaluation", title: "Evaluation",
+      steps: [
+        { id: "demo-call", customerAction: "Attends live demo", frontstage: "Video call, screen share", backstage: "Sales prep, demo env setup", supportProcess: "Video platform, demo env", persona: "Buyer (decision maker)", momentOfTruth: true },
+        { id: "trial-setup", customerAction: "Gets trial provisioned", frontstage: "Trial welcome, setup wizard", backstage: "Trial provisioning, sample data", supportProcess: "Provisioning, seed data", persona: "IT Admin" },
+        { id: "pilot-test", customerAction: "Runs pilot with team", frontstage: "Pilot dashboard, reports", backstage: "Usage monitoring, metrics", supportProcess: "Analytics, monitoring", persona: "End User" }
+      ]
+    },
+    {
+      id: "procurement", title: "Procurement",
+      steps: [
+        { id: "proposal", customerAction: "Reviews pricing", frontstage: "Proposal doc, ROI calculator", backstage: "Pricing engine, legal review", supportProcess: "CPQ, doc generation", persona: "Buyer (decision maker)" },
+        { id: "security-review", customerAction: "Security questionnaire", frontstage: "Security docs portal", backstage: "Security team review", supportProcess: "GRC platform", persona: "IT Admin", failureMode: "Security blocks deal" },
+        { id: "contract", customerAction: "Signs contract", frontstage: "E-signature flow", backstage: "Legal, billing setup", supportProcess: "E-sign, billing, CRM", persona: "Buyer (decision maker)", momentOfTruth: true }
+      ]
+    },
+    {
+      id: "implementation", title: "Implementation",
+      steps: [
+        { id: "kickoff", customerAction: "Attends kickoff", frontstage: "Kickoff meeting, project plan", backstage: "CSM assigned, timeline", supportProcess: "PM tool, CSM platform", persona: "IT Admin" },
+        { id: "sso-setup", customerAction: "Configures SSO", frontstage: "SSO wizard, docs", backstage: "IdP integration, testing", supportProcess: "IdP connector, auth", persona: "IT Admin", failureMode: "SSO misconfiguration" },
+        { id: "data-migration", customerAction: "Migrates data", frontstage: "Migration tool, progress UI", backstage: "Data transform, validation", supportProcess: "ETL, validation engine", persona: "IT Admin" }
+      ]
+    },
+    {
+      id: "rollout", title: "Rollout",
+      steps: [
+        { id: "training", customerAction: "Attends training", frontstage: "Training webinar, docs", backstage: "Content creation", supportProcess: "LMS, webinar platform", persona: "End User" },
+        { id: "go-live", customerAction: "Full team goes live", frontstage: "Go-live email, welcome", backstage: "Monitoring up, support briefed", supportProcess: "Monitoring, support, status page", persona: "End User", momentOfTruth: true },
+        { id: "first-week", customerAction: "First week of usage", frontstage: "In-app tips, chat", backstage: "Anomaly detection, CSM check-in", supportProcess: "Analytics, support triggers", persona: "End User" }
+      ]
+    },
+    {
+      id: "expansion", title: "Expansion",
+      steps: [
+        { id: "success-review", customerAction: "Reviews success metrics", frontstage: "QBR presentation, ROI report", backstage: "Metric aggregation, forecast", supportProcess: "BI dashboard, CRM", persona: "Buyer (decision maker)" },
+        { id: "expand-seats", customerAction: "Requests more licenses", frontstage: "Self-serve expansion UI", backstage: "Provisioning, billing adjust", supportProcess: "License mgmt, billing", persona: "Buyer (decision maker)" }
+      ]
+    }
+  ]
+};
+
+// ============================================================
+// RENDER BLUEPRINT
+// ============================================================
+const lanes = ['customer', 'frontstage', 'backstage', 'support'];
+const laneLabels = { customer: 'Customer Actions', frontstage: 'Frontstage', backstage: 'Backstage', support: 'Support Processes' };
+const laneFields = { customer: 'customerAction', frontstage: 'frontstage', backstage: 'backstage', support: 'supportProcess' };
+
+function renderBlueprint() {
+  const bp = document.getElementById('blueprint');
+  const milestones = journeyData.milestones;
+  const numCols = milestones.length;
+  const numRows = lanes.length;
+
+  // Title
+  const titleEl = document.createElement('div');
+  titleEl.className = 'blueprint-title';
+  titleEl.textContent = journeyData.title;
+  bp.appendChild(titleEl);
+
+  const personasEl = document.createElement('div');
+  personasEl.className = 'blueprint-personas';
+  personasEl.textContent = 'Personas: ' + journeyData.personas.join(' • ');
+  bp.appendChild(personasEl);
+
+  // Grid
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  grid.style.gridTemplateColumns = '48px ' + milestones.map(() => 'minmax(200px, 1fr)').join(' ');
+  grid.style.gridTemplateRows = 'auto ' + lanes.map(() => 'auto').join(' ');
+  bp.appendChild(grid);
+
+  // Corner cell
+  const corner = document.createElement('div');
+  corner.style.gridRow = '1'; corner.style.gridColumn = '1';
+  grid.appendChild(corner);
+
+  // Phase headers
+  milestones.forEach((m, i) => {
+    const hdr = document.createElement('div');
+    hdr.className = 'phase-header';
+    hdr.style.gridRow = '1';
+    hdr.style.gridColumn = String(i + 2);
+    hdr.textContent = m.title;
+    grid.appendChild(hdr);
+  });
+
+  // Lane rows
+  lanes.forEach((lane, li) => {
+    // Label
+    const label = document.createElement('div');
+    label.className = 'lane-label lane-label--' + lane;
+    label.style.gridRow = String(li + 2);
+    label.style.gridColumn = '1';
+    label.textContent = laneLabels[lane];
+    grid.appendChild(label);
+
+    // Cells per milestone
+    milestones.forEach((m, mi) => {
+      const cell = document.createElement('div');
+      cell.className = 'cell cell--' + lane;
+      cell.style.gridRow = String(li + 2);
+      cell.style.gridColumn = String(mi + 2);
+      cell.dataset.lane = lane;
+      cell.dataset.phase = mi;
+
+      m.steps.forEach(step => {
+        const text = step[laneFields[lane]];
+        if (!text) return;
+        const box = document.createElement('div');
+        box.className = 'step-box';
+        box.textContent = text;
+        box.dataset.stepId = step.id;
+        box.dataset.step = JSON.stringify(step);
+
+        if (step.momentOfTruth && lane === 'customer') {
+          const dot = document.createElement('div');
+          dot.className = 'marker marker--mot';
+          dot.title = 'Moment of Truth';
+          box.appendChild(dot);
+        }
+        if (step.failureMode && lane === 'customer') {
+          const dot = document.createElement('div');
+          dot.className = 'marker marker--failure';
+          dot.title = 'Failure Point: ' + step.failureMode;
+          box.appendChild(dot);
+        }
+
+        if (lane === 'customer' && step.persona) {
+          const badge = document.createElement('div');
+          badge.className = 'persona-badge';
+          badge.textContent = step.persona;
+          box.appendChild(badge);
+        }
+
+        box.addEventListener('click', (e) => {
+          e.stopPropagation();
+          showPopover(step, box);
+        });
+
+        cell.appendChild(box);
+      });
+
+      grid.appendChild(cell);
+    });
+  });
+
+  // Draw dashed lane dividers
+  requestAnimationFrame(() => {
+    const gridRect = grid.getBoundingClientRect();
+    lanes.forEach((_, li) => {
+      if (li === 0) return;
+      const firstCell = grid.querySelector(`.cell[data-lane="${lanes[li]}"][data-phase="0"]`);
+      if (!firstCell) return;
+      const cellRect = firstCell.getBoundingClientRect();
+      const divider = document.createElement('div');
+      divider.className = 'lane-divider';
+      divider.style.top = (cellRect.top - gridRect.top) + 'px';
+      grid.appendChild(divider);
+    });
+
+    // Phase dividers
+    milestones.forEach((_, mi) => {
+      if (mi === 0) return;
+      const firstCell = grid.querySelector(`.cell[data-lane="customer"][data-phase="${mi}"]`);
+      if (!firstCell) return;
+      const cellRect = firstCell.getBoundingClientRect();
+      const divider = document.createElement('div');
+      divider.className = 'phase-divider';
+      divider.style.left = (cellRect.left - gridRect.left) + 'px';
+      grid.appendChild(divider);
+    });
+
+    // Draw arrows between phases in customer lane
+    drawArrows(grid);
+    // Render minimap
+    renderMinimap();
+  });
+}
+
+function drawArrows(grid) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.style.position = 'absolute';
+  svg.style.top = '0';
+  svg.style.left = '0';
+  svg.style.width = '100%';
+  svg.style.height = '100%';
+  svg.style.pointerEvents = 'none';
+  svg.style.overflow = 'visible';
+  svg.style.zIndex = '2';
+
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+  marker.setAttribute('id', 'arrowhead');
+  marker.setAttribute('markerWidth', '8');
+  marker.setAttribute('markerHeight', '6');
+  marker.setAttribute('refX', '8');
+  marker.setAttribute('refY', '3');
+  marker.setAttribute('orient', 'auto');
+  const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+  polygon.setAttribute('points', '0 0, 8 3, 0 6');
+  polygon.setAttribute('fill', '#aaa');
+  marker.appendChild(polygon);
+  defs.appendChild(marker);
+  svg.appendChild(defs);
+
+  const gridRect = grid.getBoundingClientRect();
+  const milestones = journeyData.milestones;
+
+  // Connect last box in each phase to first box in next phase (customer lane)
+  for (let mi = 0; mi < milestones.length - 1; mi++) {
+    const currCell = grid.querySelector(`.cell[data-lane="customer"][data-phase="${mi}"]`);
+    const nextCell = grid.querySelector(`.cell[data-lane="customer"][data-phase="${mi + 1}"]`);
+    if (!currCell || !nextCell) continue;
+
+    const currBoxes = currCell.querySelectorAll('.step-box');
+    const nextBoxes = nextCell.querySelectorAll('.step-box');
+    if (!currBoxes.length || !nextBoxes.length) continue;
+
+    const lastBox = currBoxes[currBoxes.length - 1];
+    const firstBox = nextBoxes[0];
+
+    const r1 = lastBox.getBoundingClientRect();
+    const r2 = firstBox.getBoundingClientRect();
+
+    const x1 = r1.right - gridRect.left;
+    const y1 = r1.top + r1.height / 2 - gridRect.top;
+    const x2 = r2.left - gridRect.left;
+    const y2 = r2.top + r2.height / 2 - gridRect.top;
+
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1);
+    line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2);
+    line.setAttribute('y2', y2);
+    line.setAttribute('stroke', '#bbb');
+    line.setAttribute('stroke-width', '1.5');
+    line.setAttribute('marker-end', 'url(#arrowhead)');
+    svg.appendChild(line);
+  }
+
+  grid.style.position = 'relative';
+  grid.appendChild(svg);
+}
+
+// ============================================================
+// POPOVER
+// ============================================================
+const popover = document.getElementById('popover');
+const popoverBody = document.getElementById('popover-body');
+let popoverVisible = false;
+
+function showPopover(step, boxEl) {
+  const rect = boxEl.getBoundingClientRect();
+  let html = `<div class="popover-title">${step.customerAction}</div>`;
+  html += `<div class="popover-row"><span class="popover-label">Frontstage</span><span class="popover-value">${step.frontstage}</span></div>`;
+  html += `<div class="popover-row"><span class="popover-label">Backstage</span><span class="popover-value">${step.backstage}</span></div>`;
+  html += `<div class="popover-row"><span class="popover-label">Support</span><span class="popover-value">${step.supportProcess}</span></div>`;
+  html += `<div class="popover-row"><span class="popover-label">Persona</span><span class="popover-value">${step.persona}</span></div>`;
+  if (step.momentOfTruth) html += `<div class="popover-row"><span class="popover-label" style="color:var(--marker-mot)">Moment of Truth</span></div>`;
+  if (step.failureMode) html += `<div class="popover-row"><span class="popover-label" style="color:var(--marker-failure)">Failure</span><span class="popover-value">${step.failureMode}</span></div>`;
+
+  popoverBody.innerHTML = html;
+
+  // Position popover
+  let left = rect.right + 12;
+  let top = rect.top;
+  if (left + 320 > window.innerWidth) left = rect.left - 332;
+  if (top + 200 > window.innerHeight) top = window.innerHeight - 220;
+  if (top < 8) top = 8;
+
+  popover.style.left = left + 'px';
+  popover.style.top = top + 'px';
+  popover.classList.add('visible');
+  popoverVisible = true;
+}
+
+function hidePopover() {
+  popover.classList.remove('visible');
+  popoverVisible = false;
+}
+
+document.getElementById('popover-close').addEventListener('click', hidePopover);
+document.addEventListener('click', (e) => {
+  if (popoverVisible && !popover.contains(e.target) && !e.target.closest('.step-box')) {
+    hidePopover();
+  }
+});
+
+// ============================================================
+// ZOOM & PAN ENGINE
+// ============================================================
+const viewport = document.getElementById('viewport');
+const canvas = document.getElementById('canvas');
+const zoomLevelEl = document.getElementById('zoom-level');
+
+let scale = 1;
+let translateX = 0;
+let translateY = 0;
+const MIN_SCALE = 0.15;
+const MAX_SCALE = 3;
+const ZOOM_STEP = 0.15;
+
+let isPanning = false;
+let panStartX = 0, panStartY = 0;
+let panStartTX = 0, panStartTY = 0;
+
+function applyTransform(animate) {
+  if (animate) {
+    canvas.classList.add('animating');
+    setTimeout(() => canvas.classList.remove('animating'), 360);
+  } else {
+    canvas.classList.remove('animating');
+  }
+  canvas.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+  zoomLevelEl.textContent = Math.round(scale * 100) + '%';
+  updateMinimap();
+}
+
+function zoomAtPoint(newScale, cx, cy, animate) {
+  newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
+  const ratio = newScale / scale;
+  translateX = cx - ratio * (cx - translateX);
+  translateY = cy - ratio * (cy - translateY);
+  scale = newScale;
+  applyTransform(animate);
+}
+
+function fitToScreen(animate) {
+  const bp = document.getElementById('blueprint');
+  const bpRect = bp.getBoundingClientRect();
+  const vpW = viewport.clientWidth;
+  const vpH = viewport.clientHeight;
+
+  // Get actual blueprint size (unscaled)
+  const bpW = bp.scrollWidth;
+  const bpH = bp.scrollHeight;
+
+  const padding = 40;
+  const sx = (vpW - padding * 2) / bpW;
+  const sy = (vpH - padding * 2) / bpH;
+  scale = Math.min(sx, sy, 1);
+
+  translateX = (vpW - bpW * scale) / 2;
+  translateY = (vpH - bpH * scale) / 2;
+  applyTransform(animate !== false);
+}
+
+// Mouse pan
+viewport.addEventListener('mousedown', (e) => {
+  if (e.target.closest('.step-box') || e.target.closest('.popover')) return;
+  if (e.button !== 0) return;
+  isPanning = true;
+  panStartX = e.clientX;
+  panStartY = e.clientY;
+  panStartTX = translateX;
+  panStartTY = translateY;
+  viewport.classList.add('grabbing');
+  hidePopover();
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (!isPanning) return;
+  translateX = panStartTX + (e.clientX - panStartX);
+  translateY = panStartTY + (e.clientY - panStartY);
+  applyTransform(false);
+});
+
+window.addEventListener('mouseup', () => {
+  if (isPanning) {
+    isPanning = false;
+    viewport.classList.remove('grabbing');
+  }
+});
+
+// Scroll wheel zoom
+viewport.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const rect = viewport.getBoundingClientRect();
+  const cx = e.clientX - rect.left;
+  const cy = e.clientY - rect.top;
+
+  // Detect pinch (ctrlKey is set for pinch on trackpad)
+  let delta;
+  if (e.ctrlKey) {
+    delta = -e.deltaY * 0.01;
+  } else {
+    delta = -e.deltaY * 0.002;
+  }
+
+  const newScale = scale * (1 + delta);
+  zoomAtPoint(newScale, cx, cy, false);
+}, { passive: false });
+
+// Double click to zoom in
+viewport.addEventListener('dblclick', (e) => {
+  if (e.target.closest('.step-box') || e.target.closest('.popover')) return;
+  const rect = viewport.getBoundingClientRect();
+  const cx = e.clientX - rect.left;
+  const cy = e.clientY - rect.top;
+  const newScale = Math.min(scale * 1.75, MAX_SCALE);
+  zoomAtPoint(newScale, cx, cy, true);
+});
+
+// Control buttons
+document.getElementById('btn-zoom-in').addEventListener('click', () => {
+  const rect = viewport.getBoundingClientRect();
+  zoomAtPoint(scale * (1 + ZOOM_STEP), rect.width / 2, rect.height / 2, true);
+});
+document.getElementById('btn-zoom-out').addEventListener('click', () => {
+  const rect = viewport.getBoundingClientRect();
+  zoomAtPoint(scale * (1 - ZOOM_STEP), rect.width / 2, rect.height / 2, true);
+});
+document.getElementById('btn-fit').addEventListener('click', () => fitToScreen(true));
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.key === '0' && (e.metaKey || e.ctrlKey)) {
+    e.preventDefault();
+    fitToScreen(true);
+  }
+  if (e.key === '=' && (e.metaKey || e.ctrlKey)) {
+    e.preventDefault();
+    const rect = viewport.getBoundingClientRect();
+    zoomAtPoint(scale * (1 + ZOOM_STEP), rect.width / 2, rect.height / 2, true);
+  }
+  if (e.key === '-' && (e.metaKey || e.ctrlKey)) {
+    e.preventDefault();
+    const rect = viewport.getBoundingClientRect();
+    zoomAtPoint(scale * (1 - ZOOM_STEP), rect.width / 2, rect.height / 2, true);
+  }
+});
+
+// ============================================================
+// MINIMAP
+// ============================================================
+const minimap = document.getElementById('minimap');
+const minimapCanvas = document.getElementById('minimap-canvas');
+const minimapViewport = document.getElementById('minimap-viewport');
+const minimapContent = document.getElementById('minimap-content');
+
+let minimapScale = 1;
+let canvasW = 0, canvasH = 0;
+
+function renderMinimap() {
+  const bp = document.getElementById('blueprint');
+  canvasW = bp.scrollWidth;
+  canvasH = bp.scrollHeight;
+
+  const mmW = minimap.clientWidth;
+  const mmH = minimap.clientHeight;
+
+  minimapScale = Math.min(mmW / canvasW, mmH / canvasH);
+
+  const ctx = minimapCanvas.getContext('2d');
+  minimapCanvas.width = mmW;
+  minimapCanvas.height = mmH;
+
+  ctx.clearRect(0, 0, mmW, mmH);
+  ctx.fillStyle = '#fafafa';
+  ctx.fillRect(0, 0, canvasW * minimapScale, canvasH * minimapScale);
+
+  // Draw lane bands
+  const laneColors = ['#fff9e6', '#fff9e6', '#ffffff', '#f3f3f3'];
+  const laneH = canvasH / 4;
+  const headerH = 60;
+  laneColors.forEach((color, i) => {
+    ctx.fillStyle = color;
+    const y = (headerH + i * (canvasH - headerH) / 4) * minimapScale;
+    const h = ((canvasH - headerH) / 4) * minimapScale;
+    ctx.fillRect(0, y, canvasW * minimapScale, h);
+  });
+
+  // Draw column dividers
+  const milestones = journeyData.milestones;
+  ctx.strokeStyle = '#ddd';
+  ctx.lineWidth = 0.5;
+  for (let i = 1; i < milestones.length; i++) {
+    const x = (48 + i * ((canvasW - 48) / milestones.length)) * minimapScale;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvasH * minimapScale);
+    ctx.stroke();
+  }
+
+  // Draw little dots for boxes
+  const boxes = bp.querySelectorAll('.step-box');
+  const bpRect = bp.getBoundingClientRect();
+  ctx.fillStyle = '#999';
+  boxes.forEach(box => {
+    const r = box.getBoundingClientRect();
+    const x = ((r.left - bpRect.left) / scale) * minimapScale;
+    const y = ((r.top - bpRect.top) / scale) * minimapScale;
+    const w = (r.width / scale) * minimapScale;
+    const h = (r.height / scale) * minimapScale;
+    ctx.fillRect(x, y, Math.max(w, 2), Math.max(h, 1));
+  });
+
+  updateMinimap();
+}
+
+function updateMinimap() {
+  const vpW = viewport.clientWidth;
+  const vpH = viewport.clientHeight;
+
+  // Visible area in canvas coordinates
+  const visLeft = -translateX / scale;
+  const visTop = -translateY / scale;
+  const visW = vpW / scale;
+  const visH = vpH / scale;
+
+  // Map to minimap coordinates
+  const mmLeft = visLeft * minimapScale;
+  const mmTop = visTop * minimapScale;
+  const mmW = visW * minimapScale;
+  const mmH = visH * minimapScale;
+
+  minimapViewport.style.left = mmLeft + 'px';
+  minimapViewport.style.top = mmTop + 'px';
+  minimapViewport.style.width = mmW + 'px';
+  minimapViewport.style.height = mmH + 'px';
+}
+
+// Click minimap to navigate
+let minimapDragging = false;
+
+function minimapNavigate(e) {
+  const rect = minimap.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+
+  // Target center in canvas coordinates
+  const targetX = mx / minimapScale;
+  const targetY = my / minimapScale;
+
+  const vpW = viewport.clientWidth;
+  const vpH = viewport.clientHeight;
+
+  translateX = -(targetX * scale - vpW / 2);
+  translateY = -(targetY * scale - vpH / 2);
+  applyTransform(true);
+}
+
+minimap.addEventListener('mousedown', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  minimapDragging = true;
+  minimapNavigate(e);
+});
+window.addEventListener('mousemove', (e) => {
+  if (minimapDragging) {
+    e.preventDefault();
+    minimapNavigate(e);
+  }
+});
+window.addEventListener('mouseup', () => { minimapDragging = false; });
+
+// ============================================================
+// TOUCH SUPPORT (pinch to zoom)
+// ============================================================
+let lastTouchDist = 0;
+let lastTouchCenter = { x: 0, y: 0 };
+let touchPanning = false;
+
+viewport.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    const dx = e.touches[1].clientX - e.touches[0].clientX;
+    const dy = e.touches[1].clientY - e.touches[0].clientY;
+    lastTouchDist = Math.hypot(dx, dy);
+    lastTouchCenter = {
+      x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+      y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+    };
+  } else if (e.touches.length === 1) {
+    touchPanning = true;
+    panStartX = e.touches[0].clientX;
+    panStartY = e.touches[0].clientY;
+    panStartTX = translateX;
+    panStartTY = translateY;
+  }
+}, { passive: false });
+
+viewport.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    const dx = e.touches[1].clientX - e.touches[0].clientX;
+    const dy = e.touches[1].clientY - e.touches[0].clientY;
+    const dist = Math.hypot(dx, dy);
+    const center = {
+      x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+      y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+    };
+    const rect = viewport.getBoundingClientRect();
+    const cx = center.x - rect.left;
+    const cy = center.y - rect.top;
+    const newScale = scale * (dist / lastTouchDist);
+    zoomAtPoint(newScale, cx, cy, false);
+    lastTouchDist = dist;
+    lastTouchCenter = center;
+  } else if (e.touches.length === 1 && touchPanning) {
+    translateX = panStartTX + (e.touches[0].clientX - panStartX);
+    translateY = panStartTY + (e.touches[0].clientY - panStartY);
+    applyTransform(false);
+  }
+}, { passive: false });
+
+viewport.addEventListener('touchend', () => { touchPanning = false; });
+
+// ============================================================
+// INIT
+// ============================================================
+renderBlueprint();
+// After layout is computed, fit to screen
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    fitToScreen(false);
+  });
+});
+
+// Handle resize
+window.addEventListener('resize', () => {
+  fitToScreen(true);
+  renderMinimap();
+});
+</script>
+</body>
+</html>

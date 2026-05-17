@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Journey — Emotion Curve</title>
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --emotion-neg2: #fecaca;
+  --emotion-neg1: #fed7aa;
+  --emotion-neutral: #e5e7eb;
+  --emotion-pos1: #bbf7d0;
+  --emotion-pos2: #86efac;
+  --color-mot: #ef4444;
+  --color-failure: #d97706;
+  --color-pain: #f97316;
+  --color-opportunity: #22c55e;
+  --card-radius: 8px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.15);
+  --transition: 0.2s ease;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font);
+  background: #f8f9fa;
+  color: #1a1a2e;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ── Toolbar ── */
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 12px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.toolbar-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-right: auto;
+  white-space: nowrap;
+}
+
+.toolbar select {
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: #fff;
+  color: #374151;
+  outline: none;
+  transition: border-color var(--transition);
+  cursor: pointer;
+}
+
+.toolbar select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+}
+
+.toolbar .legend {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 0.78rem;
+  color: #6b7280;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-swatch--mot {
+  background: none;
+  border: 2.5px solid var(--color-mot);
+}
+
+.legend-swatch--failure {
+  width: 0;
+  height: 0;
+  border-radius: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 9px solid var(--color-failure);
+}
+
+.legend-swatch--pain {
+  background: rgba(249,115,22,0.25);
+  border-radius: 2px;
+  width: 14px;
+  height: 8px;
+}
+
+.legend-swatch--opportunity {
+  background: var(--color-opportunity);
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  width: 12px;
+  height: 12px;
+  border-radius: 0;
+}
+
+/* ── Chart Container ── */
+.chart-section {
+  position: sticky;
+  top: 58px;
+  z-index: 50;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 24px 24px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: box-shadow 0.3s ease;
+}
+
+.chart-wrapper {
+  max-width: 960px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.chart-svg {
+  width: 100%;
+  display: block;
+  overflow: visible;
+}
+
+/* ── Tooltip ── */
+.tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: #1f2937;
+  color: #f3f4f6;
+  font-size: 0.78rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: var(--shadow-lg);
+  z-index: 200;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  max-width: 220px;
+  line-height: 1.4;
+}
+
+.tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tooltip-name {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.tooltip-emotion {
+  color: #d1d5db;
+}
+
+.tooltip-metric {
+  color: #9ca3af;
+  font-size: 0.72rem;
+  margin-top: 2px;
+}
+
+/* ── Detail Cards Section ── */
+.cards-section {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+.milestone {
+  margin-bottom: 12px;
+}
+
+.milestone-heading {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #374151;
+  padding: 16px 0 8px;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 16px;
+}
+
+/* Flow arrow */
+.flow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  position: relative;
+}
+
+.flow-arrow::before {
+  content: "";
+  width: 2px;
+  height: 100%;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  background: #94a3b8;
+}
+
+.flow-arrow svg {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Card */
+.card {
+  position: relative;
+  background: #fffdf7;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--card-radius);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
+  outline: none;
+  border-left: 5px solid var(--emotion-neutral);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.card:focus-visible {
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.3);
+}
+
+.card[data-highlighted="true"] {
+  box-shadow: 0 0 0 2px #6366f1, var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.card[data-valence="-2"] { border-left-color: var(--emotion-neg2); }
+.card[data-valence="-1"] { border-left-color: var(--emotion-neg1); }
+.card[data-valence="0"]  { border-left-color: var(--emotion-neutral); }
+.card[data-valence="1"]  { border-left-color: var(--emotion-pos1); }
+.card[data-valence="2"]  { border-left-color: var(--emotion-pos2); }
+
+.card[data-pain="true"] {
+  border-bottom: 3px solid var(--color-pain);
+}
+
+.card[data-opportunity="true"] {
+  border-right: 2px dashed var(--color-opportunity);
+  border-top: 2px dashed var(--color-opportunity);
+}
+
+.card-mot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-mot);
+}
+
+.card-failure-marker {
+  position: absolute;
+  top: 8px;
+  left: 14px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 9px solid var(--color-failure);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.card-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1f2937;
+  flex: 1;
+  min-width: 0;
+}
+
+.card-emotion-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.04);
+  color: #4b5563;
+  white-space: nowrap;
+}
+
+.card-metric {
+  font-size: 0.75rem;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.card-body {
+  display: none;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.card.expanded .card-body {
+  display: block;
+}
+
+.card-field {
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
+
+.card-field-label {
+  font-weight: 600;
+  color: #6b7280;
+  display: inline;
+  margin-right: 4px;
+}
+
+.card-field-value {
+  color: #374151;
+}
+
+.card-field--pain .card-field-value {
+  color: #c2410c;
+}
+
+.card-field--opportunity .card-field-value {
+  color: #15803d;
+}
+
+.card-field--failure .card-field-value {
+  color: #92400e;
+}
+
+/* Dimmed card for persona filter */
+.card.dimmed {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* ── Y-axis Labels ── */
+.y-label {
+  font-size: 10px;
+  fill: #9ca3af;
+  text-anchor: end;
+  dominant-baseline: middle;
+  font-family: var(--font);
+}
+
+/* ── Milestone Labels ── */
+.milestone-label {
+  font-size: 10px;
+  fill: #6b7280;
+  font-weight: 600;
+  text-anchor: middle;
+  font-family: var(--font);
+}
+
+/* ── Emotion Labels on Curve ── */
+.emotion-label {
+  font-size: 10px;
+  fill: #4b5563;
+  text-anchor: middle;
+  font-family: var(--font);
+  pointer-events: none;
+}
+
+/* ── Data Point ── */
+.data-point {
+  cursor: pointer;
+  transition: r 0.15s ease;
+}
+
+.data-point:hover {
+  filter: brightness(0.92);
+}
+
+/* ── Keyboard focus indicator ── */
+.data-point.focused {
+  stroke: #6366f1;
+  stroke-width: 3;
+}
+
+/* Screen reader skip link */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .toolbar {
+    padding: 10px 14px;
+  }
+  .chart-section {
+    padding: 16px 10px 10px;
+  }
+  .cards-section {
+    padding: 20px 14px 60px;
+  }
+  .toolbar .legend {
+    display: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar" role="banner">
+  <span class="toolbar-title" id="journey-title"></span>
+  <div class="legend" aria-label="Legend">
+    <span class="legend-item"><span class="legend-swatch legend-swatch--mot"></span> Moment of Truth</span>
+    <span class="legend-item"><span class="legend-swatch legend-swatch--failure"></span> Failure Point</span>
+    <span class="legend-item"><span class="legend-swatch legend-swatch--pain"></span> Pain Point</span>
+    <span class="legend-item"><span class="legend-swatch legend-swatch--opportunity"></span> Opportunity</span>
+  </div>
+  <select id="persona-filter" aria-label="Filter by persona">
+    <option value="all">All Personas</option>
+  </select>
+</div>
+
+<section class="chart-section" aria-label="Emotion curve chart">
+  <div class="chart-wrapper">
+    <svg class="chart-svg" id="chart-svg" role="img" aria-label="Emotion curve visualization"></svg>
+    <div class="tooltip" id="tooltip"></div>
+  </div>
+</section>
+
+<section class="cards-section" id="cards-section" aria-label="Journey step details">
+</section>
+
+<script>
+// ── Sample Data ──
+const journeyData = {
+  title: "New User Onboarding — Emotion Curve",
+  personas: ["Alex (new user)", "Admin (team lead)"],
+  milestones: [
+    {
+      id: "awareness", title: "Awareness & Sign-up",
+      steps: [
+        { id: "discover", description: "Discovers product through colleague", emotion: "Curious", emotionValence: 1, persona: "Alex (new user)", duration: "2 days", channel: "Word of mouth" },
+        { id: "visit-landing", description: "Visits landing page", emotion: "Interested", emotionValence: 1, persona: "Alex (new user)", duration: "3 min", channel: "Web", momentOfTruth: true },
+        { id: "sign-up", description: "Creates account", emotion: "Hopeful", emotionValence: 1, persona: "Alex (new user)", duration: "2 min", channel: "Web" }
+      ]
+    },
+    {
+      id: "activation", title: "Activation",
+      steps: [
+        { id: "empty-workspace", description: "Sees empty workspace", emotion: "Confused", emotionValence: -1, persona: "Alex (new user)", duration: "30 sec", channel: "App", painPoint: "No onboarding guidance", failureMode: "User closes tab" },
+        { id: "find-tutorial", description: "Searches for help", emotion: "Frustrated", emotionValence: -2, persona: "Alex (new user)", duration: "5 min", channel: "Help center", painPoint: "Outdated tutorial" },
+        { id: "first-action", description: "Creates first project", emotion: "Relieved", emotionValence: 0, persona: "Alex (new user)", duration: "8 min", channel: "App", opportunity: "Guided first-run wizard" }
+      ]
+    },
+    {
+      id: "engagement", title: "First Value",
+      steps: [
+        { id: "invite-team", description: "Invites team members", emotion: "Excited", emotionValence: 2, persona: "Alex (new user)", duration: "2 min", channel: "App", momentOfTruth: true },
+        { id: "team-joins", description: "Team accepts invite", emotion: "Satisfied", emotionValence: 2, persona: "Admin (team lead)", duration: "1 day", channel: "Email → App" },
+        { id: "first-collab", description: "First shared task", emotion: "Delighted", emotionValence: 2, persona: "Alex (new user)", duration: "15 min", channel: "App", momentOfTruth: true, opportunity: "Celebration moment" }
+      ]
+    }
+  ]
+};
+
+// ── Flatten steps ──
+const allSteps = [];
+const milestoneBoundaries = []; // { index, title }
+let stepIndex = 0;
+journeyData.milestones.forEach((m, mi) => {
+  milestoneBoundaries.push({ index: stepIndex, title: m.title, endIndex: stepIndex + m.steps.length - 1 });
+  m.steps.forEach(s => {
+    allSteps.push({ ...s, milestoneTitle: m.title, globalIndex: stepIndex });
+    stepIndex++;
+  });
+});
+
+// ── Valence colors ──
+function valenceColor(v) {
+  const map = { '-2': '#fecaca', '-1': '#fed7aa', '0': '#e5e7eb', '1': '#bbf7d0', '2': '#86efac' };
+  return map[String(v)] || '#e5e7eb';
+}
+
+// ── Emotion emoji ──
+function emotionEmoji(v) {
+  if (v >= 2) return '\u{1F929}';
+  if (v >= 1) return '\u{1F60A}';
+  if (v === 0) return '\u{1F610}';
+  if (v >= -1) return '\u{1F615}';
+  return '\u{1F621}';
+}
+
+// ── Chart Dimensions ──
+const CHART = {
+  paddingLeft: 90,
+  paddingRight: 40,
+  paddingTop: 48,
+  paddingBottom: 40,
+  height: 320,
+  pointRadius: 8,
+};
+
+// ── Build SVG Chart ──
+function buildChart(activePersona) {
+  const svg = document.getElementById('chart-svg');
+  const wrapperWidth = svg.parentElement.clientWidth;
+  const w = wrapperWidth;
+  const h = CHART.height;
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  svg.setAttribute('width', w);
+  svg.setAttribute('height', h);
+  svg.innerHTML = '';
+
+  const plotLeft = CHART.paddingLeft;
+  const plotRight = w - CHART.paddingRight;
+  const plotTop = CHART.paddingTop;
+  const plotBottom = h - CHART.paddingBottom;
+  const plotW = plotRight - plotLeft;
+  const plotH = plotBottom - plotTop;
+
+  const n = allSteps.length;
+  const xStep = plotW / (n - 1 || 1);
+
+  function xPos(i) { return plotLeft + i * xStep; }
+  function yPos(v) { return plotTop + plotH * (1 - (v + 2) / 4); } // -2..+2 mapped
+
+  // ── Defs: gradients ──
+  const defs = el('defs');
+  // Area gradient: red at bottom, green at top
+  const areaGrad = el('linearGradient', { id: 'areaGrad', x1: '0', y1: '1', x2: '0', y2: '0' });
+  areaGrad.appendChild(el('stop', { offset: '0%', 'stop-color': '#fecaca', 'stop-opacity': '0.6' }));
+  areaGrad.appendChild(el('stop', { offset: '25%', 'stop-color': '#fed7aa', 'stop-opacity': '0.5' }));
+  areaGrad.appendChild(el('stop', { offset: '50%', 'stop-color': '#f3f4f6', 'stop-opacity': '0.3' }));
+  areaGrad.appendChild(el('stop', { offset: '75%', 'stop-color': '#bbf7d0', 'stop-opacity': '0.5' }));
+  areaGrad.appendChild(el('stop', { offset: '100%', 'stop-color': '#86efac', 'stop-opacity': '0.6' }));
+  defs.appendChild(areaGrad);
+
+  // Glow filter for line
+  const glow = el('filter', { id: 'glow', x: '-20%', y: '-20%', width: '140%', height: '140%' });
+  const feGauss = el('feGaussianBlur', { stdDeviation: '3', result: 'glow' });
+  glow.appendChild(feGauss);
+  const feMerge = el('feMerge');
+  feMerge.appendChild(el('feMergeNode', { in: 'glow' }));
+  feMerge.appendChild(el('feMergeNode', { in: 'SourceGraphic' }));
+  glow.appendChild(feMerge);
+  defs.appendChild(glow);
+
+  // Drop shadow for points
+  const shadow = el('filter', { id: 'pointShadow', x: '-50%', y: '-50%', width: '200%', height: '200%' });
+  shadow.appendChild(el('feDropShadow', { dx: '0', dy: '1', stdDeviation: '2', 'flood-color': 'rgba(0,0,0,0.15)' }));
+  defs.appendChild(shadow);
+
+  svg.appendChild(defs);
+
+  // ── Y-axis grid lines + labels ──
+  const yLabels = [
+    { v: 2, text: 'Very Positive' },
+    { v: 1, text: 'Positive' },
+    { v: 0, text: 'Neutral' },
+    { v: -1, text: 'Negative' },
+    { v: -2, text: 'Very Negative' }
+  ];
+  yLabels.forEach(yl => {
+    const y = yPos(yl.v);
+    svg.appendChild(el('line', {
+      x1: plotLeft, y1: y, x2: plotRight, y2: y,
+      stroke: '#f0f0f0', 'stroke-width': '1'
+    }));
+    svg.appendChild(el('text', {
+      x: plotLeft - 8, y: y,
+      class: 'y-label'
+    }, yl.text));
+  });
+
+  // Neutral zero line (stronger)
+  svg.appendChild(el('line', {
+    x1: plotLeft, y1: yPos(0), x2: plotRight, y2: yPos(0),
+    stroke: '#d1d5db', 'stroke-width': '1', 'stroke-dasharray': '4,3'
+  }));
+
+  // ── Milestone boundaries ──
+  milestoneBoundaries.forEach((mb, i) => {
+    if (i === 0) return; // skip first
+    const x = xPos(mb.index) - xStep / 2;
+    svg.appendChild(el('line', {
+      x1: x, y1: plotTop - 10, x2: x, y2: plotBottom + 5,
+      stroke: '#d1d5db', 'stroke-width': '1', 'stroke-dasharray': '5,4'
+    }));
+  });
+
+  // Milestone title labels at top
+  milestoneBoundaries.forEach(mb => {
+    const midIndex = (mb.index + mb.endIndex) / 2;
+    const x = xPos(midIndex);
+    svg.appendChild(el('text', {
+      x: x, y: plotTop - 20,
+      class: 'milestone-label'
+    }, mb.title));
+  });
+
+  // ── Compute points ──
+  const points = allSteps.map((s, i) => ({
+    x: xPos(i),
+    y: yPos(s.emotionValence),
+    step: s,
+    index: i,
+    dimmed: activePersona !== 'all' && s.persona !== activePersona
+  }));
+
+  // ── Pain point highlighted regions ──
+  allSteps.forEach((s, i) => {
+    if (!s.painPoint) return;
+    const px = xPos(i);
+    const regionW = xStep * 0.6;
+    const ry = yPos(0);
+    const rh = yPos(s.emotionValence) - ry;
+    if (rh > 0) {
+      svg.appendChild(el('rect', {
+        x: px - regionW / 2, y: ry, width: regionW, height: rh,
+        fill: 'rgba(249,115,22,0.12)', rx: '4', ry: '4'
+      }));
+    }
+  });
+
+  // ── Bezier curve path ──
+  const activePoints = points.filter(p => !p.dimmed);
+
+  if (activePoints.length > 1) {
+    // Area fill path
+    const areaPath = bezierAreaPath(activePoints, yPos(0));
+    svg.appendChild(el('path', {
+      d: areaPath,
+      fill: 'url(#areaGrad)',
+      opacity: '0.7'
+    }));
+
+    // Line path
+    const linePath = bezierLinePath(activePoints);
+    // Glow line behind
+    svg.appendChild(el('path', {
+      d: linePath,
+      fill: 'none',
+      stroke: '#a78bfa',
+      'stroke-width': '4',
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+      opacity: '0.3',
+      filter: 'url(#glow)'
+    }));
+    // Main line
+    svg.appendChild(el('path', {
+      d: linePath,
+      fill: 'none',
+      stroke: '#7c3aed',
+      'stroke-width': '2.5',
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round'
+    }));
+  }
+
+  // Dimmed line for non-active persona
+  if (activePersona !== 'all') {
+    const dimmedPoints = points.filter(p => p.dimmed);
+    if (dimmedPoints.length > 1) {
+      const dp = bezierLinePath(dimmedPoints);
+      svg.appendChild(el('path', {
+        d: dp, fill: 'none', stroke: '#d1d5db', 'stroke-width': '1.5',
+        'stroke-dasharray': '4,4', opacity: '0.5'
+      }));
+    }
+  }
+
+  // ── Emotion text labels on curve ──
+  points.forEach(p => {
+    if (p.dimmed) return;
+    const labelY = p.y + (p.step.emotionValence >= 0 ? -18 : 22);
+    svg.appendChild(el('text', {
+      x: p.x, y: labelY,
+      class: 'emotion-label',
+      opacity: '0.85'
+    }, p.step.emotion));
+  });
+
+  // ── Data points (circles + markers) ──
+  points.forEach(p => {
+    const g = el('g', {
+      class: 'data-point' + (p.dimmed ? ' dimmed-point' : ''),
+      'data-index': p.index,
+      tabindex: '0',
+      role: 'button',
+      'aria-label': `${p.step.description}: ${p.step.emotion} (${p.step.emotionValence})`
+    });
+
+    if (p.dimmed) {
+      g.style.opacity = '0.2';
+      g.style.pointerEvents = 'none';
+    }
+
+    // Moment of truth ring
+    if (p.step.momentOfTruth && !p.dimmed) {
+      g.appendChild(el('circle', {
+        cx: p.x, cy: p.y, r: CHART.pointRadius + 5,
+        fill: 'none', stroke: '#ef4444', 'stroke-width': '2.5',
+        'stroke-dasharray': '0', opacity: '0.8'
+      }));
+      // Pulsing animation ring
+      const pulseRing = el('circle', {
+        cx: p.x, cy: p.y, r: CHART.pointRadius + 5,
+        fill: 'none', stroke: '#ef4444', 'stroke-width': '1.5',
+        opacity: '0'
+      });
+      const animR = el('animate', { attributeName: 'r', from: String(CHART.pointRadius + 5), to: String(CHART.pointRadius + 14), dur: '2s', repeatCount: 'indefinite' });
+      const animO = el('animate', { attributeName: 'opacity', from: '0.6', to: '0', dur: '2s', repeatCount: 'indefinite' });
+      pulseRing.appendChild(animR);
+      pulseRing.appendChild(animO);
+      g.appendChild(pulseRing);
+    }
+
+    // Main circle with shadow
+    g.appendChild(el('circle', {
+      cx: p.x, cy: p.y, r: CHART.pointRadius,
+      fill: valenceColor(p.step.emotionValence),
+      stroke: '#fff', 'stroke-width': '2.5',
+      filter: 'url(#pointShadow)'
+    }));
+
+    // Failure point: warning triangle
+    if (p.step.failureMode && !p.dimmed) {
+      const tx = p.x + CHART.pointRadius + 4;
+      const ty = p.y - CHART.pointRadius - 4;
+      g.appendChild(el('polygon', {
+        points: `${tx},${ty - 7} ${tx - 5},${ty + 2} ${tx + 5},${ty + 2}`,
+        fill: '#d97706', stroke: '#fff', 'stroke-width': '1'
+      }));
+      g.appendChild(el('text', {
+        x: tx, y: ty - 0.5,
+        fill: '#fff', 'font-size': '7', 'text-anchor': 'middle', 'font-weight': '700',
+        'dominant-baseline': 'middle', 'pointer-events': 'none'
+      }, '!'));
+    }
+
+    // Opportunity: green star
+    if (p.step.opportunity && !p.dimmed) {
+      const sx = p.x - CHART.pointRadius - 6;
+      const sy = p.y - CHART.pointRadius - 6;
+      g.appendChild(el('text', {
+        x: sx, y: sy,
+        fill: '#22c55e', 'font-size': '12', 'text-anchor': 'middle',
+        'dominant-baseline': 'middle', 'pointer-events': 'none'
+      }, '★'));
+    }
+
+    // Interaction
+    if (!p.dimmed) {
+      g.addEventListener('mouseenter', e => showTooltip(p, e));
+      g.addEventListener('mouseleave', hideTooltip);
+      g.addEventListener('click', () => scrollToCard(p.index));
+      g.addEventListener('focus', () => setFocusedPoint(p.index));
+    }
+
+    svg.appendChild(g);
+  });
+
+  return points;
+}
+
+// ── SVG element helper ──
+function el(tag, attrs, text) {
+  const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  if (attrs) Object.entries(attrs).forEach(([k, v]) => node.setAttribute(k, v));
+  if (text) node.textContent = text;
+  return node;
+}
+
+// ── Bezier curve helpers ──
+function bezierLinePath(pts) {
+  if (pts.length < 2) return '';
+  let d = `M ${pts[0].x},${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(i - 1, 0)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(i + 2, pts.length - 1)];
+    const tension = 0.35;
+    const cp1x = p1.x + (p2.x - p0.x) * tension;
+    const cp1y = p1.y + (p2.y - p0.y) * tension;
+    const cp2x = p2.x - (p3.x - p1.x) * tension;
+    const cp2y = p2.y - (p3.y - p1.y) * tension;
+    d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+  }
+  return d;
+}
+
+function bezierAreaPath(pts, baseY) {
+  if (pts.length < 2) return '';
+  let d = `M ${pts[0].x},${baseY} L ${pts[0].x},${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(i - 1, 0)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(i + 2, pts.length - 1)];
+    const tension = 0.35;
+    const cp1x = p1.x + (p2.x - p0.x) * tension;
+    const cp1y = p1.y + (p2.y - p0.y) * tension;
+    const cp2x = p2.x - (p3.x - p1.x) * tension;
+    const cp2y = p2.y - (p3.y - p1.y) * tension;
+    d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+  }
+  d += ` L ${pts[pts.length - 1].x},${baseY} Z`;
+  return d;
+}
+
+// ── Tooltip ──
+const tooltipEl = document.getElementById('tooltip');
+
+function showTooltip(p, event) {
+  const step = p.step;
+  tooltipEl.innerHTML = `
+    <div class="tooltip-name">${emotionEmoji(step.emotionValence)} ${step.description}</div>
+    <div class="tooltip-emotion">${step.emotion} (${step.emotionValence > 0 ? '+' : ''}${step.emotionValence})</div>
+    <div class="tooltip-metric">${step.channel} &middot; ${step.duration}</div>
+  `;
+  tooltipEl.classList.add('visible');
+
+  const wrapperRect = document.querySelector('.chart-wrapper').getBoundingClientRect();
+  const svgRect = document.getElementById('chart-svg').getBoundingClientRect();
+  const scaleX = svgRect.width / parseFloat(document.getElementById('chart-svg').getAttribute('width'));
+  const scaleY = svgRect.height / parseFloat(document.getElementById('chart-svg').getAttribute('height'));
+
+  const px = p.x * scaleX;
+  const py = p.y * scaleY;
+
+  let left = px + 16;
+  let top = py - 40;
+
+  // Keep within wrapper
+  const tw = 200;
+  if (left + tw > wrapperRect.width) left = px - tw - 16;
+  if (top < 0) top = py + 16;
+
+  tooltipEl.style.left = left + 'px';
+  tooltipEl.style.top = top + 'px';
+}
+
+function hideTooltip() {
+  tooltipEl.classList.remove('visible');
+}
+
+// ── Cards ──
+function buildCards() {
+  const container = document.getElementById('cards-section');
+  container.innerHTML = '';
+
+  journeyData.milestones.forEach((m, mi) => {
+    const milestoneDiv = document.createElement('div');
+    milestoneDiv.className = 'milestone';
+
+    const heading = document.createElement('h2');
+    heading.className = 'milestone-heading';
+    heading.textContent = m.title;
+    milestoneDiv.appendChild(heading);
+
+    m.steps.forEach((step, si) => {
+      const globalIdx = allSteps.findIndex(s => s.id === step.id);
+
+      // Flow arrow between cards (skip first)
+      if (si > 0) {
+        const arrow = document.createElement('div');
+        arrow.className = 'flow-arrow';
+        arrow.innerHTML = '<svg width="8" height="6" viewBox="0 0 8 6"><polygon points="4,6 0,0 8,0" fill="#94a3b8"/></svg>';
+        milestoneDiv.appendChild(arrow);
+      }
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.id = `card-${step.id}`;
+      card.setAttribute('data-index', globalIdx);
+      card.setAttribute('data-valence', step.emotionValence);
+      card.setAttribute('data-persona', step.persona);
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('role', 'article');
+      card.setAttribute('aria-label', step.description);
+
+      if (step.painPoint) card.setAttribute('data-pain', 'true');
+      if (step.opportunity) card.setAttribute('data-opportunity', 'true');
+
+      let inner = '';
+
+      if (step.momentOfTruth) inner += '<div class="card-mot" title="Moment of Truth"></div>';
+      if (step.failureMode) inner += '<div class="card-failure-marker" title="Failure Point"></div>';
+
+      inner += `<div class="card-header">`;
+      inner += `<span class="card-name">${step.description}</span>`;
+      inner += `<span class="card-emotion-badge">${emotionEmoji(step.emotionValence)} ${step.emotion}</span>`;
+      inner += `<span class="card-metric">${step.duration}</span>`;
+      inner += `</div>`;
+
+      inner += `<div class="card-body">`;
+      inner += `<div class="card-field"><span class="card-field-label">Channel:</span><span class="card-field-value">${step.channel}</span></div>`;
+      inner += `<div class="card-field"><span class="card-field-label">Persona:</span><span class="card-field-value">${step.persona}</span></div>`;
+      inner += `<div class="card-field"><span class="card-field-label">Valence:</span><span class="card-field-value">${step.emotionValence > 0 ? '+' : ''}${step.emotionValence}</span></div>`;
+
+      if (step.painPoint) {
+        inner += `<div class="card-field card-field--pain"><span class="card-field-label">Pain Point:</span><span class="card-field-value">${step.painPoint}</span></div>`;
+      }
+      if (step.failureMode) {
+        inner += `<div class="card-field card-field--failure"><span class="card-field-label">Failure Mode:</span><span class="card-field-value">${step.failureMode}</span></div>`;
+      }
+      if (step.opportunity) {
+        inner += `<div class="card-field card-field--opportunity"><span class="card-field-label">Opportunity:</span><span class="card-field-value">${step.opportunity}</span></div>`;
+      }
+
+      inner += `</div>`;
+
+      card.innerHTML = inner;
+
+      // Expand/collapse on click
+      card.addEventListener('click', () => {
+        card.classList.toggle('expanded');
+      });
+
+      milestoneDiv.appendChild(card);
+    });
+
+    container.appendChild(milestoneDiv);
+  });
+}
+
+// ── Scroll to card ──
+function scrollToCard(index) {
+  const step = allSteps[index];
+  if (!step) return;
+  const card = document.getElementById(`card-${step.id}`);
+  if (!card) return;
+
+  // Remove previous highlights
+  document.querySelectorAll('.card[data-highlighted]').forEach(c => c.removeAttribute('data-highlighted'));
+
+  card.setAttribute('data-highlighted', 'true');
+  if (!card.classList.contains('expanded')) card.classList.add('expanded');
+
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // Remove highlight after 3s
+  setTimeout(() => card.removeAttribute('data-highlighted'), 3000);
+}
+
+// ── Keyboard Navigation ──
+let focusedIndex = -1;
+
+function setFocusedPoint(index) {
+  focusedIndex = index;
+  // Update visual focus
+  document.querySelectorAll('.data-point').forEach(dp => dp.classList.remove('focused'));
+  const target = document.querySelector(`.data-point[data-index="${index}"]`);
+  if (target) target.classList.add('focused');
+}
+
+document.addEventListener('keydown', e => {
+  const activePersona = document.getElementById('persona-filter').value;
+
+  // Get navigable indices
+  const navigable = allSteps
+    .map((s, i) => ({ index: i, persona: s.persona }))
+    .filter(s => activePersona === 'all' || s.persona === activePersona)
+    .map(s => s.index);
+
+  if (navigable.length === 0) return;
+
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+    e.preventDefault();
+    const currentNavIdx = navigable.indexOf(focusedIndex);
+    let nextNavIdx;
+    if (e.key === 'ArrowRight') {
+      nextNavIdx = currentNavIdx < 0 ? 0 : Math.min(currentNavIdx + 1, navigable.length - 1);
+    } else {
+      nextNavIdx = currentNavIdx < 0 ? 0 : Math.max(currentNavIdx - 1, 0);
+    }
+    const newIdx = navigable[nextNavIdx];
+    setFocusedPoint(newIdx);
+
+    // Show tooltip for focused point
+    const dp = document.querySelector(`.data-point[data-index="${newIdx}"]`);
+    if (dp) {
+      const step = allSteps[newIdx];
+      const svgEl = document.getElementById('chart-svg');
+      const w = parseFloat(svgEl.getAttribute('width'));
+      const h = parseFloat(svgEl.getAttribute('height'));
+      const plotLeft = CHART.paddingLeft;
+      const plotRight = w - CHART.paddingRight;
+      const plotTop = CHART.paddingTop;
+      const plotBottom = h - CHART.paddingBottom;
+      const n = allSteps.length;
+      const xStep = (plotRight - plotLeft) / (n - 1 || 1);
+      const px = plotLeft + newIdx * xStep;
+      const py = plotTop + (plotBottom - plotTop) * (1 - (step.emotionValence + 2) / 4);
+
+      showTooltip({ x: px, y: py, step: step }, null);
+    }
+  }
+
+  if (e.key === 'Enter' && focusedIndex >= 0) {
+    e.preventDefault();
+    scrollToCard(focusedIndex);
+  }
+});
+
+// ── Persona Filter ──
+function initPersonaFilter() {
+  const select = document.getElementById('persona-filter');
+  journeyData.personas.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    select.appendChild(opt);
+  });
+
+  select.addEventListener('change', () => {
+    const val = select.value;
+    buildChart(val);
+    applyPersonaFilter(val);
+    focusedIndex = -1;
+    hideTooltip();
+  });
+}
+
+function applyPersonaFilter(persona) {
+  document.querySelectorAll('.card').forEach(card => {
+    const cardPersona = card.getAttribute('data-persona');
+    if (persona === 'all' || cardPersona === persona) {
+      card.classList.remove('dimmed');
+    } else {
+      card.classList.add('dimmed');
+    }
+  });
+}
+
+// ── Resize handler ──
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    const activePersona = document.getElementById('persona-filter').value;
+    buildChart(activePersona);
+  }, 150);
+});
+
+// ── Init ──
+document.getElementById('journey-title').textContent = journeyData.title;
+initPersonaFilter();
+buildCards();
+buildChart('all');
+</script>
+
+</body>
+</html>

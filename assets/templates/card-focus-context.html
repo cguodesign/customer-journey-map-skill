@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Journey Map — Card Focus+Context</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --customer-bg: #fff9e6; --customer-border: #c9a227;
+  --backstage-bg: #ffffff; --backstage-border: #aaaaaa;
+  --support-bg: #f3f3f3; --support-border: #999999;
+  --emotion-neg2: #fecaca; --emotion-neg1: #fed7aa;
+  --emotion-neutral: #e5e7eb; --emotion-pos1: #bbf7d0; --emotion-pos2: #86efac;
+  --mot-color: #ef4444; --failure-color: #8b6914;
+  --pain-color: #f97316; --opportunity-color: #22c55e;
+  --text-primary: #1f2937; --text-secondary: #6b7280;
+  --surface: #ffffff; --surface-alt: #f9fafb;
+  --border: #e5e7eb; --border-strong: #d1d5db;
+  --radius: 8px; --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,.1);
+  --transition: 200ms ease;
+}
+
+html { scroll-behavior: smooth; scroll-padding-top: 180px; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--surface-alt); color: var(--text-primary); line-height: 1.5; }
+
+/* Header / Minimap */
+.header { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 24px; box-shadow: var(--shadow); }
+.header-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+.breadcrumb { font-size: 12px; color: var(--text-secondary); font-weight: 400; }
+
+.minimap { display: flex; align-items: flex-start; gap: 4px; padding: 4px 0; overflow-x: auto; }
+.minimap-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.minimap-dots { display: flex; gap: 3px; align-items: center; }
+.minimap-label { font-size: 9px; color: var(--text-secondary); white-space: nowrap; max-width: 80px; overflow: hidden; text-overflow: ellipsis; }
+.minimap-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--emotion-neutral); cursor: pointer; transition: transform var(--transition), border-color var(--transition); flex-shrink: 0; }
+.minimap-dot:hover { transform: scale(1.4); }
+.minimap-dot.active { background: currentColor; }
+.minimap-dot.search-match { box-shadow: 0 0 0 2px var(--pain-color); }
+.minimap-separator { width: 12px; height: 1px; background: var(--border-strong); align-self: center; margin: 0 2px; flex-shrink: 0; }
+
+/* Toolbar */
+.toolbar { position: sticky; top: 85px; z-index: 99; background: var(--surface); border-bottom: 1px solid var(--border); padding: 8px 24px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toolbar select, .toolbar input, .toolbar button { font-size: 12px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-primary); height: 28px; }
+.toolbar select { cursor: pointer; }
+.toolbar input[type="text"] { width: 180px; }
+.toolbar button { cursor: pointer; font-weight: 500; }
+.toolbar button.active { background: var(--text-primary); color: #fff; border-color: var(--text-primary); }
+.toolbar .toggle-group { display: flex; gap: 0; }
+.toolbar .toggle-group button { border-radius: 0; margin-left: -1px; }
+.toolbar .toggle-group button:first-child { border-radius: 4px 0 0 4px; margin-left: 0; }
+.toolbar .toggle-group button:last-child { border-radius: 0 4px 4px 0; }
+.toolbar label { font-size: 12px; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.toolbar input[type="checkbox"] { cursor: pointer; }
+
+/* Main content */
+.container { max-width: 800px; margin: 0 auto; padding: 24px; }
+
+/* Milestone groups */
+.milestone-group { margin-bottom: 32px; }
+.milestone-heading { font-size: 18px; font-weight: 700; padding: 12px 0 8px; border-bottom: 2px solid var(--border-strong); margin-bottom: 16px; color: var(--text-primary); }
+
+/* Cards */
+.card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; padding: 14px 16px; box-shadow: var(--shadow); cursor: pointer; transition: box-shadow var(--transition), border-color var(--transition); border-left: 4px solid var(--emotion-neutral); }
+.card:hover { box-shadow: var(--shadow-lg); border-color: var(--border-strong); }
+.card.expanded { border-color: var(--border-strong); }
+.card[data-valence="-2"] { border-left-color: var(--emotion-neg2); }
+.card[data-valence="-1"] { border-left-color: var(--emotion-neg1); }
+.card[data-valence="0"] { border-left-color: var(--emotion-neutral); }
+.card[data-valence="1"] { border-left-color: var(--emotion-pos1); }
+.card[data-valence="2"] { border-left-color: var(--emotion-pos2); }
+.card.pain-point { border-bottom: 2px solid var(--pain-color); }
+.card.opportunity { border: 1px dashed var(--opportunity-color); border-left: 4px solid; }
+.card.opportunity[data-valence="-2"] { border-left-color: var(--emotion-neg2); }
+.card.opportunity[data-valence="-1"] { border-left-color: var(--emotion-neg1); }
+.card.opportunity[data-valence="0"] { border-left-color: var(--emotion-neutral); }
+.card.opportunity[data-valence="1"] { border-left-color: var(--emotion-pos1); }
+.card.opportunity[data-valence="2"] { border-left-color: var(--emotion-pos2); }
+.card.hidden { display: none; }
+
+/* Markers */
+.marker-mot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--mot-color); }
+.marker-failure { position: absolute; top: 8px; left: 24px; width: 8px; height: 8px; border-radius: 50%; background: var(--failure-color); }
+
+/* Card header (collapsed state) */
+.card-header { display: flex; align-items: center; gap: 10px; }
+.card-name { font-weight: 600; font-size: 14px; flex: 1; }
+.card-name .highlight { background: #fef08a; border-radius: 2px; padding: 0 1px; }
+.emotion-badge { font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: 500; white-space: nowrap; }
+.emotion-badge[data-valence="-2"] { background: var(--emotion-neg2); color: #991b1b; }
+.emotion-badge[data-valence="-1"] { background: var(--emotion-neg1); color: #9a3412; }
+.emotion-badge[data-valence="0"] { background: var(--emotion-neutral); color: #374151; }
+.emotion-badge[data-valence="1"] { background: var(--emotion-pos1); color: #166534; }
+.emotion-badge[data-valence="2"] { background: var(--emotion-pos2); color: #14532d; }
+.card-metric { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+
+/* Card body (expanded) */
+.card-body { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.card.expanded .card-body { display: block; }
+.card-field { font-size: 12px; margin-bottom: 6px; }
+.card-field-label { font-weight: 600; color: var(--text-secondary); display: inline; }
+.card-field-value { color: var(--text-primary); }
+.card-description { font-size: 13px; margin-bottom: 8px; color: var(--text-primary); }
+
+/* Service layer badges */
+.layer-badge { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 3px; margin-right: 4px; margin-bottom: 4px; }
+.layer-customer { background: var(--customer-bg); border: 1px solid var(--customer-border); color: #78591a; }
+.layer-backstage { background: var(--backstage-bg); border: 1px solid var(--backstage-border); color: #555; }
+.layer-support { background: var(--support-bg); border: 1px solid var(--support-border); color: #666; }
+
+/* Normal density additions */
+.card-description-inline { font-size: 12px; color: var(--text-secondary); margin-top: 4px; display: none; }
+.density-normal .card-description-inline { display: block; }
+.density-expanded .card-description-inline { display: none; }
+.density-expanded .card { cursor: default; }
+.density-expanded .card .card-body { display: block; }
+
+/* Flow arrows */
+.flow-arrow { display: flex; align-items: center; justify-content: center; height: 20px; margin: -6px 0; position: relative; z-index: 1; }
+.flow-arrow::before { content: ''; display: block; width: 2px; height: 20px; background: var(--border-strong); }
+.flow-arrow.dashed::before { background: repeating-linear-gradient(to bottom, var(--failure-color) 0, var(--failure-color) 3px, transparent 3px, transparent 6px); }
+.flow-arrow::after { content: ''; position: absolute; bottom: 0; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--border-strong); }
+.flow-arrow.dashed::after { border-top-color: var(--failure-color); }
+
+/* Back to top */
+.back-to-top { position: fixed; bottom: 24px; right: 24px; width: 40px; height: 40px; border-radius: 50%; background: var(--text-primary); color: #fff; border: none; cursor: pointer; font-size: 18px; display: none; align-items: center; justify-content: center; box-shadow: var(--shadow-lg); z-index: 200; transition: opacity var(--transition); }
+.back-to-top.visible { display: flex; }
+
+/* Focus ring for keyboard nav */
+.card:focus { outline: 2px solid #3b82f6; outline-offset: 2px; }
+.minimap-dot:focus { outline: 2px solid #3b82f6; outline-offset: 1px; }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .toolbar { padding: 8px 12px; }
+  .container { padding: 16px 12px; }
+  .header { padding: 8px 12px; }
+  .toolbar input[type="text"] { width: 120px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header" id="header">
+  <div class="header-title">
+    <span id="journey-title"></span>
+    <span class="breadcrumb" id="breadcrumb"></span>
+  </div>
+  <div class="minimap" id="minimap"></div>
+</div>
+
+<div class="toolbar" id="toolbar">
+  <select id="filter-persona"><option value="">All Personas</option></select>
+  <select id="filter-category"><option value="">All Channels</option></select>
+  <label><input type="checkbox" id="filter-pain"> Pain points only</label>
+  <select id="sort-select">
+    <option value="journey">Journey order</option>
+    <option value="emotion">Emotion (low→high)</option>
+    <option value="dropoff">Drop-off risk</option>
+    <option value="priority">Priority (MoT first)</option>
+    <option value="duration">Duration</option>
+  </select>
+  <input type="text" id="search-input" placeholder="Search... (emotion:frustrated)">
+  <div class="toggle-group" id="density-toggle">
+    <button data-density="compact">Compact</button>
+    <button data-density="normal" class="active">Normal</button>
+    <button data-density="expanded">Expanded</button>
+  </div>
+</div>
+
+<div class="container" id="container"></div>
+
+<button class="back-to-top" id="back-to-top" title="Back to top">&#8593;</button>
+
+<script>
+const journeyData = {
+  title: "New User Onboarding",
+  personas: ["Alex (new user)", "Admin (team lead)"],
+  milestones: [
+    {
+      id: "awareness",
+      title: "Awareness & Sign-up",
+      steps: [
+        { id: "discover-product", description: "Discovers product through colleague recommendation", emotion: "Curious", emotionValence: 1, persona: "Alex (new user)", channel: "Word of mouth", duration: "2 days" },
+        { id: "visit-landing", description: "Visits landing page and reads value proposition", emotion: "Interested", emotionValence: 1, persona: "Alex (new user)", channel: "Web", duration: "3 min", momentOfTruth: true },
+        { id: "sign-up", description: "Creates account with email", emotion: "Hopeful", emotionValence: 1, persona: "Alex (new user)", channel: "Web", duration: "2 min" }
+      ]
+    },
+    {
+      id: "activation",
+      title: "Activation",
+      steps: [
+        { id: "empty-workspace", description: "Sees empty workspace with no guidance", emotion: "Confused", emotionValence: -1, persona: "Alex (new user)", channel: "App", duration: "30 sec", painPoint: "No onboarding guidance, user doesn't know where to start", failureMode: "User closes tab and never returns" },
+        { id: "find-tutorial", description: "Searches help center for getting started guide", emotion: "Frustrated", emotionValence: -2, persona: "Alex (new user)", channel: "Help center", duration: "5 min", painPoint: "Tutorial is outdated and doesn't match current UI" },
+        { id: "first-action", description: "Creates first project after trial and error", emotion: "Relieved", emotionValence: 0, persona: "Alex (new user)", channel: "App", duration: "8 min", opportunity: "Guided first-run wizard could reduce time to value" },
+        { id: "explore-features", description: "Clicks through menus to understand capabilities", emotion: "Overwhelmed", emotionValence: -1, persona: "Alex (new user)", channel: "App", duration: "12 min", painPoint: "Too many features visible at once without context" },
+        { id: "watch-video", description: "Finds and watches onboarding video", emotion: "Focused", emotionValence: 0, persona: "Alex (new user)", channel: "YouTube", duration: "4 min" }
+      ]
+    },
+    {
+      id: "engagement",
+      title: "First Value",
+      steps: [
+        { id: "invite-team", description: "Invites team members to collaborate", emotion: "Excited", emotionValence: 2, persona: "Alex (new user)", channel: "App", duration: "2 min", momentOfTruth: true, frontstage: "Invitation email with personalized message", backstage: "Permission system creates team workspace, sends notification" },
+        { id: "team-joins", description: "Team members accept invite and join workspace", emotion: "Satisfied", emotionValence: 2, persona: "Admin (team lead)", channel: "Email → App", duration: "1 day", supportProcess: "Email delivery system, SSO integration" },
+        { id: "first-collaboration", description: "Team completes first shared task together", emotion: "Delighted", emotionValence: 2, persona: "Alex (new user)", channel: "App", duration: "15 min", momentOfTruth: true, opportunity: "Celebration moment could reinforce daily habit" }
+      ]
+    },
+    {
+      id: "retention",
+      title: "Habit Formation",
+      steps: [
+        { id: "daily-login", description: "Returns daily to check team updates", emotion: "Comfortable", emotionValence: 1, persona: "Alex (new user)", channel: "App", duration: "5 min" },
+        { id: "customize-workflow", description: "Configures workspace to match team process", emotion: "Empowered", emotionValence: 2, persona: "Admin (team lead)", channel: "App", duration: "20 min", frontstage: "Settings UI with templates", backstage: "Configuration engine applies rules" },
+        { id: "hit-paywall", description: "Reaches free tier limit on team size", emotion: "Annoyed", emotionValence: -1, persona: "Admin (team lead)", channel: "App", duration: "1 min", painPoint: "No warning before hitting limit, abrupt block", failureMode: "Team downgrades or churns to competitor", momentOfTruth: true },
+        { id: "evaluate-upgrade", description: "Compares pricing plans for team needs", emotion: "Calculating", emotionValence: 0, persona: "Admin (team lead)", channel: "Web", duration: "10 min" },
+        { id: "convert-paid", description: "Upgrades to paid plan", emotion: "Committed", emotionValence: 1, persona: "Admin (team lead)", channel: "App", duration: "3 min", opportunity: "Personalized plan recommendation based on usage patterns" }
+      ]
+    }
+  ]
+};
+
+// State
+let state = {
+  density: 'normal',
+  sort: 'journey',
+  persona: '',
+  category: '',
+  painOnly: false,
+  search: '',
+  expandedCards: new Set(),
+  focusedIndex: -1
+};
+
+// Utility
+function parseDuration(d) {
+  if (!d) return 0;
+  const m = d.match(/(\d+)\s*(sec|min|hour|day|week|month)/i);
+  if (!m) return 0;
+  const n = parseInt(m[1]);
+  const u = m[2].toLowerCase();
+  const mult = { sec: 1/60, min: 1, hour: 60, day: 1440, week: 10080, month: 43200 };
+  return n * (mult[u] || 1);
+}
+
+function allSteps() {
+  const steps = [];
+  journeyData.milestones.forEach(m => {
+    m.steps.forEach((s, i) => {
+      steps.push({ ...s, milestone: m.title, milestoneId: m.id, indexInMilestone: i });
+    });
+  });
+  return steps;
+}
+
+function getValenceColor(v) {
+  const map = { '-2': 'var(--emotion-neg2)', '-1': 'var(--emotion-neg1)', '0': 'var(--emotion-neutral)', '1': 'var(--emotion-pos1)', '2': 'var(--emotion-pos2)' };
+  return map[String(v)] || map['0'];
+}
+
+function formatStepName(id) {
+  return id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function highlightText(text, query) {
+  if (!query) return escapeHtml(text);
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(`(${escaped})`, 'gi');
+  return escapeHtml(text).replace(re, '<span class="highlight">$1</span>');
+}
+
+// Search
+function matchesSearch(step, query) {
+  if (!query) return true;
+  const fieldMatch = query.match(/^(\w+):(.+)$/);
+  if (fieldMatch) {
+    const field = fieldMatch[1].toLowerCase();
+    const val = fieldMatch[2].toLowerCase();
+    const fieldMap = {
+      emotion: step.emotion,
+      channel: step.channel,
+      persona: step.persona,
+      duration: step.duration,
+      id: step.id,
+      description: step.description
+    };
+    const target = fieldMap[field];
+    return target ? target.toLowerCase().includes(val) : false;
+  }
+  const q = query.toLowerCase();
+  const searchable = [step.id, step.description, step.emotion, step.channel, step.persona, step.duration, step.painPoint, step.opportunity, step.failureMode, step.frontstage, step.backstage, step.supportProcess].filter(Boolean).join(' ').toLowerCase();
+  return searchable.includes(q);
+}
+
+// Filter & sort
+function getFilteredSteps() {
+  let steps = allSteps();
+  if (state.persona) steps = steps.filter(s => s.persona === state.persona);
+  if (state.category) steps = steps.filter(s => s.channel === state.category);
+  if (state.painOnly) steps = steps.filter(s => s.painPoint);
+  if (state.search) steps = steps.filter(s => matchesSearch(s, state.search));
+
+  if (state.sort === 'emotion') {
+    steps.sort((a, b) => a.emotionValence - b.emotionValence);
+  } else if (state.sort === 'dropoff') {
+    steps.sort((a, b) => {
+      const aRisk = (a.failureMode ? 2 : 0) + (a.painPoint ? 1 : 0);
+      const bRisk = (b.failureMode ? 2 : 0) + (b.painPoint ? 1 : 0);
+      return bRisk - aRisk;
+    });
+  } else if (state.sort === 'priority') {
+    steps.sort((a, b) => {
+      const aP = (a.momentOfTruth ? 4 : 0) + (a.failureMode ? 2 : 0) + (a.painPoint ? 1 : 0);
+      const bP = (b.momentOfTruth ? 4 : 0) + (b.failureMode ? 2 : 0) + (b.painPoint ? 1 : 0);
+      return bP - aP;
+    });
+  } else if (state.sort === 'duration') {
+    steps.sort((a, b) => parseDuration(b.duration) - parseDuration(a.duration));
+  }
+  return steps;
+}
+
+// Build minimap
+function buildMinimap() {
+  const minimap = document.getElementById('minimap');
+  minimap.innerHTML = '';
+  journeyData.milestones.forEach((m, mi) => {
+    if (mi > 0) {
+      const sep = document.createElement('div');
+      sep.className = 'minimap-separator';
+      minimap.appendChild(sep);
+    }
+    const group = document.createElement('div');
+    group.className = 'minimap-group';
+    const dots = document.createElement('div');
+    dots.className = 'minimap-dots';
+    m.steps.forEach(s => {
+      const dot = document.createElement('div');
+      dot.className = 'minimap-dot';
+      dot.dataset.stepId = s.id;
+      dot.style.borderColor = getValenceColor(s.emotionValence);
+      dot.style.color = getValenceColor(s.emotionValence);
+      dot.tabIndex = 0;
+      dot.title = formatStepName(s.id) + ' (' + s.emotion + ')';
+      dot.addEventListener('click', () => jumpToStep(s.id));
+      dot.addEventListener('keydown', e => { if (e.key === 'Enter') jumpToStep(s.id); });
+      dots.appendChild(dot);
+    });
+    const label = document.createElement('div');
+    label.className = 'minimap-label';
+    label.textContent = m.title;
+    group.appendChild(dots);
+    group.appendChild(label);
+    minimap.appendChild(group);
+  });
+}
+
+// Build cards
+function buildCards() {
+  const container = document.getElementById('container');
+  container.innerHTML = '';
+  const steps = getFilteredSteps();
+  const searchQuery = state.search && !state.search.includes(':') ? state.search : '';
+
+  if (state.sort === 'journey') {
+    // Group by milestone
+    const grouped = {};
+    steps.forEach(s => {
+      if (!grouped[s.milestoneId]) grouped[s.milestoneId] = { title: s.milestone, steps: [] };
+      grouped[s.milestoneId].steps.push(s);
+    });
+    journeyData.milestones.forEach(m => {
+      if (!grouped[m.id]) return;
+      const section = document.createElement('div');
+      section.className = 'milestone-group';
+      section.dataset.milestoneId = m.id;
+      const heading = document.createElement('h2');
+      heading.className = 'milestone-heading';
+      heading.textContent = grouped[m.id].title;
+      heading.id = 'milestone-' + m.id;
+      section.appendChild(heading);
+      grouped[m.id].steps.forEach((s, i) => {
+        if (i > 0) {
+          const arrow = document.createElement('div');
+          arrow.className = 'flow-arrow' + (s.failureMode ? ' dashed' : '');
+          section.appendChild(arrow);
+        }
+        section.appendChild(createCard(s, searchQuery));
+      });
+      container.appendChild(section);
+    });
+  } else {
+    // Flat list
+    const section = document.createElement('div');
+    section.className = 'milestone-group';
+    steps.forEach((s, i) => {
+      if (i > 0) {
+        const arrow = document.createElement('div');
+        arrow.className = 'flow-arrow' + (s.failureMode ? ' dashed' : '');
+        section.appendChild(arrow);
+      }
+      section.appendChild(createCard(s, searchQuery));
+    });
+    container.appendChild(section);
+  }
+
+  // Apply density
+  container.className = 'container density-' + state.density;
+  updateMinimapSearch();
+}
+
+function createCard(step, searchQuery) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.id = 'card-' + step.id;
+  card.dataset.stepId = step.id;
+  card.dataset.valence = step.emotionValence;
+  card.dataset.milestone = step.milestone;
+  card.tabIndex = 0;
+
+  if (step.painPoint) card.classList.add('pain-point');
+  if (step.opportunity) card.classList.add('opportunity');
+  if (state.expandedCards.has(step.id) || state.density === 'expanded') card.classList.add('expanded');
+
+  // Markers
+  if (step.momentOfTruth) {
+    const mot = document.createElement('div');
+    mot.className = 'marker-mot';
+    mot.title = 'Moment of Truth';
+    card.appendChild(mot);
+  }
+  if (step.failureMode) {
+    const fail = document.createElement('div');
+    fail.className = 'marker-failure';
+    fail.title = 'Failure mode: ' + step.failureMode;
+    card.appendChild(fail);
+  }
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'card-header';
+  const name = document.createElement('span');
+  name.className = 'card-name';
+  name.innerHTML = highlightText(formatStepName(step.id), searchQuery);
+  const badge = document.createElement('span');
+  badge.className = 'emotion-badge';
+  badge.dataset.valence = step.emotionValence;
+  badge.textContent = step.emotion;
+  const metric = document.createElement('span');
+  metric.className = 'card-metric';
+  metric.textContent = step.duration || '';
+  header.appendChild(name);
+  header.appendChild(badge);
+  header.appendChild(metric);
+  card.appendChild(header);
+
+  // Normal density inline description
+  const inlineDesc = document.createElement('div');
+  inlineDesc.className = 'card-description-inline';
+  inlineDesc.innerHTML = highlightText(step.description, searchQuery);
+  card.appendChild(inlineDesc);
+
+  // Body (expanded)
+  const body = document.createElement('div');
+  body.className = 'card-body';
+
+  const desc = document.createElement('div');
+  desc.className = 'card-description';
+  desc.innerHTML = highlightText(step.description, searchQuery);
+  body.appendChild(desc);
+
+  const fields = [
+    ['Persona', step.persona],
+    ['Channel', step.channel],
+    ['Duration', step.duration],
+    ['Pain Point', step.painPoint],
+    ['Opportunity', step.opportunity],
+    ['Failure Mode', step.failureMode],
+  ];
+  fields.forEach(([label, value]) => {
+    if (!value) return;
+    const f = document.createElement('div');
+    f.className = 'card-field';
+    f.innerHTML = `<span class="card-field-label">${label}:</span> <span class="card-field-value">${highlightText(value, searchQuery)}</span>`;
+    body.appendChild(f);
+  });
+
+  // Service layers
+  if (step.frontstage || step.backstage || step.supportProcess) {
+    const layers = document.createElement('div');
+    layers.className = 'card-field';
+    layers.style.marginTop = '8px';
+    if (step.frontstage) layers.innerHTML += `<span class="layer-badge layer-customer">Frontstage</span><span class="card-field-value" style="font-size:12px">${escapeHtml(step.frontstage)}</span><br>`;
+    if (step.backstage) layers.innerHTML += `<span class="layer-badge layer-backstage">Backstage</span><span class="card-field-value" style="font-size:12px">${escapeHtml(step.backstage)}</span><br>`;
+    if (step.supportProcess) layers.innerHTML += `<span class="layer-badge layer-support">Support</span><span class="card-field-value" style="font-size:12px">${escapeHtml(step.supportProcess)}</span>`;
+    body.appendChild(layers);
+  }
+
+  card.appendChild(body);
+
+  // Click to expand/collapse
+  card.addEventListener('click', (e) => {
+    if (state.density === 'expanded') return;
+    toggleCard(step.id);
+  });
+
+  return card;
+}
+
+function toggleCard(id) {
+  if (state.expandedCards.has(id)) {
+    state.expandedCards.delete(id);
+  } else {
+    state.expandedCards.add(id);
+  }
+  const el = document.getElementById('card-' + id);
+  if (el) el.classList.toggle('expanded');
+}
+
+function jumpToStep(id) {
+  const el = document.getElementById('card-' + id);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.focus();
+    updateHash(id);
+  }
+}
+
+// Scroll spy
+function updateScrollSpy() {
+  const cards = document.querySelectorAll('.card');
+  const headerHeight = document.getElementById('header').offsetHeight + document.getElementById('toolbar').offsetHeight + 20;
+  let currentId = null;
+  let currentMilestone = '';
+
+  cards.forEach(card => {
+    const rect = card.getBoundingClientRect();
+    if (rect.top <= headerHeight + 100 && rect.bottom > headerHeight) {
+      currentId = card.dataset.stepId;
+      currentMilestone = card.dataset.milestone;
+    }
+  });
+
+  // Update minimap active states
+  document.querySelectorAll('.minimap-dot').forEach(dot => {
+    dot.classList.toggle('active', dot.dataset.stepId === currentId);
+  });
+
+  // Update breadcrumb
+  if (currentId) {
+    document.getElementById('breadcrumb').textContent = currentMilestone + ' > ' + formatStepName(currentId);
+  }
+
+  // Back to top button
+  const btn = document.getElementById('back-to-top');
+  btn.classList.toggle('visible', window.scrollY > 300);
+}
+
+function updateMinimapSearch() {
+  document.querySelectorAll('.minimap-dot').forEach(dot => {
+    const step = allSteps().find(s => s.id === dot.dataset.stepId);
+    const isMatch = state.search && step && matchesSearch(step, state.search);
+    dot.classList.toggle('search-match', isMatch);
+  });
+}
+
+// Hash
+function updateHash(id) {
+  history.replaceState(null, '', '#' + id);
+}
+
+function restoreHash() {
+  const hash = location.hash.slice(1);
+  if (hash) {
+    setTimeout(() => jumpToStep(hash), 100);
+  }
+}
+
+// Populate filters
+function populateFilters() {
+  const personas = new Set();
+  const channels = new Set();
+  allSteps().forEach(s => {
+    if (s.persona) personas.add(s.persona);
+    if (s.channel) channels.add(s.channel);
+  });
+
+  const personaSelect = document.getElementById('filter-persona');
+  personas.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p; opt.textContent = p;
+    personaSelect.appendChild(opt);
+  });
+
+  const categorySelect = document.getElementById('filter-category');
+  channels.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c;
+    categorySelect.appendChild(opt);
+  });
+}
+
+// Event binding
+function bindEvents() {
+  document.getElementById('filter-persona').addEventListener('change', e => {
+    state.persona = e.target.value;
+    buildCards();
+  });
+  document.getElementById('filter-category').addEventListener('change', e => {
+    state.category = e.target.value;
+    buildCards();
+  });
+  document.getElementById('filter-pain').addEventListener('change', e => {
+    state.painOnly = e.target.checked;
+    buildCards();
+  });
+  document.getElementById('sort-select').addEventListener('change', e => {
+    state.sort = e.target.value;
+    buildCards();
+  });
+
+  let searchTimeout;
+  document.getElementById('search-input').addEventListener('input', e => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      state.search = e.target.value.trim();
+      buildCards();
+    }, 200);
+  });
+
+  // Density toggle
+  document.querySelectorAll('#density-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#density-toggle button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.density = btn.dataset.density;
+      buildCards();
+    });
+  });
+
+  // Back to top
+  document.getElementById('back-to-top').addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Scroll spy
+  let scrollRaf;
+  window.addEventListener('scroll', () => {
+    if (scrollRaf) cancelAnimationFrame(scrollRaf);
+    scrollRaf = requestAnimationFrame(updateScrollSpy);
+  }, { passive: true });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    const cards = Array.from(document.querySelectorAll('.card:not(.hidden)'));
+    if (!cards.length) return;
+
+    if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
+      e.preventDefault();
+      document.getElementById('search-input').focus();
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      const focused = document.activeElement;
+      if (focused && focused.classList.contains('card') && focused.classList.contains('expanded')) {
+        const id = focused.dataset.stepId;
+        if (state.density !== 'expanded') {
+          state.expandedCards.delete(id);
+          focused.classList.remove('expanded');
+        }
+      }
+      if (document.getElementById('search-input') === document.activeElement) {
+        document.getElementById('search-input').blur();
+      }
+      return;
+    }
+
+    if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT') return;
+
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const currentFocused = document.activeElement;
+      let idx = cards.indexOf(currentFocused);
+      if (e.key === 'ArrowDown') idx = Math.min(idx + 1, cards.length - 1);
+      else idx = Math.max(idx - 1, 0);
+      if (idx < 0) idx = 0;
+      cards[idx].focus();
+      cards[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      updateHash(cards[idx].dataset.stepId);
+    }
+
+    if (e.key === 'Enter') {
+      const focused = document.activeElement;
+      if (focused && focused.classList.contains('card') && state.density !== 'expanded') {
+        toggleCard(focused.dataset.stepId);
+      }
+    }
+  });
+}
+
+// Init
+function init() {
+  document.getElementById('journey-title').textContent = journeyData.title;
+  populateFilters();
+  buildMinimap();
+  buildCards();
+  bindEvents();
+  restoreHash();
+  requestAnimationFrame(updateScrollSpy);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

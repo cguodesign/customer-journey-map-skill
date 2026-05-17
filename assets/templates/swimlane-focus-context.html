@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enterprise Client Onboarding — Service Blueprint</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --lane-customer-bg: #fff9e6;
+  --lane-customer-border: #c9a227;
+  --lane-frontstage-bg: #fff9e6;
+  --lane-frontstage-border: #c9a227;
+  --lane-backstage-bg: #ffffff;
+  --lane-backstage-border: #aaaaaa;
+  --lane-support-bg: #f3f3f3;
+  --lane-support-border: #999999;
+  --mot-color: #ef4444;
+  --failure-color: #8b6914;
+  --divider-color: #666;
+  --minimap-bg: #f8f9fa;
+  --minimap-viewport: rgba(59, 130, 246, 0.2);
+  --minimap-viewport-border: #3b82f6;
+  --phase-min-width: 280px;
+  --lane-label-width: 180px;
+  --header-height: 140px;
+  --breadcrumb-height: 36px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f0f2f5;
+  color: #1a1a2e;
+  line-height: 1.5;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* Header Area */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.header-title {
+  padding: 10px 20px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-title h1 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.search-container {
+  position: relative;
+  width: 240px;
+}
+
+.search-container input {
+  width: 100%;
+  padding: 6px 32px 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-container input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+}
+
+.search-container .search-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.search-results-count {
+  position: absolute;
+  right: 34px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: #6b7280;
+}
+
+/* Minimap */
+.minimap {
+  padding: 8px 20px 10px;
+  background: var(--minimap-bg);
+  border-top: 1px solid #e8ecf0;
+  position: relative;
+  overflow: hidden;
+}
+
+.minimap-track {
+  display: flex;
+  gap: 3px;
+  position: relative;
+  padding: 0 0 0 var(--lane-label-width);
+}
+
+.minimap-phase {
+  flex: 1;
+  min-width: 0;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 4px 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  text-align: center;
+}
+
+.minimap-phase:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.minimap-phase.active {
+  border-color: #3b82f6;
+  background: #dbeafe;
+  font-weight: 600;
+}
+
+.minimap-phase .phase-label {
+  font-size: 10px;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.minimap-phase .phase-steps {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  margin-top: 3px;
+}
+
+.minimap-phase .step-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #d1d5db;
+}
+
+.minimap-phase .step-dot.mot {
+  background: var(--mot-color);
+}
+
+.minimap-phase .step-dot.failure {
+  background: var(--failure-color);
+}
+
+.minimap-phase .step-dot.search-match {
+  background: #f59e0b;
+  box-shadow: 0 0 3px #f59e0b;
+}
+
+.minimap-viewport-indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--minimap-viewport);
+  border: 2px solid var(--minimap-viewport-border);
+  border-radius: 4px;
+  pointer-events: none;
+  transition: left 0.15s ease, width 0.15s ease;
+}
+
+/* Breadcrumb */
+.breadcrumb-bar {
+  height: var(--breadcrumb-height);
+  background: #fff;
+  border-top: 1px solid #e8ecf0;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  font-size: 12px;
+  color: #6b7280;
+  gap: 6px;
+}
+
+.breadcrumb-bar .crumb {
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+/* Main Content */
+.main-content {
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
+}
+
+.blueprint-container {
+  display: flex;
+  min-width: max-content;
+  position: relative;
+}
+
+/* Lane Labels (sticky left) */
+.lane-labels {
+  position: sticky;
+  left: 0;
+  z-index: 50;
+  width: var(--lane-label-width);
+  min-width: var(--lane-label-width);
+  background: #fff;
+  border-right: 2px solid #e2e8f0;
+  box-shadow: 2px 0 6px rgba(0,0,0,0.06);
+}
+
+.lane-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border-bottom: 1px solid #e8ecf0;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+  min-height: 80px;
+}
+
+.lane-label:hover {
+  background: #f8f9fa;
+}
+
+.lane-label .label-text {
+  flex: 1;
+}
+
+.lane-label .collapse-icon {
+  font-size: 10px;
+  color: #9ca3af;
+  transition: transform 0.2s;
+  margin-left: 6px;
+}
+
+.lane-label.collapsed .collapse-icon {
+  transform: rotate(-90deg);
+}
+
+.lane-label-customer { background: var(--lane-customer-bg); border-left: 3px solid var(--lane-customer-border); }
+.lane-label-frontstage { background: var(--lane-frontstage-bg); border-left: 3px solid var(--lane-frontstage-border); }
+.lane-label-backstage { background: var(--lane-backstage-bg); border-left: 3px solid var(--lane-backstage-border); }
+.lane-label-support { background: var(--lane-support-bg); border-left: 3px solid var(--lane-support-border); }
+
+/* Divider labels */
+.divider-label {
+  padding: 4px 14px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--divider-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px dashed var(--divider-color);
+  background: #fafafa;
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+}
+
+/* Phase columns */
+.phases-container {
+  display: flex;
+  flex: 1;
+}
+
+.phase-column {
+  min-width: var(--phase-min-width);
+  flex: 1;
+  border-right: 1px solid #e8ecf0;
+  position: relative;
+}
+
+.phase-column:last-child {
+  border-right: none;
+}
+
+.phase-header {
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-bottom: 2px solid #e2e8f0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Lanes */
+.lane-row {
+  min-height: 80px;
+  padding: 8px 10px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #e8ecf0;
+  transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
+}
+
+.lane-row.collapsed {
+  max-height: 0 !important;
+  min-height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  opacity: 0;
+  border-bottom: none;
+}
+
+.lane-row-customer { background: var(--lane-customer-bg); }
+.lane-row-frontstage { background: var(--lane-frontstage-bg); }
+.lane-row-backstage { background: var(--lane-backstage-bg); }
+.lane-row-support { background: var(--lane-support-bg); }
+
+/* Divider rows */
+.divider-row {
+  height: 22px;
+  border-bottom: 1px dashed var(--divider-color);
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.divider-row span {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--divider-color);
+}
+
+/* Step boxes */
+.step-box {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: #374151;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex: 1;
+  min-width: 120px;
+  max-width: 260px;
+  line-height: 1.4;
+}
+
+.step-box:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.12);
+  transform: translateY(-1px);
+}
+
+.step-box.search-highlight {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245,158,11,0.3);
+  background: #fffbeb;
+}
+
+/* Markers */
+.marker-mot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mot-color);
+  box-shadow: 0 0 4px rgba(239,68,68,0.4);
+}
+
+.marker-failure {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--failure-color);
+  box-shadow: 0 0 4px rgba(139,105,20,0.4);
+}
+
+/* Arrows between phases */
+.phase-arrow {
+  position: absolute;
+  right: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  color: #9ca3af;
+  font-size: 16px;
+}
+
+/* Persona badge */
+.persona-badge {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 500;
+  background: #e8ecf0;
+  color: #6b7280;
+}
+
+/* Detail Drawer */
+.detail-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-top: 2px solid #3b82f6;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 200;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.detail-drawer.open {
+  transform: translateY(0);
+}
+
+.detail-drawer-content {
+  padding: 16px 24px;
+}
+
+.detail-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.detail-drawer-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.detail-drawer-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.detail-drawer-close:hover {
+  color: #1a1a2e;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.detail-field {
+  font-size: 12px;
+}
+
+.detail-field .field-label {
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.3px;
+  margin-bottom: 2px;
+}
+
+.detail-field .field-value {
+  color: #374151;
+}
+
+.detail-field .field-value.mot-badge {
+  color: var(--mot-color);
+  font-weight: 600;
+}
+
+.detail-field .field-value.failure-badge {
+  color: var(--failure-color);
+  font-weight: 600;
+}
+
+/* Back to start button */
+.back-to-start {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 150;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.2s;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.back-to-start.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.back-to-start:hover {
+  background: #2563eb;
+  transform: scale(1.1);
+}
+
+/* Legend */
+.legend {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 150;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  color: #6b7280;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legend-dot.mot { background: var(--mot-color); }
+.legend-dot.failure { background: var(--failure-color); }
+
+/* Scrollbar styling */
+.main-content::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 5px;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.step-box {
+  animation: fadeIn 0.3s ease both;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">
+    <h1 id="blueprintTitle"></h1>
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="Search steps..." aria-label="Search steps">
+      <span class="search-icon">&#128269;</span>
+      <span class="search-results-count" id="searchCount"></span>
+    </div>
+  </div>
+  <div class="minimap" id="minimap">
+    <div class="minimap-track" id="minimapTrack">
+      <div class="minimap-viewport-indicator" id="minimapViewport"></div>
+    </div>
+  </div>
+  <div class="breadcrumb-bar" id="breadcrumb">
+    <span>Blueprint</span>
+    <span>&rsaquo;</span>
+    <span class="crumb" id="breadcrumbPhase">—</span>
+  </div>
+</div>
+
+<div class="main-content" id="mainContent">
+  <div class="blueprint-container" id="blueprintContainer">
+    <div class="lane-labels" id="laneLabels"></div>
+    <div class="phases-container" id="phasesContainer"></div>
+  </div>
+</div>
+
+<div class="detail-drawer" id="detailDrawer">
+  <div class="detail-drawer-content" id="detailDrawerContent"></div>
+</div>
+
+<button class="back-to-start" id="backToStart" title="Back to start">&#8592;</button>
+
+<div class="legend" id="legend">
+  <div class="legend-item"><span class="legend-dot mot"></span> Moment of Truth</div>
+  <div class="legend-item"><span class="legend-dot failure"></span> Failure Point</div>
+</div>
+
+<script>
+// ========== DATA ==========
+const journeyData = {
+  title: "Enterprise Client Onboarding — Service Blueprint",
+  personas: ["Buyer (decision maker)", "End User", "IT Admin"],
+  milestones: [
+    {
+      id: "discovery",
+      title: "Discovery",
+      steps: [
+        { id: "research", customerAction: "Researches solutions online", frontstage: "Marketing site, case studies", backstage: "Content marketing, SEO", supportProcess: "CMS, analytics", persona: "Buyer (decision maker)" },
+        { id: "demo-request", customerAction: "Requests product demo", frontstage: "Demo request form, confirmation email", backstage: "Lead routing, CRM update, calendar scheduling", supportProcess: "CRM, calendar API", persona: "Buyer (decision maker)", momentOfTruth: true }
+      ]
+    },
+    {
+      id: "evaluation",
+      title: "Evaluation",
+      steps: [
+        { id: "demo-call", customerAction: "Attends live demo with sales", frontstage: "Video call, screen share of product", backstage: "Sales prep, custom demo environment setup", supportProcess: "Video platform, demo environment, CRM notes", persona: "Buyer (decision maker)", momentOfTruth: true },
+        { id: "trial-setup", customerAction: "Gets trial account provisioned", frontstage: "Trial welcome email, setup wizard", backstage: "Trial provisioning, sample data seeding", supportProcess: "Provisioning service, seed data generator", persona: "IT Admin" },
+        { id: "pilot-test", customerAction: "Runs pilot with small team", frontstage: "Pilot dashboard, usage reports", backstage: "Usage monitoring, success metric tracking", supportProcess: "Analytics, monitoring stack", persona: "End User" }
+      ]
+    },
+    {
+      id: "procurement",
+      title: "Procurement",
+      steps: [
+        { id: "proposal", customerAction: "Reviews pricing proposal", frontstage: "Custom proposal document, ROI calculator", backstage: "Pricing engine, legal review, proposal generation", supportProcess: "CPQ system, document generation", persona: "Buyer (decision maker)" },
+        { id: "security-review", customerAction: "Submits security questionnaire", frontstage: "Security documentation portal", backstage: "Security team review, compliance check", supportProcess: "GRC platform, documentation vault", persona: "IT Admin", failureMode: "Security concerns block deal for weeks" },
+        { id: "contract", customerAction: "Signs contract", frontstage: "E-signature flow", backstage: "Legal approval, contract generation, billing setup", supportProcess: "E-sign platform, billing system, CRM", persona: "Buyer (decision maker)", momentOfTruth: true }
+      ]
+    },
+    {
+      id: "implementation",
+      title: "Implementation",
+      steps: [
+        { id: "kickoff", customerAction: "Attends implementation kickoff", frontstage: "Kickoff meeting, project plan shared", backstage: "CSM assigned, project plan created, timeline set", supportProcess: "Project management tool, CSM platform", persona: "IT Admin" },
+        { id: "sso-setup", customerAction: "Configures SSO integration", frontstage: "SSO setup wizard, documentation", backstage: "Identity provider integration, testing", supportProcess: "IdP connector, auth service", persona: "IT Admin", failureMode: "SSO misconfiguration blocks all users" },
+        { id: "data-migration", customerAction: "Migrates existing data", frontstage: "Migration tool UI, progress dashboard", backstage: "Data transformation, validation, import pipeline", supportProcess: "ETL service, data validation engine", persona: "IT Admin" }
+      ]
+    },
+    {
+      id: "rollout",
+      title: "Rollout",
+      steps: [
+        { id: "training", customerAction: "Attends training sessions", frontstage: "Training webinar, documentation portal", backstage: "Training content creation, scheduling", supportProcess: "LMS, webinar platform", persona: "End User" },
+        { id: "go-live", customerAction: "Full team starts using product", frontstage: "Go-live announcement, welcome experience", backstage: "Monitoring ramp-up, support team briefed", supportProcess: "Monitoring, support ticketing, status page", persona: "End User", momentOfTruth: true },
+        { id: "first-week", customerAction: "Navigates first week of full usage", frontstage: "In-app tips, proactive chat", backstage: "Usage anomaly detection, CSM check-in", supportProcess: "Analytics, proactive support triggers", persona: "End User" }
+      ]
+    },
+    {
+      id: "expansion",
+      title: "Expansion",
+      steps: [
+        { id: "success-review", customerAction: "Reviews success metrics with CSM", frontstage: "QBR presentation, ROI report", backstage: "Success metric aggregation, renewal forecast", supportProcess: "BI dashboard, CRM", persona: "Buyer (decision maker)" },
+        { id: "expand-seats", customerAction: "Requests additional licenses", frontstage: "Self-serve expansion UI, quote", backstage: "License provisioning, billing adjustment", supportProcess: "License management, billing system", persona: "Buyer (decision maker)", opportunity: "Automated expansion triggers based on usage patterns" }
+      ]
+    }
+  ]
+};
+
+// ========== STATE ==========
+const state = {
+  collapsedLanes: new Set(),
+  activePhaseIndex: 0,
+  searchMatches: new Set(),
+  drawerOpen: false,
+  selectedStep: null
+};
+
+const lanes = [
+  { key: 'customer', label: 'Customer Actions', field: 'customerAction', cssClass: 'customer' },
+  { key: 'frontstage', label: 'Frontstage', field: 'frontstage', cssClass: 'frontstage' },
+  { key: 'backstage', label: 'Backstage', field: 'backstage', cssClass: 'backstage' },
+  { key: 'support', label: 'Support Processes', field: 'supportProcess', cssClass: 'support' }
+];
+
+const dividers = [
+  { after: 'customer', label: 'Line of Interaction' },
+  { after: 'frontstage', label: 'Line of Visibility' },
+  { after: 'backstage', label: 'Line of Internal Interaction' }
+];
+
+// ========== RENDER ==========
+function render() {
+  document.getElementById('blueprintTitle').textContent = journeyData.title;
+  renderLaneLabels();
+  renderPhases();
+  renderMinimap();
+  updateBreadcrumb();
+}
+
+function renderLaneLabels() {
+  const container = document.getElementById('laneLabels');
+  let html = '<div style="height:33px;border-bottom:2px solid #e2e8f0;background:#f8f9fa;display:flex;align-items:center;padding:0 14px;font-size:11px;color:#6b7280;">Layers</div>';
+
+  lanes.forEach((lane, i) => {
+    const collapsed = state.collapsedLanes.has(lane.key);
+    html += `<div class="lane-label lane-label-${lane.cssClass} ${collapsed ? 'collapsed' : ''}" data-lane="${lane.key}">
+      <span class="label-text">${lane.label}</span>
+      <span class="collapse-icon">&#9660;</span>
+    </div>`;
+
+    const divider = dividers.find(d => d.after === lane.key);
+    if (divider) {
+      html += `<div class="divider-label">${divider.label}</div>`;
+    }
+  });
+
+  container.innerHTML = html;
+
+  container.querySelectorAll('.lane-label').forEach(el => {
+    el.addEventListener('click', () => {
+      const laneKey = el.dataset.lane;
+      if (state.collapsedLanes.has(laneKey)) {
+        state.collapsedLanes.delete(laneKey);
+        el.classList.remove('collapsed');
+      } else {
+        state.collapsedLanes.add(laneKey);
+        el.classList.add('collapsed');
+      }
+      updateLaneVisibility();
+    });
+  });
+}
+
+function renderPhases() {
+  const container = document.getElementById('phasesContainer');
+  let html = '';
+
+  journeyData.milestones.forEach((milestone, mi) => {
+    html += `<div class="phase-column" data-phase-index="${mi}" data-phase-id="${milestone.id}">`;
+    html += `<div class="phase-header">${milestone.title}</div>`;
+
+    lanes.forEach((lane, li) => {
+      const collapsed = state.collapsedLanes.has(lane.key);
+      html += `<div class="lane-row lane-row-${lane.cssClass} ${collapsed ? 'collapsed' : ''}" data-lane="${lane.key}">`;
+
+      milestone.steps.forEach((step, si) => {
+        const text = step[lane.field];
+        if (text) {
+          const isMatch = state.searchMatches.has(step.id);
+          html += `<div class="step-box ${isMatch ? 'search-highlight' : ''}" data-step-id="${step.id}" data-phase-index="${mi}" style="animation-delay:${si * 0.05}s">`;
+          if (step.momentOfTruth && lane.key === 'customer') {
+            html += `<div class="marker-mot" title="Moment of Truth"></div>`;
+          }
+          if (step.failureMode && lane.key === 'customer') {
+            html += `<div class="marker-failure" title="Failure Point"></div>`;
+          }
+          html += `<span class="step-text">${text}</span>`;
+          if (lane.key === 'customer' && step.persona) {
+            html += `<div class="persona-badge">${step.persona}</div>`;
+          }
+          html += `</div>`;
+        }
+      });
+
+      html += `</div>`;
+
+      const divider = dividers.find(d => d.after === lane.key);
+      if (divider) {
+        html += `<div class="divider-row"><span>${divider.label}</span></div>`;
+      }
+    });
+
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+
+  container.querySelectorAll('.step-box').forEach(el => {
+    el.addEventListener('click', () => openDrawer(el.dataset.stepId));
+  });
+}
+
+function renderMinimap() {
+  const track = document.getElementById('minimapTrack');
+  let html = '';
+
+  journeyData.milestones.forEach((milestone, mi) => {
+    html += `<div class="minimap-phase ${mi === state.activePhaseIndex ? 'active' : ''}" data-phase-index="${mi}">`;
+    html += `<div class="phase-label">${milestone.title}</div>`;
+    html += `<div class="phase-steps">`;
+    milestone.steps.forEach(step => {
+      let dotClass = 'step-dot';
+      if (state.searchMatches.has(step.id)) dotClass += ' search-match';
+      else if (step.momentOfTruth) dotClass += ' mot';
+      else if (step.failureMode) dotClass += ' failure';
+      html += `<span class="${dotClass}"></span>`;
+    });
+    html += `</div></div>`;
+  });
+
+  // Keep viewport indicator
+  html += '';
+  track.innerHTML = html + '<div class="minimap-viewport-indicator" id="minimapViewport"></div>';
+
+  track.querySelectorAll('.minimap-phase').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = parseInt(el.dataset.phaseIndex);
+      scrollToPhase(idx);
+    });
+  });
+
+  updateMinimapViewport();
+}
+
+function updateMinimapViewport() {
+  const mainContent = document.getElementById('mainContent');
+  const phasesContainer = document.getElementById('phasesContainer');
+  const viewport = document.getElementById('minimapViewport');
+  const track = document.getElementById('minimapTrack');
+
+  if (!viewport || !track || !phasesContainer) return;
+
+  const phaseColumns = phasesContainer.querySelectorAll('.phase-column');
+  if (phaseColumns.length === 0) return;
+
+  const scrollLeft = mainContent.scrollLeft;
+  const viewportWidth = mainContent.clientWidth;
+  const labelWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--lane-label-width'));
+
+  // Calculate which phases are visible
+  const contentScrollLeft = Math.max(0, scrollLeft - labelWidth);
+  const totalPhasesWidth = phasesContainer.scrollWidth;
+
+  // Map to minimap coordinates
+  const minimapPhases = track.querySelectorAll('.minimap-phase');
+  if (minimapPhases.length === 0) return;
+
+  const trackRect = track.getBoundingClientRect();
+  const firstPhaseRect = minimapPhases[0].getBoundingClientRect();
+  const lastPhaseRect = minimapPhases[minimapPhases.length - 1].getBoundingClientRect();
+  const minimapStart = firstPhaseRect.left - trackRect.left;
+  const minimapEnd = lastPhaseRect.right - trackRect.left;
+  const minimapWidth = minimapEnd - minimapStart;
+
+  const ratio = minimapWidth / totalPhasesWidth;
+  const vpLeft = minimapStart + (contentScrollLeft * ratio);
+  const vpWidth = Math.min(viewportWidth * ratio, minimapWidth);
+
+  viewport.style.left = Math.max(minimapStart, vpLeft) + 'px';
+  viewport.style.width = Math.max(30, vpWidth) + 'px';
+}
+
+function updateBreadcrumb() {
+  const crumb = document.getElementById('breadcrumbPhase');
+  const milestone = journeyData.milestones[state.activePhaseIndex];
+  crumb.textContent = milestone ? milestone.title : '—';
+}
+
+function updateLaneVisibility() {
+  const phaseColumns = document.querySelectorAll('.phase-column');
+  phaseColumns.forEach(col => {
+    col.querySelectorAll('.lane-row').forEach(row => {
+      const laneKey = row.dataset.lane;
+      if (state.collapsedLanes.has(laneKey)) {
+        row.classList.add('collapsed');
+      } else {
+        row.classList.remove('collapsed');
+      }
+    });
+  });
+
+  // Update label styles
+  document.querySelectorAll('.lane-label').forEach(el => {
+    const laneKey = el.dataset.lane;
+    if (state.collapsedLanes.has(laneKey)) {
+      el.classList.add('collapsed');
+    } else {
+      el.classList.remove('collapsed');
+    }
+  });
+}
+
+// ========== INTERACTIONS ==========
+function scrollToPhase(index) {
+  const mainContent = document.getElementById('mainContent');
+  const phaseColumns = document.querySelectorAll('.phase-column');
+  if (phaseColumns[index]) {
+    const col = phaseColumns[index];
+    const labelWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--lane-label-width'));
+    mainContent.scrollTo({
+      left: col.offsetLeft - labelWidth,
+      behavior: 'smooth'
+    });
+  }
+}
+
+function detectActivePhase() {
+  const mainContent = document.getElementById('mainContent');
+  const phaseColumns = document.querySelectorAll('.phase-column');
+  const scrollLeft = mainContent.scrollLeft;
+  const labelWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--lane-label-width'));
+  const viewCenter = scrollLeft + mainContent.clientWidth / 2;
+
+  let activeIdx = 0;
+  phaseColumns.forEach((col, i) => {
+    const colLeft = col.offsetLeft + labelWidth;
+    const colRight = colLeft + col.offsetWidth;
+    if (viewCenter >= colLeft && viewCenter <= colRight) {
+      activeIdx = i;
+    }
+  });
+
+  if (activeIdx !== state.activePhaseIndex) {
+    state.activePhaseIndex = activeIdx;
+    updateBreadcrumb();
+    updateMinimapActive();
+  }
+
+  updateMinimapViewport();
+  updateBackToStart();
+}
+
+function updateMinimapActive() {
+  document.querySelectorAll('.minimap-phase').forEach((el, i) => {
+    el.classList.toggle('active', i === state.activePhaseIndex);
+  });
+}
+
+function updateBackToStart() {
+  const mainContent = document.getElementById('mainContent');
+  const btn = document.getElementById('backToStart');
+  btn.classList.toggle('visible', mainContent.scrollLeft > 200);
+}
+
+function openDrawer(stepId) {
+  const step = findStep(stepId);
+  if (!step) return;
+
+  state.selectedStep = step;
+  state.drawerOpen = true;
+
+  const milestone = journeyData.milestones.find(m => m.steps.some(s => s.id === stepId));
+  const drawer = document.getElementById('detailDrawer');
+  const content = document.getElementById('detailDrawerContent');
+
+  let html = `<div class="detail-drawer-header">
+    <h3>${step.customerAction}</h3>
+    <button class="detail-drawer-close" id="drawerClose">&times;</button>
+  </div>`;
+
+  html += `<div class="detail-grid">`;
+  html += `<div class="detail-field"><div class="field-label">Phase</div><div class="field-value">${milestone ? milestone.title : ''}</div></div>`;
+  html += `<div class="detail-field"><div class="field-label">Persona</div><div class="field-value">${step.persona || '—'}</div></div>`;
+  html += `<div class="detail-field"><div class="field-label">Frontstage</div><div class="field-value">${step.frontstage || '—'}</div></div>`;
+  html += `<div class="detail-field"><div class="field-label">Backstage</div><div class="field-value">${step.backstage || '—'}</div></div>`;
+  html += `<div class="detail-field"><div class="field-label">Support Process</div><div class="field-value">${step.supportProcess || '—'}</div></div>`;
+
+  if (step.momentOfTruth) {
+    html += `<div class="detail-field"><div class="field-label">Marker</div><div class="field-value mot-badge">Moment of Truth</div></div>`;
+  }
+  if (step.failureMode) {
+    html += `<div class="detail-field"><div class="field-label">Failure Risk</div><div class="field-value failure-badge">${step.failureMode}</div></div>`;
+  }
+  if (step.opportunity) {
+    html += `<div class="detail-field"><div class="field-label">Opportunity</div><div class="field-value">${step.opportunity}</div></div>`;
+  }
+
+  html += `</div>`;
+  content.innerHTML = html;
+  drawer.classList.add('open');
+
+  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+}
+
+function closeDrawer() {
+  const drawer = document.getElementById('detailDrawer');
+  drawer.classList.remove('open');
+  state.drawerOpen = false;
+  state.selectedStep = null;
+}
+
+function findStep(stepId) {
+  for (const milestone of journeyData.milestones) {
+    const step = milestone.steps.find(s => s.id === stepId);
+    if (step) return step;
+  }
+  return null;
+}
+
+// ========== SEARCH ==========
+function handleSearch(query) {
+  state.searchMatches.clear();
+  const countEl = document.getElementById('searchCount');
+
+  if (!query.trim()) {
+    countEl.textContent = '';
+    clearSearchHighlights();
+    renderMinimap();
+    return;
+  }
+
+  const q = query.toLowerCase();
+  journeyData.milestones.forEach(milestone => {
+    milestone.steps.forEach(step => {
+      const searchable = [
+        step.customerAction,
+        step.frontstage,
+        step.backstage,
+        step.supportProcess,
+        step.persona,
+        step.failureMode,
+        step.opportunity
+      ].filter(Boolean).join(' ').toLowerCase();
+
+      if (searchable.includes(q)) {
+        state.searchMatches.add(step.id);
+      }
+    });
+  });
+
+  countEl.textContent = state.searchMatches.size > 0 ? `${state.searchMatches.size}` : '0';
+  applySearchHighlights();
+  renderMinimap();
+}
+
+function applySearchHighlights() {
+  document.querySelectorAll('.step-box').forEach(el => {
+    const stepId = el.dataset.stepId;
+    el.classList.toggle('search-highlight', state.searchMatches.has(stepId));
+  });
+}
+
+function clearSearchHighlights() {
+  document.querySelectorAll('.step-box.search-highlight').forEach(el => {
+    el.classList.remove('search-highlight');
+  });
+}
+
+// ========== INIT ==========
+function init() {
+  render();
+
+  const mainContent = document.getElementById('mainContent');
+  let scrollTimeout;
+  mainContent.addEventListener('scroll', () => {
+    if (scrollTimeout) cancelAnimationFrame(scrollTimeout);
+    scrollTimeout = requestAnimationFrame(detectActivePhase);
+  });
+
+  document.getElementById('backToStart').addEventListener('click', () => {
+    mainContent.scrollTo({ left: 0, behavior: 'smooth' });
+  });
+
+  let searchDebounce;
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => handleSearch(e.target.value), 200);
+  });
+
+  // Close drawer on escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && state.drawerOpen) {
+      closeDrawer();
+    }
+  });
+
+  // Close drawer on click outside
+  document.addEventListener('click', (e) => {
+    if (state.drawerOpen) {
+      const drawer = document.getElementById('detailDrawer');
+      if (!drawer.contains(e.target) && !e.target.closest('.step-box')) {
+        closeDrawer();
+      }
+    }
+  });
+
+  // Adjust header height on load
+  requestAnimationFrame(() => {
+    const header = document.querySelector('.header');
+    const headerHeight = header.offsetHeight;
+    document.documentElement.style.setProperty('--header-height', headerHeight + 'px');
+    mainContent.style.top = headerHeight + 'px';
+
+    // Reposition legend when drawer is open
+    detectActivePhase();
+  });
+
+  // Handle window resize
+  window.addEventListener('resize', () => {
+    const header = document.querySelector('.header');
+    const headerHeight = header.offsetHeight;
+    document.documentElement.style.setProperty('--header-height', headerHeight + 'px');
+    mainContent.style.top = headerHeight + 'px';
+    updateMinimapViewport();
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

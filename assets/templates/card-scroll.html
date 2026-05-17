@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Journey Map</title>
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-customer-bg: #fff9e6;
+  --color-customer-border: #c9a227;
+  --color-backstage-bg: #ffffff;
+  --color-backstage-border: #aaaaaa;
+  --color-support-bg: #f3f3f3;
+  --color-support-border: #999999;
+  --emotion-neg2: #fecaca;
+  --emotion-neg1: #fed7aa;
+  --emotion-neutral: #e5e7eb;
+  --emotion-pos1: #bbf7d0;
+  --emotion-pos2: #86efac;
+  --color-mot: #ef4444;
+  --color-failure: #8b6914;
+  --color-pain: #f97316;
+  --color-opportunity: #22c55e;
+  --card-radius: 8px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+  --transition: 0.2s ease;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #f8f9fa;
+  color: #1a1a2e;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Toolbar */
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 12px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.toolbar-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-right: auto;
+  white-space: nowrap;
+}
+
+.toolbar select,
+.toolbar input[type="text"] {
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: #fff;
+  color: #374151;
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.toolbar select:focus,
+.toolbar input[type="text"]:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+}
+
+.toolbar input[type="text"] {
+  width: 220px;
+}
+
+.toolbar label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.toolbar label input[type="checkbox"] {
+  accent-color: var(--color-pain);
+}
+
+/* Journey container */
+.journey {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+/* Milestone heading */
+.milestone {
+  margin-bottom: 12px;
+}
+
+.milestone-heading {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #374151;
+  padding: 16px 0 8px;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 16px;
+}
+
+/* Flow arrow between cards */
+.flow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  position: relative;
+}
+
+.flow-arrow::before {
+  content: "";
+  width: 2px;
+  height: 100%;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+.flow-arrow--solid::before {
+  background: #94a3b8;
+}
+
+.flow-arrow--dashed::before {
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--color-failure) 0,
+    var(--color-failure) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+.flow-arrow svg {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Card */
+.card {
+  position: relative;
+  background: var(--color-customer-bg);
+  border: 1px solid #e5e7eb;
+  border-radius: var(--card-radius);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: box-shadow var(--transition), transform var(--transition);
+  outline: none;
+  border-left: 5px solid var(--emotion-neutral);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.card:focus-visible {
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.3);
+}
+
+.card[data-focused="true"] {
+  box-shadow: 0 0 0 2px #6366f1;
+}
+
+/* Emotion valence border */
+.card[data-valence="-2"] { border-left-color: var(--emotion-neg2); }
+.card[data-valence="-1"] { border-left-color: var(--emotion-neg1); }
+.card[data-valence="0"] { border-left-color: var(--emotion-neutral); }
+.card[data-valence="1"] { border-left-color: var(--emotion-pos1); }
+.card[data-valence="2"] { border-left-color: var(--emotion-pos2); }
+
+/* Pain point underline */
+.card[data-pain="true"] {
+  border-bottom: 3px solid var(--color-pain);
+}
+
+/* Opportunity dashed border */
+.card[data-opportunity="true"] {
+  border-right: 2px dashed var(--color-opportunity);
+  border-top: 2px dashed var(--color-opportunity);
+}
+
+/* Moment of truth dot */
+.card-mot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-mot);
+}
+
+/* Failure marker */
+.card-failure-marker {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-failure);
+}
+
+/* Card header (collapsed) */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.card-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1f2937;
+  flex: 1;
+  min-width: 0;
+}
+
+.card-emotion-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.04);
+  color: #4b5563;
+  white-space: nowrap;
+}
+
+.card-metric {
+  font-size: 0.75rem;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+/* Card body (expanded) */
+.card-body {
+  display: none;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.card.expanded .card-body {
+  display: block;
+}
+
+.card-field {
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
+
+.card-field-label {
+  font-weight: 600;
+  color: #6b7280;
+  display: inline;
+  margin-right: 4px;
+}
+
+.card-field-value {
+  color: #374151;
+}
+
+.card-field--pain .card-field-value {
+  color: #c2410c;
+}
+
+.card-field--opportunity .card-field-value {
+  color: #15803d;
+}
+
+.card-field--failure .card-field-value {
+  color: #92400e;
+}
+
+/* Service layer badges */
+.card-layer {
+  display: inline-block;
+  font-size: 0.72rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+
+.card-layer--frontstage {
+  background: var(--color-customer-bg);
+  border: 1px solid var(--color-customer-border);
+  color: var(--color-customer-border);
+}
+
+.card-layer--backstage {
+  background: var(--color-backstage-bg);
+  border: 1px solid var(--color-backstage-border);
+  color: var(--color-backstage-border);
+}
+
+.card-layer--support {
+  background: var(--color-support-bg);
+  border: 1px solid var(--color-support-border);
+  color: var(--color-support-border);
+}
+
+/* Hidden state for filtering */
+.card.hidden,
+.flow-arrow.hidden,
+.milestone.hidden {
+  display: none;
+}
+
+/* Search highlight */
+.highlight {
+  background: #fef08a;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* Sort indicator */
+.sort-indicator {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  margin-left: 4px;
+}
+
+/* No results */
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: #9ca3af;
+  font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .toolbar {
+    padding: 10px 16px;
+  }
+  .toolbar input[type="text"] {
+    width: 100%;
+    order: 10;
+  }
+  .journey {
+    padding: 20px 16px 60px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar" role="toolbar" aria-label="Journey map controls">
+  <span class="toolbar-title" id="journey-title"></span>
+  <select id="filter-persona" aria-label="Filter by persona">
+    <option value="">All personas</option>
+  </select>
+  <select id="filter-category" aria-label="Filter by channel">
+    <option value="">All channels</option>
+  </select>
+  <label>
+    <input type="checkbox" id="filter-pain"> Pain points only
+  </label>
+  <select id="sort-by" aria-label="Sort by">
+    <option value="order">Journey order</option>
+    <option value="emotion">Emotion (low to high)</option>
+    <option value="dropoff">Drop-off risk</option>
+    <option value="priority">Priority</option>
+    <option value="duration">Duration</option>
+  </select>
+  <input type="text" id="search-input" placeholder="Search... (e.g. emotion:frustrated)" aria-label="Search steps">
+</div>
+
+<div class="journey" id="journey-container" role="list" aria-label="Journey steps">
+</div>
+
+<script>
+// ─── Sample Data ───────────────────────────────────────────────────────────────
+const journeyData = {
+  title: "New User Onboarding",
+  personas: ["Alex (new user)", "Admin (team lead)"],
+  milestones: [
+    {
+      id: "awareness",
+      title: "Awareness & Sign-up",
+      steps: [
+        { id: "discover-product", description: "Discovers product through colleague recommendation", emotion: "Curious", emotionValence: 1, persona: "Alex (new user)", channel: "Word of mouth", duration: "2 days" },
+        { id: "visit-landing", description: "Visits landing page and reads value proposition", emotion: "Interested", emotionValence: 1, persona: "Alex (new user)", channel: "Web", duration: "3 min", momentOfTruth: true },
+        { id: "sign-up", description: "Creates account with email", emotion: "Hopeful", emotionValence: 1, persona: "Alex (new user)", channel: "Web", duration: "2 min" }
+      ]
+    },
+    {
+      id: "activation",
+      title: "Activation",
+      steps: [
+        { id: "empty-workspace", description: "Sees empty workspace with no guidance", emotion: "Confused", emotionValence: -1, persona: "Alex (new user)", channel: "App", duration: "30 sec", painPoint: "No onboarding guidance, user doesn't know where to start", failureMode: "User closes tab and never returns" },
+        { id: "find-tutorial", description: "Searches help center for getting started guide", emotion: "Frustrated", emotionValence: -2, persona: "Alex (new user)", channel: "Help center", duration: "5 min", painPoint: "Tutorial is outdated and doesn't match current UI" },
+        { id: "first-action", description: "Creates first project after trial and error", emotion: "Relieved", emotionValence: 0, persona: "Alex (new user)", channel: "App", duration: "8 min", opportunity: "Guided first-run wizard could reduce time to value" }
+      ]
+    },
+    {
+      id: "engagement",
+      title: "First Value",
+      steps: [
+        { id: "invite-team", description: "Invites team members to collaborate", emotion: "Excited", emotionValence: 2, persona: "Alex (new user)", channel: "App", duration: "2 min", momentOfTruth: true, frontstage: "Invitation email sent", backstage: "Permission system creates team workspace" },
+        { id: "team-joins", description: "Team members accept invite and join", emotion: "Satisfied", emotionValence: 2, persona: "Admin (team lead)", channel: "Email → App", duration: "1 day", supportProcess: "Email delivery system, SSO integration" },
+        { id: "first-collaboration", description: "Team completes first shared task", emotion: "Delighted", emotionValence: 2, persona: "Alex (new user)", channel: "App", duration: "15 min", momentOfTruth: true, opportunity: "Celebration moment could reinforce habit" }
+      ]
+    }
+  ]
+};
+
+// ─── State ─────────────────────────────────────────────────────────────────────
+let focusedIndex = -1;
+let allCards = [];
+let flatSteps = [];
+
+// ─── Utility ───────────────────────────────────────────────────────────────────
+function parseDuration(str) {
+  if (!str) return 0;
+  const s = str.toLowerCase();
+  if (s.includes("day")) return parseFloat(s) * 1440;
+  if (s.includes("hr") || s.includes("hour")) return parseFloat(s) * 60;
+  if (s.includes("min")) return parseFloat(s);
+  if (s.includes("sec")) return parseFloat(s) / 60;
+  return 0;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function highlightText(text, query) {
+  if (!query) return escapeHtml(text);
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(`(${escaped})`, "gi");
+  return escapeHtml(text).replace(regex, '<span class="highlight">$1</span>');
+}
+
+// ─── Rendering ─────────────────────────────────────────────────────────────────
+function buildFlatSteps() {
+  flatSteps = [];
+  let order = 0;
+  journeyData.milestones.forEach(m => {
+    m.steps.forEach(step => {
+      flatSteps.push({ ...step, milestone: m.id, milestoneTitle: m.title, order: order++ });
+    });
+  });
+}
+
+function getDropoffScore(step) {
+  let score = 0;
+  if (step.painPoint) score += 2;
+  if (step.failureMode) score += 3;
+  if (step.emotionValence <= -1) score += 1;
+  if (step.emotionValence <= -2) score += 1;
+  return score;
+}
+
+function getPriorityScore(step) {
+  let score = 0;
+  if (step.momentOfTruth) score += 3;
+  if (step.painPoint) score += 2;
+  if (step.failureMode) score += 2;
+  if (step.opportunity) score += 1;
+  score += Math.max(0, -step.emotionValence);
+  return score;
+}
+
+function renderCard(step, searchQuery) {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.setAttribute("role", "listitem");
+  card.setAttribute("tabindex", "0");
+  card.setAttribute("data-id", step.id);
+  card.setAttribute("data-valence", step.emotionValence);
+  card.setAttribute("data-persona", step.persona);
+  card.setAttribute("data-channel", step.channel);
+  card.setAttribute("data-milestone", step.milestone);
+  if (step.painPoint) card.setAttribute("data-pain", "true");
+  if (step.opportunity) card.setAttribute("data-opportunity", "true");
+
+  let html = "";
+
+  // Markers
+  if (step.momentOfTruth) html += '<div class="card-mot" title="Moment of Truth"></div>';
+  if (step.failureMode) html += '<div class="card-failure-marker" title="Failure mode"></div>';
+
+  // Header
+  html += '<div class="card-header">';
+  html += `<span class="card-name">${highlightText(step.description, searchQuery)}</span>`;
+  html += `<span class="card-emotion-badge">${highlightText(step.emotion, searchQuery)}</span>`;
+  html += `<span class="card-metric">${escapeHtml(step.duration || "")}</span>`;
+  html += '</div>';
+
+  // Body
+  html += '<div class="card-body">';
+  html += `<div class="card-field"><span class="card-field-label">Persona:</span><span class="card-field-value">${highlightText(step.persona, searchQuery)}</span></div>`;
+  html += `<div class="card-field"><span class="card-field-label">Channel:</span><span class="card-field-value">${highlightText(step.channel, searchQuery)}</span></div>`;
+  html += `<div class="card-field"><span class="card-field-label">Duration:</span><span class="card-field-value">${escapeHtml(step.duration || "N/A")}</span></div>`;
+  html += `<div class="card-field"><span class="card-field-label">Emotion:</span><span class="card-field-value">${highlightText(step.emotion, searchQuery)} (${step.emotionValence > 0 ? "+" : ""}${step.emotionValence})</span></div>`;
+
+  if (step.painPoint) {
+    html += `<div class="card-field card-field--pain"><span class="card-field-label">Pain Point:</span><span class="card-field-value">${highlightText(step.painPoint, searchQuery)}</span></div>`;
+  }
+  if (step.failureMode) {
+    html += `<div class="card-field card-field--failure"><span class="card-field-label">Failure Mode:</span><span class="card-field-value">${highlightText(step.failureMode, searchQuery)}</span></div>`;
+  }
+  if (step.opportunity) {
+    html += `<div class="card-field card-field--opportunity"><span class="card-field-label">Opportunity:</span><span class="card-field-value">${highlightText(step.opportunity, searchQuery)}</span></div>`;
+  }
+  if (step.frontstage || step.backstage || step.supportProcess) {
+    html += '<div class="card-field">';
+    if (step.frontstage) html += `<span class="card-layer card-layer--frontstage">Frontstage: ${escapeHtml(step.frontstage)}</span>`;
+    if (step.backstage) html += `<span class="card-layer card-layer--backstage">Backstage: ${escapeHtml(step.backstage)}</span>`;
+    if (step.supportProcess) html += `<span class="card-layer card-layer--support">Support: ${escapeHtml(step.supportProcess)}</span>`;
+    html += '</div>';
+  }
+
+  html += '</div>';
+  card.innerHTML = html;
+
+  card.addEventListener("click", () => toggleCard(card));
+
+  return card;
+}
+
+function renderArrow(step) {
+  const arrow = document.createElement("div");
+  const hasFailure = step.failureMode;
+  arrow.className = `flow-arrow ${hasFailure ? "flow-arrow--dashed" : "flow-arrow--solid"}`;
+  arrow.setAttribute("data-before", step.id);
+  arrow.innerHTML = `<svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+    <path d="M5 8L0.67 0.5H9.33L5 8Z" fill="${hasFailure ? '#8b6914' : '#94a3b8'}"/>
+  </svg>`;
+  return arrow;
+}
+
+function render() {
+  const container = document.getElementById("journey-container");
+  container.innerHTML = "";
+  allCards = [];
+
+  const personaFilter = document.getElementById("filter-persona").value;
+  const channelFilter = document.getElementById("filter-category").value;
+  const painOnly = document.getElementById("filter-pain").checked;
+  const sortBy = document.getElementById("sort-by").value;
+  const searchRaw = document.getElementById("search-input").value.trim();
+
+  // Parse search
+  let searchQuery = "";
+  let searchField = "";
+  const fieldMatch = searchRaw.match(/^(\w+):(.+)$/);
+  if (fieldMatch) {
+    searchField = fieldMatch[1].toLowerCase();
+    searchQuery = fieldMatch[2].toLowerCase();
+  } else {
+    searchQuery = searchRaw.toLowerCase();
+  }
+
+  // Filter
+  let steps = flatSteps.filter(step => {
+    if (personaFilter && step.persona !== personaFilter) return false;
+    if (channelFilter && step.channel !== channelFilter) return false;
+    if (painOnly && !step.painPoint) return false;
+    if (searchQuery) {
+      if (searchField) {
+        const fieldValue = getFieldValue(step, searchField);
+        if (!fieldValue || !fieldValue.toLowerCase().includes(searchQuery)) return false;
+      } else {
+        const text = getSearchableText(step);
+        if (!text.toLowerCase().includes(searchQuery)) return false;
+      }
+    }
+    return true;
+  });
+
+  // Sort
+  if (sortBy === "emotion") {
+    steps.sort((a, b) => a.emotionValence - b.emotionValence);
+  } else if (sortBy === "dropoff") {
+    steps.sort((a, b) => getDropoffScore(b) - getDropoffScore(a));
+  } else if (sortBy === "priority") {
+    steps.sort((a, b) => getPriorityScore(b) - getPriorityScore(a));
+  } else if (sortBy === "duration") {
+    steps.sort((a, b) => parseDuration(b.duration) - parseDuration(a.duration));
+  }
+  // default: order is already set
+
+  if (steps.length === 0) {
+    container.innerHTML = '<div class="no-results">No steps match the current filters.</div>';
+    return;
+  }
+
+  // Group by milestone if sorted by order
+  if (sortBy === "order") {
+    const grouped = {};
+    const milestoneOrder = journeyData.milestones.map(m => m.id);
+    steps.forEach(s => {
+      if (!grouped[s.milestone]) grouped[s.milestone] = [];
+      grouped[s.milestone].push(s);
+    });
+
+    milestoneOrder.forEach(mId => {
+      if (!grouped[mId]) return;
+      const milestone = journeyData.milestones.find(m => m.id === mId);
+      const section = document.createElement("div");
+      section.className = "milestone";
+      section.innerHTML = `<h2 class="milestone-heading">${escapeHtml(milestone.title)}</h2>`;
+      container.appendChild(section);
+
+      grouped[mId].forEach((step, i) => {
+        const card = renderCard(step, searchQuery || "");
+        container.appendChild(card);
+        allCards.push(card);
+
+        if (i < grouped[mId].length - 1) {
+          const nextStep = grouped[mId][i + 1];
+          container.appendChild(renderArrow(nextStep));
+        }
+      });
+
+      // Arrow between milestones
+      const mIdx = milestoneOrder.indexOf(mId);
+      if (mIdx < milestoneOrder.length - 1) {
+        const nextMId = milestoneOrder[mIdx + 1];
+        if (grouped[nextMId] && grouped[nextMId].length > 0) {
+          container.appendChild(renderArrow(grouped[nextMId][0]));
+        }
+      }
+    });
+  } else {
+    // Flat list
+    steps.forEach((step, i) => {
+      const card = renderCard(step, searchQuery || "");
+      container.appendChild(card);
+      allCards.push(card);
+      if (i < steps.length - 1) {
+        container.appendChild(renderArrow(steps[i + 1]));
+      }
+    });
+  }
+
+  focusedIndex = -1;
+}
+
+function getFieldValue(step, field) {
+  const map = {
+    emotion: step.emotion,
+    persona: step.persona,
+    channel: step.channel,
+    duration: step.duration,
+    description: step.description,
+    pain: step.painPoint,
+    painpoint: step.painPoint,
+    failure: step.failureMode,
+    opportunity: step.opportunity,
+    id: step.id
+  };
+  return map[field] || "";
+}
+
+function getSearchableText(step) {
+  return [
+    step.id, step.description, step.emotion, step.persona,
+    step.channel, step.duration, step.painPoint,
+    step.failureMode, step.opportunity, step.frontstage,
+    step.backstage, step.supportProcess
+  ].filter(Boolean).join(" ");
+}
+
+// ─── Interactions ──────────────────────────────────────────────────────────────
+function toggleCard(card) {
+  const wasExpanded = card.classList.contains("expanded");
+  // Collapse all
+  allCards.forEach(c => c.classList.remove("expanded"));
+  if (!wasExpanded) {
+    card.classList.add("expanded");
+  }
+}
+
+function setFocus(index) {
+  if (allCards.length === 0) return;
+  allCards.forEach(c => c.removeAttribute("data-focused"));
+  focusedIndex = Math.max(0, Math.min(index, allCards.length - 1));
+  const card = allCards[focusedIndex];
+  card.setAttribute("data-focused", "true");
+  card.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  card.focus();
+}
+
+// ─── Init ──────────────────────────────────────────────────────────────────────
+function init() {
+  document.getElementById("journey-title").textContent = journeyData.title;
+
+  // Populate filters
+  const personaSelect = document.getElementById("filter-persona");
+  journeyData.personas.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p;
+    opt.textContent = p;
+    personaSelect.appendChild(opt);
+  });
+
+  const channels = new Set();
+  journeyData.milestones.forEach(m => m.steps.forEach(s => channels.add(s.channel)));
+  const channelSelect = document.getElementById("filter-category");
+  [...channels].sort().forEach(ch => {
+    const opt = document.createElement("option");
+    opt.value = ch;
+    opt.textContent = ch;
+    channelSelect.appendChild(opt);
+  });
+
+  buildFlatSteps();
+  render();
+
+  // Event listeners
+  document.getElementById("filter-persona").addEventListener("change", render);
+  document.getElementById("filter-category").addEventListener("change", render);
+  document.getElementById("filter-pain").addEventListener("change", render);
+  document.getElementById("sort-by").addEventListener("change", render);
+
+  let debounceTimer;
+  document.getElementById("search-input").addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(render, 200);
+  });
+
+  // Keyboard navigation
+  document.addEventListener("keydown", (e) => {
+    const target = e.target;
+    // Don't capture when typing in search
+    if (target.tagName === "INPUT" || target.tagName === "SELECT") {
+      if (e.key === "Escape") {
+        target.blur();
+        e.preventDefault();
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case "ArrowDown":
+      case "j":
+        e.preventDefault();
+        setFocus(focusedIndex + 1);
+        break;
+      case "ArrowUp":
+      case "k":
+        e.preventDefault();
+        setFocus(focusedIndex - 1);
+        break;
+      case "Enter":
+      case " ":
+        e.preventDefault();
+        if (focusedIndex >= 0 && focusedIndex < allCards.length) {
+          toggleCard(allCards[focusedIndex]);
+        }
+        break;
+      case "Escape":
+        e.preventDefault();
+        allCards.forEach(c => c.classList.remove("expanded"));
+        break;
+      case "/":
+        e.preventDefault();
+        document.getElementById("search-input").focus();
+        break;
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>

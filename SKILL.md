@@ -84,11 +84,27 @@ Transform journey understanding into audience-appropriate output.
 | **Interactive HTML** | Workshop/reference use. Layered, expandable, explorable. |
 | **Engineering handoff** | Dev team needs to build. Acceptance criteria, spec-shaped. |
 
-3. Render from journey file data. Include only active categories and filled fields.
-4. Show provenance in output:
+3. For Interactive HTML, select rendering mode + interaction mode:
+
+   **Rendering** (from data shape):
+   - Default → Card grid
+   - Active categories include frontstage/backstage/support → Swimlane
+   - Primary dimension is temporal/duration → Timeline
+   - Emotional arc is focus → Emotion curve (or as overlay/multi-view tab)
+
+   **Interaction** (from step count):
+   - ≤ 15 steps → Scroll-driven
+   - 16–60 steps → Focus+Context
+   - \> 60 steps → Zoom-pan
+   - Multiple audiences → Multi-view (tabs between rendering modes)
+
+   Use the matching template from `assets/templates/` as base. Inject journey data into the template's `journeyData` object. Consult `references/html-rendering-guide.md` for color system and data mapping.
+
+4. Render from journey file data. Include only active categories and filled fields.
+5. Show provenance in output:
    - Storyline: footnotes/endnotes (preserve narrative flow)
    - Brief: inline attribution markers
-   - Interactive HTML: expandable evidence panels
+   - Interactive HTML: expandable provenance panels
    - Engineering handoff: inline source references
 
 ### Storyline mechanics
@@ -141,5 +157,8 @@ For detailed field vocabulary, format syntax, and rules:
 
 - **`references/journey.schema.md`** — Complete field definitions (13 categories, ~100 fields), composite/atomic rules, namespace conventions, provenance system details.
 - **`references/journey.format.md`** — Canonical markdown format: preamble structure, milestone/step syntax, provenance notation, cross-references, complete example.
+
+- **`references/html-rendering-guide.md`** — Interactive HTML rendering: M×N combination matrix, selection logic, color system, data-to-visual mapping.
+- **`assets/templates/*.html`** — 11 self-contained HTML templates (one per valid rendering × interaction combination). Inject journey data into the `journeyData` JS object.
 
 Consult these when reading or writing journey files. Do not memorize field lists — reference the schema document when suggesting fields.
