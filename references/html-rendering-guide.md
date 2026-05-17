@@ -64,33 +64,103 @@ if audience is mixed (multiple needs):
 
 ---
 
-## Color System
+## Color Strategy
 
-### Service Layer Colors
+### Principles
 
-Used as primary palette in Swimlane mode. In Card grid / Timeline, applied to expandable sections.
+1. **Palette type must match data semantics.**
+   - **Categorical** (distinct hues, equal perceptual weight): unordered groups — personas, channels, service layers. Limit to 6–8 distinct hues; beyond that, group as "Other" or restructure.
+   - **Sequential** (single hue, light-to-dark): ordered magnitude — duration, drop-off rate, priority score. Never use rainbow gradients.
+   - **Diverging** (two hues meeting at neutral midpoint): data with meaningful center — emotion valence (negative ↔ positive), satisfaction delta.
 
-| Layer | Background | Border | Applied to |
-|-------|-----------|--------|------------|
-| Customer / Frontstage | `#fff9e6` | `#c9a227` | Customer-visible actions, frontstage sections |
-| Backstage | `#ffffff` | `#aaaaaa` | Internal processes not visible to customer |
-| Support / Infrastructure | `#f3f3f3` | `#999999` | Systems, tools, platforms |
-| Evidence / Physical | `#fafafa` | `#cccccc` | Tangible touchpoints, artifacts |
-| Muted / Optional | `#f5f5f5` | dashed `#cccccc` | Optional steps, low priority |
+2. **Use perceptually uniform color space (LCH/CIELAB) for interpolation.** Equal numerical steps must produce equal perceived color change. HSL/RGB create misleading brightness variation that biases interpretation. When generating intermediate steps between two brand colors, interpolate in LCH, not HSL.
 
-### Emotion Valence Colors
+3. **Encoding hierarchy: Position > Size > Shape > Color.** Color is reinforcement, never the sole encoding. Every color-coded element must carry a secondary indicator (icon, pattern, text label, or position) so the visualization reads in grayscale.
 
-Applied to card left-border bar, emotion badges, and emotion curve fill.
+4. **Encode with the right color dimension.**
+   - Hue → categorical/nominal (no inherent order)
+   - Lightness → ordinal/sequential (intensity encodes magnitude)
+   - Saturation → emphasis only (not for primary data encoding)
 
-| Valence | Label | Hex | 
-|---------|-------|-----|
-| -2 | Very negative | `#fecaca` |
-| -1 | Negative | `#fed7aa` |
-| 0 | Neutral | `#e5e7eb` |
-| +1 | Positive | `#bbf7d0` |
-| +2 | Very positive | `#86efac` |
+5. **Respect natural semantic associations.** Red = negative/hot/danger, green = positive/growth, orange = warning, blue = neutral/cold/trust. Violating these (e.g., green for loss) creates cognitive friction. When brand colors conflict with semantic expectations, use brand for chrome/identity and semantic colors for data.
 
-### Markers
+### Theming & White-label Architecture
+
+All colors must be defined as CSS custom properties at `:root`, organized in three tiers:
+
+```
+/* Tier 1: Brand seed (user provides these) */
+--brand-primary: ...;
+--brand-secondary: ...;
+--brand-surface: ...;
+--brand-text: ...;
+
+/* Tier 2: Semantic palette (derived from seed or overridden) */
+--color-layer-frontstage-bg: ...;
+--color-layer-backstage-bg: ...;
+--color-valence-negative-2: ...;
+--color-valence-positive-2: ...;
+--color-marker-critical: ...;
+--color-marker-warning: ...;
+
+/* Tier 3: Component scope (local overrides) */
+--card-border: var(--color-layer-frontstage-border);
+--minimap-dot-fill: var(--color-valence-neutral);
+```
+
+**Derivation strategy when user provides only brand colors:**
+1. Use brand primary for chrome (headers, active tab, selected state).
+2. Derive sequential palette from brand primary by stepping lightness in LCH (5 stops, L from 95 down to 35).
+3. Keep semantic data colors (valence, markers) independent of brand — these must maintain universal meaning.
+4. Surface and text colors: respect brand surface/text for backgrounds and body text.
+
+**Swap themes by reassigning Tier 1 variables.** No rebuild, no code change. This enables white-label deployments where each client sets 3–4 brand values.
+
+### Dark Mode
+
+**Do not invert. Re-derive.**
+
+- Background: use `#121212` or similar dark grey, never pure `#000000` (causes halation).
+- Surfaces: layer with subtle lightness increments (`#1e1e1e`, `#2a2a2a`, `#333333`).
+- Text: use `#e0e0e0` for body, `#ffffff` for headings. Never full-white body text on full-black.
+- Data colors: maintain the same hue and semantic meaning, but increase lightness by 10–15% and reduce chroma slightly so colors remain legible against dark backgrounds.
+- Borders: lighten to ~30% opacity white (`rgba(255,255,255,0.3)`).
+- Markers: keep the same hues but increase contrast against dark surface. Test every marker color pair against the dark surface for WCAG 3:1 minimum.
+
+Implement via `@media (prefers-color-scheme: dark)` overriding Tier 1 and Tier 2 variables. Alternatively, support a `.dark` class toggle on `<html>` for manual switching.
+
+### Accessibility
+
+- **Contrast minimums**: 3:1 for data visualization shapes (≥ 3×3px). 4.5:1 for text labels. Test all color pairs in both light and dark modes.
+- **Colorblind safety**: Blue-orange is universally safe across deuteranopia, protanopia, and tritanopia. Avoid red-green combinations as sole differentiators. When the palette requires red and green (e.g., valence), always pair with a secondary encoding (icon, pattern, position).
+- **Reference palettes**: Okabe-Ito (8 colors, universally distinguishable), Cividis (sequential, colorblind-optimized).
+- **Test tools**: Sim Daltonism, Coblis, or browser DevTools color vision simulation.
+
+### Default Palette
+
+The following defaults are provided for use when no brand colors are specified. All values are CSS custom property names — override at Tier 1 to theme.
+
+**Service layers (categorical):**
+
+| Layer | Light bg | Light border | Dark bg | Dark border |
+|-------|----------|-------------|---------|------------|
+| Customer / Frontstage | `#fff9e6` | `#c9a227` | `#2a2518` | `#d4a72c` |
+| Backstage | `#ffffff` | `#aaaaaa` | `#1e1e1e` | `#666666` |
+| Support / Infrastructure | `#f3f3f3` | `#999999` | `#252525` | `#777777` |
+| Evidence / Physical | `#fafafa` | `#cccccc` | `#1a1a1a` | `#555555` |
+| Muted / Optional | `#f5f5f5` | dashed `#cccccc` | `#1c1c1c` | dashed `#555555` |
+
+**Emotion valence (diverging):**
+
+| Valence | Light | Dark |
+|---------|-------|------|
+| -2 (very negative) | `#fecaca` | `#991b1b` |
+| -1 (negative) | `#fed7aa` | `#9a3412` |
+| 0 (neutral) | `#e5e7eb` | `#4b5563` |
+| +1 (positive) | `#bbf7d0` | `#166534` |
+| +2 (very positive) | `#86efac` | `#15803d` |
+
+**Markers (semantic, fixed across themes):**
 
 | Marker | Visual | Position | Trigger field |
 |--------|--------|----------|---------------|
@@ -101,11 +171,13 @@ Applied to card left-border bar, emotion badges, and emotion curve fill.
 | Source provenance | 📎 icon | Inline after field | `_provenance: source: ...` |
 | User-modified | ✏️ icon | Inline after field | `_provenance: user-modified` |
 
-### Color Priority Rules
+### Color Application Rules
 
 1. **Layer color > emotion color** in Swimlane mode. Show emotion via left-border bar instead.
-2. **Accessibility**: every color-coded element must also carry a non-color indicator (icon, pattern, or text label).
+2. **Dual encoding**: every color-coded element must also carry a non-color indicator (icon, pattern, or text label).
 3. **Print**: all background colors at 50% opacity. Markers and text labels preserved.
+4. **10–20 color range**: when persona count, channel count, or category count exceeds 8, shift from distinct hues to a lightness-stepped single-hue palette grouped by semantic cluster. Never display 20 equally-weighted distinct hues.
+5. **Brand colors for chrome, semantic colors for data.** Do not repurpose brand red as "negative valence" — brand identity and data encoding must remain independent channels.
 
 ---
 
