@@ -117,6 +117,14 @@ Transform journey understanding into audience-appropriate output.
 - **Analogy**: When the journey resembles a familiar non-product experience, use it.
 - **Voice**: Third-person, present-action verbs.
 
+### Engineering handoff mechanics
+
+- **Spec-shaped**: Sections per addressable fix, each mapped to its journey step.
+- **Current vs required**: State today's behavior, then the required behavior.
+- **Acceptance criteria as checkboxes**: Write each criterion as a `- [ ]` Markdown checkbox — specific, testable, one assertion per box.
+- **Edge cases, systems, dependencies**: List them explicitly; note build order.
+- **Source references inline**: Cite the journey fields each requirement derives from.
+
 ---
 
 ## Storage
@@ -129,6 +137,10 @@ Detect user environment and select storage adapter:
 | Notion MCP connected | Shared workspace page | Read/write via MCP |
 | Drive MCP connected | Shared folder .md file | Read/write via MCP |
 | No storage detected | Conversation paste | Ask user to paste previous journey.md; output updated version for user to save |
+
+When running in Claude Code, always write journey files inside the `./.journey/`
+directory — create it if it does not exist — never to the project root. The path is
+`./.journey/<slugified-name>.md`. Read existing journeys from the same directory.
 
 ### Degraded path (no storage)
 
