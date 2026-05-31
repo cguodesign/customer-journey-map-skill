@@ -25,13 +25,14 @@ Accept what the user says and build. Do not challenge, interrogate, or refuse.
 
 1. Start with required fields only: `persona`, `milestone`, `description`.
 2. Suggest optional fields organically when conversation surfaces them. Example: user mentions frustration → suggest `emotion`. User describes a backend system → suggest `backstage` or `systems`.
-3. Group steps into milestones as natural clusters emerge. Propose milestone boundaries; let user confirm.
-4. Ask about hidden dimensions when appropriate:
+3. **Persist specifics into fields, not just into the reply.** When the user states a concrete fact — a duration, a metric, a pain point, a failure, an emotion — write it onto the relevant step's field immediately. Do this whether it arrives in a big opening description or a later focused turn; a salient fact buried in an opening dump must land in the file just as reliably as one given on its own. Acknowledging it in conversation is not enough.
+4. Group steps into milestones as natural clusters emerge. Propose milestone boundaries; let user confirm.
+5. Ask about hidden dimensions when appropriate:
    - Backstage: "What system or team supports this?"
    - Failure path: "What if this step fails — where does the user go?"
    - Temporal: "How long does this take?"
-5. After 3-5 steps, offer a meta-pause: "I notice we keep capturing [categories]. Want me to focus on those and stop suggesting others?"
-6. Write journey data to canonical file. Refer to `references/journey.format.md` for syntax.
+6. After 3-5 steps, pause and offer to narrow focus. Name the 1-2 categories you keep capturing and ask it as a direct yes/no: "We keep coming back to [emotion] and [failure]. Want me to focus on those and stop surfacing other dimensions?" Don't bury this as a soft aside — make it an explicit offer the user can answer.
+7. Write journey data to canonical file. Refer to `references/journey.format.md` for syntax.
 
 ### What not to do in Plan
 
@@ -39,6 +40,7 @@ Accept what the user says and build. Do not challenge, interrogate, or refuse.
 - Do not present a field selection menu at session start.
 - Do not push categories the user hasn't shown interest in.
 - Do not refuse to write a step because information is incomplete.
+- Do not write `_provenance` markers on ordinary Plan input. Plain description is the default state — no marker. (Markers are exception-only; see the Provenance section.)
 
 ---
 
@@ -139,15 +141,28 @@ Never assume storage adapter presence. Always support paste-back flow.
 
 ---
 
-## Provenance (automatic)
+## Provenance (automatic, exception-only)
 
-Track field-level provenance without user involvement.
+Track field-level provenance without user involvement. Markers are the **exception, not the rule** — in a typical file the large majority of fields carry no marker. A marker is a signal; if everything is marked, the signal is lost.
 
-- Model-generated content → no marker (default).
-- User explicitly changes a field → mark `_provenance: user-modified, [date]`.
-- Model infers from user-provided material → mark `_provenance: source: [ref]`.
+Write a marker in exactly two cases. Everything else gets **no marker** (default — model-authored from the conversation):
 
-Provenance is invisible to user during Plan. Visible in Express outputs and consulted during Modify.
+| Case | Marker | Fires when |
+|------|--------|-----------|
+| Evidence-backed | `_provenance: source: [ref]` | The model fills a field from material the user **explicitly presents as evidence** — research, interviews, analytics, an incident report. Not for claims the user mentions casually while describing the journey ("a lot of people give up here" in conversation is ordinary Plan input, **no marker** — unless they cite it as a finding). |
+| User-locked | `_provenance: user-modified, [date]` | The user **overrides a value that already exists**, or explicitly insists a field's wording is final/locked. This protects it from future model revision. |
+
+### The Plan-vs-edit distinction (this is where it goes wrong)
+
+In Plan mode the user authors almost everything by describing it. Do **not** mark all that as `user-modified` — ordinary Plan input is the default state and carries **no marker**. The `user-modified` marker is reserved for a deliberate *edit/override of a value that already exists*, or an explicit lock.
+
+- User: "verification takes 3 days and feels broken" → write `duration: 3 business days` + a `painPoint`, **no marker** (ordinary Plan input).
+- User: "change that emotion to 'dread'" or "lock the label as exactly 'The Silent Treatment'" → `_provenance: user-modified, [date]` (an explicit edit/lock).
+- Model writes `dropoffRate: 40%` from the user's interview data → `_provenance: source: user interviews` (evidence-backed).
+
+**Apply locks consistently.** If the user says "call it exactly X", "phrased EXACTLY ...", or "my wording is final", that locks the field — mark **every** field they locked that way, persona names included, not just some of them. Treat the same phrasing the same way across the whole file.
+
+**Stay silent about it.** Provenance is invisible to the user during Plan — write the markers, but do not narrate or explain them in your reply ("I marked this user-modified because…"). Markers surface in Express outputs and are consulted during Modify, not announced while building.
 
 ---
 

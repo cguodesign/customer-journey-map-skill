@@ -69,13 +69,19 @@ Selection is automatic based on step count (interaction) and data shape (renderi
 
 ## Usage
 
-Add this skill to a Claude Code project:
+Install as a skill by placing this repo where Claude Code discovers skills —
+either personal (`~/.claude/skills/`) or per-project (`<project>/.claude/skills/`):
 
 ```bash
-claude mcp add-skill customer-journey-map https://github.com/cguodesign/customer-journey-map-skill
+# Personal (available in every project)
+git clone https://github.com/cguodesign/customer-journey-map-skill ~/.claude/skills/journey
+
+# Or per-project
+git clone https://github.com/cguodesign/customer-journey-map-skill .claude/skills/journey
 ```
 
-Then start a conversation:
+The skill's entry point is `SKILL.md`; Claude Code activates it automatically
+when a conversation matches its description. Then start a conversation:
 
 - "Help me map the onboarding journey for new users"
 - "I have new research — let me update the journey"
