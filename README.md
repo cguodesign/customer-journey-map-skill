@@ -1,96 +1,119 @@
 # Customer Journey Map Skill
 
-A Claude Code skill for building, evolving, and expressing customer journey maps as long-term living documents.
+**A living customer journey map that lives in your conversation — not in a Figma file nobody opens again.**
+
+Most journey maps die the week they're made: a beautiful artifact, frozen, stale by
+the next sprint. This skill makes the map a *living document* your AI builds, updates,
+and reshapes with you across the whole life of a project — and that knows how to turn
+itself into whatever the room needs.
+
+You just talk. It does the structure.
+
+---
 
 ## What it does
 
-This skill gives Claude the ability to work with customer journey maps across three modes:
+Four things, detected from how you talk to it — no commands to memorize:
 
-- **Plan** — Build a new journey from conversation. Starts with just persona, milestone, and description. Optional fields (emotion, backstage, systems, failure modes, etc.) emerge organically as the conversation surfaces them.
-- **Modify** — Update an existing journey with new research, incidents, or product changes. Diff-based: shows what changed, why, and what downstream steps may be affected.
-- **Express** — Render the journey for a specific audience in one of four formats: Storyline (literary), One-page brief (leadership), Interactive HTML (workshop reference), or Engineering handoff (spec-shaped).
+| | | |
+|---|---|---|
+| 🟢 **Build** | "Map how a first-time buyer sets up online payments." | A structured journey appears, milestone by milestone, from plain conversation. |
+| ✏️ **Update** | "We just launched instant verification — fold it in." | A *diff*, not a redraw: what changed, why, and what it ripples into. |
+| 🎭 **Express** | "Turn this into something for Monday's kickoff." | One map → four audiences (below). |
+| 🔭 **Review** | "What are we missing — and what should we map next?" | Soft-spot review + a shortlist of adjacent journeys worth mapping. |
 
-## Key design decisions
+### One map, four audiences
 
-- **Schema-rich, user-light.** ~100 pre-defined optional fields from CJM/service design theory, but users never see a field selection menu. Fields appear when conversation naturally surfaces them.
-- **Provenance is automatic.** Model-generated content carries no marker. User modifications and source-backed claims are tracked at the field level without user involvement.
-- **Step is the atomic unit.** Not "moment", not "touchpoint". Steps group into lightweight Milestones (id + title + description).
-- **Format-first, storage-pluggable.** Journey data lives in a canonical markdown format. Storage adapters (local file, Notion MCP, Drive MCP, or paste-back) are detected at runtime.
+The same journey, rendered for whoever's in the room:
 
-## File structure
+- **Storyline** — a character-driven narrative that makes a team *feel* the experience. For kickoffs and empathy.
+- **One-page brief** — problem → fix → ask → cost of inaction. For a VP with 90 seconds and a decision to make.
+- **Engineering handoff** — spec-shaped, acceptance criteria as checkboxes, edge cases, systems. For the team that has to build it.
+- **Interactive HTML** — a self-contained, explorable map (swimlane, timeline, or emotion curve; themeable; dark mode). For workshops and reference.
 
-```
-SKILL.md                          # Behavior contract (entry point)
-references/
-  journey.schema.md               # Field vocabulary: 13 categories, ~100 fields
-  journey.format.md               # Canonical markdown format specification
-  html-rendering-guide.md         # Interactive HTML: color strategy, data mapping
-assets/templates/
-  rendering/                      # 4 rendering mode references (HTML + CSS, no JS)
-    card-grid.html
-    timeline.html
-    swimlane.html
-    emotion-curve.html
-  interaction/                    # 4 interaction mode references (JS behavior patterns)
-    scroll-driven.html
-    focus-context.html
-    zoom-pan.html
-    multi-view.html
-  wireframes/                     # 11 wireframes (one per valid M x N combination)
-    card-scroll.html
-    card-focus-context.html
-    card-multiview.html
-    timeline-scroll.html
-    timeline-focus-context.html
-    timeline-zoom-pan.html
-    swimlane-scroll.html
-    swimlane-focus-context.html
-    swimlane-zoom-pan.html
-    emotion-scroll.html
-    emotion-multiview.html
-examples/
-  plan-express/                   # Full Plan -> Express golden example
-  modify/                         # Modify mode example
-  schema-evolution/               # Field emergence and composite/atomic conflict
-```
+See them all, built from one journey, in [`demos/gallery/`](demos/gallery/).
 
-## Interactive HTML
+---
 
-The Express mode supports Interactive HTML output via an M x N matrix of rendering modes and interaction modes:
+## Why it feels different
 
-|                  | Scroll | Focus+Context | Zoom-pan | Multi-view |
-|------------------|:---:|:---:|:---:|:---:|
-| **Card grid**    | + | + | - | + |
-| **Timeline**     | + | + | + | - |
-| **Swimlane**     | + | + | + | - |
-| **Emotion curve**| + | - | - | + |
+**You never fill out a form.** Underneath sits a ~100-field vocabulary drawn from
+decades of service-design practice (NN/g, Forrester, Shostack's service blueprints,
+Jobs-to-be-Done). But you never pick from a menu — fields *emerge* when the
+conversation surfaces them. Mention a frustrating wait and `duration` + `painPoint`
+appear; describe a backend bot and the backstage layer shows up. Schema-rich
+underneath, one-conversation-wide on top.
 
-Selection is automatic based on step count (interaction) and data shape (rendering), with user override always available.
+**It knows what it knows.** Every field carries automatic, invisible provenance: it
+quietly tracks what *you* asserted, what's backed by *evidence* you cited, and what
+it *inferred itself*. So when it builds you a storyline, it won't dress up a guess as a
+statistic — it'll flag the hypothesis and tell you to go measure it.
 
-## Usage
+**It remembers.** The map is a real file that persists across sessions. Come back in
+three weeks and it's still your expert collaborator who's been on the project the
+whole time.
 
-Install as a skill by placing this repo where Claude Code discovers skills —
-either personal (`~/.claude/skills/`) or per-project (`<project>/.claude/skills/`):
+---
+
+## Quickstart
+
+Install so Claude Code discovers the skill:
 
 ```bash
 # Personal (available in every project)
 git clone https://github.com/cguodesign/customer-journey-map-skill ~/.claude/skills/journey
 
-# Or per-project
+# …or per-project
 git clone https://github.com/cguodesign/customer-journey-map-skill .claude/skills/journey
 ```
 
-The skill's entry point is `SKILL.md`; Claude Code activates it automatically
-when a conversation matches its description. Then start a conversation:
+Then just start talking:
 
-- "Help me map the onboarding journey for new users"
-- "I have new research — let me update the journey"
-- "Turn this into a storyline for Monday's kickoff"
-- "Create an interactive HTML for the design team"
+> "Help me map the journey of a small business owner setting up online payments for the first time."
 
-## Theoretical foundations
+It activates automatically. The map is written to `./.journey/`. From there:
 
-Field vocabulary draws from: NN/g Journey Mapping, Forrester CX Index, Shostack Service Blueprinting, Jobs-to-be-Done (Christensen), Adaptive Path Experience Maps, and the Double Diamond design process.
+> "Turn this into a storyline for our kickoff."
+> "We added instant verification — update it."
+> "Review the whole thing and tell me what else we should map."
+
+**New here?** Run the 10-minute guided tour in [`demos/walkthrough.md`](demos/walkthrough.md),
+or grab a copy-paste demo from [`demos/scripts/`](demos/scripts/).
+
+---
+
+## How it fits a project's life
+
+The skill leans into a different gear at each phase — see [`docs/usage-model.md`](../docs/usage-model.md)
+for the full model:
+
+- **Discovery** → fast scaffolding from discussion.
+- **Evaluation** → render it (often interactive HTML) and iterate.
+- **Development** → surgical updates with a tracked diff.
+- **Stable** → review the map for gaps and discover adjacent journeys.
+
+> Team collaboration (one shared, synthesized map across many contributors) is on the
+> roadmap (P1). Today the skill is tuned for an individual building deep, durable
+> customer understanding.
+
+---
+
+## Under the hood
+
+```
+SKILL.md                          # Behavior contract (the entry point)
+references/
+  journey.schema.md               # 13 categories, ~100 fields, provenance + composite rules
+  journey.format.md               # Canonical markdown format
+  html-rendering-guide.md         # Interactive HTML: rendering matrix, color, data mapping
+assets/templates/                 # Rendering, interaction, and wireframe templates
+examples/                         # Golden examples (Plan → Express, Modify, schema evolution)
+demos/                            # Gallery, runnable scripts, guided walkthrough
+```
+
+**Foundations:** NN/g Journey Mapping, Forrester CX Index, Shostack Service
+Blueprinting, Jobs-to-be-Done (Christensen), Adaptive Path Experience Maps, the Double
+Diamond.
 
 ## License
 

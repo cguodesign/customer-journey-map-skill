@@ -1,6 +1,6 @@
 ---
 name: journey
-description: This skill should be used when the user wants to "create a customer journey", "map a journey", "build a CJM", "update my journey", "modify the journey map", "express the journey for stakeholders", "create a service blueprint", or needs help structuring, evolving, or presenting customer journey understanding.
+description: This skill should be used when the user wants to "create a customer journey", "map a journey", "build a CJM", "update my journey", "modify the journey map", "express the journey for stakeholders" (as a storyline, one-page brief, engineering handoff, or interactive HTML map), "review a journey for gaps", "find other journeys worth mapping", "create a service blueprint", or needs help structuring, evolving, presenting, or reviewing customer journey understanding.
 ---
 
 # Journey Skill
@@ -14,6 +14,11 @@ Detect which mode the user needs from conversation context:
 - **Plan** — User wants to build a new journey or add to one in progress.
 - **Modify** — User returns with new information to update an existing journey.
 - **Express** — User wants to render the journey for a specific audience.
+- **Review** — User wants to step back: assess a whole journey's health, or discover other journeys worth mapping across their portfolio.
+
+Mode tracks where the project is in its lifecycle — early discussion leans Plan;
+sharing/evaluating leans Express; active building leans Modify; a mature, stable map
+leans Review. Infer the phase and bias accordingly (see "Lifecycle & surfacing").
 
 ---
 
@@ -124,6 +129,69 @@ Transform journey understanding into audience-appropriate output.
 - **Acceptance criteria as checkboxes**: Write each criterion as a `- [ ]` Markdown checkbox — specific, testable, one assertion per box.
 - **Edge cases, systems, dependencies**: List them explicitly; note build order.
 - **Source references inline**: Cite the journey fields each requirement derives from.
+
+---
+
+## Review mode
+
+The user has a mature map and wants to step back — assess it, or find what to map
+next. Two jobs:
+
+### 1. Journey health review
+
+Load the full journey and report its soft spots — don't just summarize it back:
+
+- **Thin coverage** — milestones/steps with only the required fields, where richer
+  detail would help.
+- **Missing failure paths** — steps with no `failureMode`/`recoveryPath` where things
+  realistically break.
+- **Evidence gaps** — high-stakes claims (drop-off, moments of truth) that carry no
+  `_provenance: source:` marker. These are model-authored guesses worth validating
+  with real research. Name them.
+- **Moments of truth** — surface the make-or-break steps so the user can prioritize.
+- **Category lopsidedness** — e.g. rich on emotion, silent on systems/accessibility —
+  offered as "want to go deeper on X?", never as a demand.
+
+### 2. Adjacent-journey discovery (portfolio)
+
+From the current journey — and any others in storage — propose **other user journeys
+worth mapping**. Good candidates:
+
+- A failure path significant enough to deserve its own journey (e.g. the
+  dispute/chargeback journey behind a payments map).
+- Other personas implied but not mapped (the admin, the support agent, the returning user).
+- Upstream/downstream journeys (what happened before step 1; what happens after the exit).
+- High-frequency edge cases the main happy path glosses over.
+
+Scan `./.journey/` for existing journeys; present a short **portfolio index** and spot
+gaps or overlaps. Propose adjacencies as a ranked shortlist with one line of rationale
+each — do **not** auto-create them. When the user picks one, switch to Plan for it.
+
+---
+
+## Lifecycle & surfacing capabilities
+
+The vocabulary is deep (≈100 fields) but must stay invisible until relevant. Surface
+capability by naming concrete next actions at transition points — never by listing
+fields or dumping a menu. Bias what you surface to the project phase:
+
+- **Early / sparse map (discovery)** — offer to scaffold fast: "want me to draft the
+  whole arc, then we refine?" Keep friction low; don't interrogate.
+- **Map exists, user wants to share (evaluation)** — name the Express formats: "I can
+  express this — storyline (to feel it), brief (to decide), engineering handoff (to
+  build), or an interactive map (to explore)."
+- **Building Interactive HTML** — after stating your rendering/interaction pick, name
+  the options the user can't see: "I can also theme it to your brand, add a dark
+  version, or switch the view — swimlane (backstage), timeline (the wait), emotion
+  curve (the arc)."
+- **Actively changing (development)** — invite updates plainly ("tell me what
+  changed"), stay quiet otherwise, lean on the diff.
+- **Mature / stable map** — proactively offer Review: "want me to check the whole map
+  for soft spots and point out adjacent journeys worth mapping?"
+
+Rules: surface **affordances** (modes → Express formats → HTML options), layered by
+depth, never the field/category list. If the user asks what you can do, give a
+one-paragraph tour (build, update, express, review), not a catalog.
 
 ---
 
