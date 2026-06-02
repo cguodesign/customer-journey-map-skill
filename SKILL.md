@@ -22,6 +22,27 @@ leans Review. Infer the phase and bias accordingly (see "Lifecycle & surfacing")
 
 ---
 
+## Routing
+
+One hop from intent to the right place. Detect the signal, enter the mode, load only
+what that mode needs, surface the affordances for the user's phase.
+
+| When the user… | Mode | Load | Then |
+|----------------|------|------|------|
+| starts fresh, or the map is sparse | Plan | `references/journey.format.md`; `references/journey.schema.md` (to suggest fields) | scaffold; offer a full draft |
+| returns with new information | Modify | the journey file; `journey.format.md`; the Provenance rules below; `journey.schema.md` if new fields appear | show a diff before writing |
+| wants to share or present | Express | the journey file; for HTML also `references/html-rendering-guide.md` + `assets/templates/*` | ask audience + goal; name the four formats |
+| has a mature map, or asks "what's missing / what next" | Review | every file in `./.journey/`; `journey.schema.md` (category coverage); `html-rendering-guide.md` if visualizing | health review + adjacent journeys |
+| introduces a novel concept needing a field | (current mode) | `journey.schema.md` → "Custom field conventions" | propose a namespace, register it in the preamble |
+| pre-sets which dimensions to track | Plan | `journey.schema.md` → "Category activation" | honor `active-categories`; suggest within them |
+| has more than one journey in `./.journey/` | (any) | list them; ask which if intent is ambiguous | disambiguate before loading |
+| has no storage available | Express / Modify | — | paste-back flow (see Storage) |
+
+Load on demand — never read every reference up front. Pull a reference only when the
+row calls for it.
+
+---
+
 ## Plan mode
 
 Accept what the user says and build. Do not challenge, interrogate, or refuse.
@@ -122,6 +143,13 @@ Transform journey understanding into audience-appropriate output.
 - **Analogy**: When the journey resembles a familiar non-product experience, use it.
 - **Voice**: Third-person, present-action verbs.
 
+### One-page brief mechanics
+
+- **Decision-first**: Lead with the ask; restate it as a single decision line at the end.
+- **Structure**: Problem (with the data that exists) → proposed fix → the ask → cost of inaction.
+- **One page**: Ruthless. It must survive a 90-second skim.
+- **Inline attribution**: Cite sources inline. Never invent a metric the journey doesn't carry — if a claim is un-sourced, frame it as a hypothesis and recommend instrumenting it.
+
 ### Engineering handoff mechanics
 
 - **Spec-shaped**: Sections per addressable fix, each mapped to its journey step.
@@ -209,6 +237,10 @@ Detect user environment and select storage adapter:
 When running in Claude Code, always write journey files inside the `./.journey/`
 directory — create it if it does not exist — never to the project root. The path is
 `./.journey/<slugified-name>.md`. Read existing journeys from the same directory.
+
+When `./.journey/` holds more than one journey, do not assume the most recent. If the
+user's request names or clearly implies one, load that file. Otherwise list the
+journeys and ask which one before reading or writing.
 
 ### Degraded path (no storage)
 
