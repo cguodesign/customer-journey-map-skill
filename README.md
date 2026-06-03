@@ -7,6 +7,8 @@ the next sprint. This skill makes the map a *living document* your AI builds, up
 and reshapes with you across the whole life of a project — then renders it for whoever's
 in the room. You just talk; it does the structure.
 
+**▶ [Explore the live showcase →](https://cguodesign.github.io/customer-journey-map-skill/)**
+
 ---
 
 ## What it does — by where you are in the work
@@ -84,10 +86,10 @@ the room needs; you just ask:
 
 | Effect | What you say |
 |---|---|
-| ![Multi-view — emotion curve / timeline / cards](demos/gallery/img/hero-multiview.png) | *"Make an interactive map our team can pull up in the review."* |
-| ![Brand-themed swimlane service blueprint](demos/gallery/img/swimlane-themed.png) | *"Render it as a swimlane, themed to our brand colors."* |
-| ![Dark-mode timeline](demos/gallery/img/timeline-dark.png) | *"Give me a dark timeline where the weeks-long wait dwarfs every step."* |
-| ![Film storyboard](demos/gallery/img/storyboard.png) | *"Turn it into a storyboard — frame by frame, like a film."* |
+| ![Multi-view — emotion curve / timeline / cards](https://raw.githubusercontent.com/cguodesign/customer-journey-map-skill/gh-pages/img/hero-multiview.png) | *"Make an interactive map our team can pull up in the review."* |
+| ![Brand-themed swimlane service blueprint](https://raw.githubusercontent.com/cguodesign/customer-journey-map-skill/gh-pages/img/swimlane-themed.png) | *"Render it as a swimlane, themed to our brand colors."* |
+| ![Dark-mode timeline](https://raw.githubusercontent.com/cguodesign/customer-journey-map-skill/gh-pages/img/timeline-dark.png) | *"Give me a dark timeline where the weeks-long wait dwarfs every step."* |
+| ![Film storyboard](https://raw.githubusercontent.com/cguodesign/customer-journey-map-skill/gh-pages/img/storyboard.png) | *"Turn it into a storyboard — frame by frame, like a film."* |
 
 > Across all of them: nobody quotes a hard drop-off percentage. The map carries no cited
 > evidence, so the skill frames the abandonment as a *hypothesis* — it won't invent a
@@ -122,9 +124,9 @@ Install so Claude Code discovers the skill:
 
 ```bash
 # Personal (every project)
-git clone https://github.com/cguodesign/customer-journey-map-skill ~/.claude/skills/journey
+git clone --depth 1 https://github.com/cguodesign/customer-journey-map-skill ~/.claude/skills/journey
 # …or per-project
-git clone https://github.com/cguodesign/customer-journey-map-skill .claude/skills/journey
+git clone --depth 1 https://github.com/cguodesign/customer-journey-map-skill .claude/skills/journey
 ```
 
 Then just start talking:

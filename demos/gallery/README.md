@@ -11,21 +11,24 @@ you can see the range of what a single map turns into.
 | `payments-handoff.md` | Express → **Engineering handoff** | *(regenerate via `scripts/02`)* spec with `- [ ]` acceptance criteria. |
 | `payments-journey.html` | Express → **Interactive HTML** | *(regenerate via `scripts/02`)* self-contained explorable map. |
 
-## Rendering showcase — `renderings/`
+## Rendering showcase — explore live
 
-The same skill, the same kind of map, rendered as interactive HTML across the modes.
-Open any file in a browser. The first three are **one journey** (`job-application-portal.md`)
-shown three ways — proof that rendering is a choice, not a fixed output.
+The same skill, the same kind of map, rendered as interactive HTML across the modes —
+**[explore them live →](https://cguodesign.github.io/customer-journey-map-skill/#demos)**.
+The interactive HTML files live on the showcase site (kept out of the installed skill so
+clones stay lean); the source journeys stay here. The first three are **one journey**
+shown three ways — rendering is a choice, not a fixed output.
 
-| File | Journey | Rendering × interaction | Shows |
-|------|---------|-------------------------|-------|
-| `job-application--multiview.html` | Job application | Multi-view (emotion / timeline / cards), scroll | Mixed-stakeholder view with a "sit in the silence" counter |
-| `job-application--timeline-dark.html` | Job application | Timeline, scroll, **dark mode** | The weeks-long wait dwarfing the minute-long steps |
-| `job-application--swimlane-zoompan.html` | Job application | Swimlane × **zoom-pan** | Pannable wall-display service blueprint |
-| `food-delivery--swimlane-themed.html` | Food delivery | Swimlane, scroll, **brand-themed** (`#6C2BD9`) | Customer lane vs. hidden backstage machinery |
-| `job-application--storyboard.html` | Job application | **Storyboard**, scroll | Film-frame "cuts" (Cut / Frame / Action / Dialogue / Time) — the visual cousin of the Storyline |
+| Rendering × interaction | Journey | Live |
+|---|---|---|
+| Multi-view (emotion / timeline / cards), scroll | Job application | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--multiview.html) |
+| Timeline, scroll, **dark mode** | Job application | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--timeline-dark.html) |
+| Swimlane × **zoom-pan** | Job application | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--swimlane-zoompan.html) |
+| Swimlane, scroll, **brand-themed** | Food delivery | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/food-delivery--swimlane-themed.html) |
+| **Storyboard**, scroll | Job application | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--storyboard.html) |
 
-Source journeys for these live alongside: `job-application-portal.md`, `food-delivery-order.md`.
+Source journeys: `job-application-portal.md`, `food-delivery-order.md`. Regenerate any
+rendering with `../scripts/02-express-four-ways.md`.
 
 ## How these were made / how to refresh them
 
