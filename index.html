@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Journey — a living customer journey map, in conversation</title>
+<title>Customer Journey Map Skill — a living map, in conversation</title>
 <meta name="description" content="A Claude Code skill that builds, updates, and expresses customer journey maps in plain conversation — a living document that grows with your project.">
 <style>
 :root{
@@ -31,10 +31,10 @@ a{color:inherit}
 /* nav */
 nav{position:sticky;top:0;z-index:20;background:rgba(244,239,231,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
-.brand{font-family:var(--serif);font-size:19px}
+.brand{font-family:var(--serif);font-size:16px}
 nav .links{display:flex;gap:26px;align-items:center}
-nav .links a{font-size:13px;color:var(--muted);text-decoration:none}
-nav .links a:hover{color:var(--ink)}
+nav .links a:not(.btn){font-size:13px;color:var(--muted);text-decoration:none}
+nav .links a:not(.btn):hover{color:var(--ink)}
 @media(max-width:640px){nav .links a:not(.btn){display:none}}
 
 /* hero */
@@ -141,7 +141,7 @@ footer a:hover{color:var(--ink)}
 <body>
 
 <nav><div class="wrap">
-  <div class="brand">Journey</div>
+  <div class="brand">Customer Journey Map Skill</div>
   <div class="links">
     <a href="#stages">How it works</a>
     <a href="#schema">Schema</a>
@@ -239,7 +239,7 @@ footer a:hover{color:var(--ink)}
 </div></section>
 
 <footer><div class="wrap">
-  <div><span class="brand">Journey</span> &nbsp;·&nbsp; a living customer journey map, in conversation</div>
+  <div><span class="brand">Customer Journey Map Skill</span> &nbsp;·&nbsp; a living map, in conversation</div>
   <div>
     <a href="https://github.com/cguodesign/customer-journey-map-skill">GitHub</a>
     <a href="#schema">Schema</a>
