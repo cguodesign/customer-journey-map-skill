@@ -150,10 +150,14 @@ references/
   journey.schema.md               # 13 categories, ~100 fields, provenance + composite rules
   journey.format.md               # Canonical markdown format
   html-rendering-guide.md         # Interactive HTML: rendering matrix, color, data mapping
-assets/templates/                 # Rendering, interaction, and wireframe templates
+assets/templates/                 # 5 rendering modes (card, timeline, swimlane, emotion, storyboard) + interaction + wireframe templates
 examples/                         # Golden examples
-demos/                            # Gallery (with screenshots), runnable scripts, guided walkthrough
+demos/                            # Journey sources + expression examples (markdown), runnable scripts, guided walkthrough
 ```
+
+The interactive HTML renderings and screenshots live on the
+[showcase site](https://cguodesign.github.io/customer-journey-map-skill/) (the `gh-pages`
+branch), **not** in the installed skill — so a `--depth 1` clone stays lean.
 
 **Foundations:** NN/g Journey Mapping, Forrester CX Index, Shostack Service
 Blueprinting, Jobs-to-be-Done (Christensen), Adaptive Path Experience Maps, the Double
