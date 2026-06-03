@@ -4,29 +4,63 @@
 
 Most journey maps die the week they're made: a beautiful artifact, frozen, stale by
 the next sprint. This skill makes the map a *living document* your AI builds, updates,
-and reshapes with you across the whole life of a project — and that knows how to turn
-itself into whatever the room needs. You just talk; it does the structure. You never
-fill out a form — a ~100-field service-design vocabulary sits underneath, but fields
-appear only when the conversation surfaces them.
+and reshapes with you across the whole life of a project — then renders it for whoever's
+in the room. You just talk; it does the structure.
 
 ---
 
-## What it does
+## What it does — by where you are in the work
 
-Four things, detected from how you talk to it — no commands to memorize:
+You don't invoke modes or learn commands. You describe your situation, and the skill
+meets you where you are:
 
-| | | |
+| Where you are | What you say | What the skill does |
 |---|---|---|
-| **Build** | "Map how a first-time buyer sets up online payments." | A structured journey appears, milestone by milestone, from plain conversation. |
-| **Update** | "We just launched instant verification — fold it in." | A *diff*, not a redraw: what changed, why, and what it ripples into. |
-| **Express** | "Turn this into something for Monday's kickoff." | One map → four audiences (below). |
-| **Review** | "What are we missing — and what should we map next?" | Soft-spot review + a shortlist of adjacent journeys worth mapping. |
+| **Kicking off** — a fuzzy idea of a user flow | *"Map how a first-time buyer sets up online payments."* | Builds a structured journey from the conversation — milestone by milestone, no form to fill. |
+| **Something changed** — new research, a shipped feature | *"We just launched instant verification — fold it in."* | Updates with a **diff**: what changed, why, and the downstream steps it touches — never a silent redraw. |
+| **Bringing others along** — a kickoff, a VP, the dev team | *"Turn this into something for Monday's kickoff."* | Renders the same map for that audience — a story, a one-pager, a spec, or an interactive map. |
+| **The map has matured** — what now? | *"Where's it weak, and what should we map next?"* | Reviews it for soft spots and proposes the adjacent journeys worth mapping. |
 
 ---
 
-## One map, four audiences
+## What you're actually working with
 
-The same journey, rendered for whoever's in the room. (Full versions in [`demos/gallery/`](demos/gallery/).)
+**A real, structured map — written from a conversation.** You describe the flow in plain
+words; the skill maintains a canonical journey file: milestones, steps, and the fields
+that actually matter on each one. No diagramming, no template.
+
+```markdown
+### Step: wait-for-bank-verification
+- persona: [Maya]
+- emotion: Anxiety → suspicion → abandonment
+- duration: 3 business days
+- painPoint: "No feedback during the wait — most people think it's broken"
+- failureMode: Assumes verification failed and abandons setup entirely
+- momentOfTruth: The single biggest drop-off point in the journey
+```
+
+**A ~100-field vocabulary you never have to learn.** Underneath sits the language of
+service design — emotion, channels, backstage systems, failure modes, metrics,
+accessibility, and more (NN/g, Forrester, Shostack's service blueprints, Jobs-to-be-Done).
+But you never pick from a menu: mention a frustrating wait and `duration` + `painPoint`
+appear; describe a backend bot and the backstage layer shows up. The depth is there when
+the conversation calls for it, invisible when it doesn't.
+
+**A living document.** The map is a file that persists across sessions and grows by diff.
+Come back in three weeks and it's still your expert collaborator who's been on the project
+the whole time — not a blank slate.
+
+**Provenance, automatically.** Every field quietly tracks what *you* asserted, what's
+backed by *evidence you cited*, and what the model *inferred itself*. So when it builds you
+a brief, it won't dress a guess up as a statistic — it flags the hypothesis and tells you
+to go measure it.
+
+---
+
+## Express it for any audience
+
+Once the map exists, the same understanding renders for whoever needs it. (Full versions
+in [`demos/gallery/`](demos/gallery/).)
 
 **Storyline** — makes a team *feel* the experience. For kickoffs, empathy-building.
 > *Maya runs a small online store. She is not a developer… A customer fills a cart, gets
@@ -39,29 +73,26 @@ The same journey, rendered for whoever's in the room. (Full versions in [`demos/
 > **Ask:** Approve 2 sprints to add status feedback to bank verification.
 > **The problem in one line:** New merchants finish signup, hit a 3-business-day wait with
 > *zero feedback*, conclude the product is broken, and quit — one step before going live.
-> **Cost of inaction:** the highest-impact drop-off in the funnel, at peak intent.
 
 **Engineering handoff** — spec-shaped, for the team that has to build it.
 > **Acceptance criteria**
 > - [ ] After KYC submission, the owner sees a status page with current state + estimated completion date.
 > - [ ] Status reflects **real** backend state, not a fake progress bar.
-> - [ ] On `verification.completed`, send email/SMS with a deep link to take the first payment.
 
-**Interactive HTML** — a self-contained, explorable map for workshops and reference.
+**Interactive HTML** — a self-contained, explorable map. The same journey renders however
+the room needs; you just ask:
 
-![Interactive journey map — emotion curve view](demos/gallery/img/hero-multiview.png)
-
-…and the same data renders however the room needs — a brand-themed service blueprint, or
-a dark timeline where a weeks-long wait dwarfs every other step:
-
-| Swimlane (themed) | Timeline (dark) |
+| Effect | What you say |
 |---|---|
-| ![Swimlane service blueprint](demos/gallery/img/swimlane-themed.png) | ![Dark-mode timeline](demos/gallery/img/timeline-dark.png) |
+| ![Multi-view — emotion curve / timeline / cards](demos/gallery/img/hero-multiview.png) | *"Make an interactive map our team can pull up in the review."* |
+| ![Brand-themed swimlane service blueprint](demos/gallery/img/swimlane-themed.png) | *"Render it as a swimlane, themed to our brand colors."* |
+| ![Dark-mode timeline](demos/gallery/img/timeline-dark.png) | *"Give me a dark timeline where the weeks-long wait dwarfs every step."* |
+| ![Film storyboard](demos/gallery/img/storyboard.png) | *"Turn it into a storyboard — frame by frame, like a film."* |
 
-> Notice across all four: nobody quotes a hard drop-off percentage. The map carries no
-> cited evidence, so the skill frames the abandonment as a *hypothesis* — it won't invent
-> a statistic to make a slide look better. Give it real analytics and the number lands
-> with its source attached. Provenance is automatic and invisible until it matters.
+> Across all of them: nobody quotes a hard drop-off percentage. The map carries no cited
+> evidence, so the skill frames the abandonment as a *hypothesis* — it won't invent a
+> statistic to make a slide look better. Give it real analytics and the number lands with
+> its source attached.
 
 [^1]: Every beat traces back to a step in the journey file via footnotes — readable with or without them.
 
@@ -69,8 +100,7 @@ a dark timeline where a weeks-long wait dwarfs every other step:
 
 ## See it across a project
 
-The map isn't a one-shot artifact — it changes gear with your project, and **persists
-between sessions** so it's still your expert collaborator three weeks later. One journey,
+The map changes gear with your project and **persists between sessions**. One journey,
 four phases ([`demos/scripts/00-hero-lifecycle.md`](demos/scripts/00-hero-lifecycle.md)
 runs this end to end):
 
@@ -82,7 +112,7 @@ runs this end to end):
    still hit the black hole."* → a diff that folds in the fork and keeps the rest intact.
 4. **Stable — review.** *"Step back — where's it weak, and what else should we map?"* → soft
    spots named (it once caught an orphaned branch in a map it had built itself) and a ranked
-   list of adjacent journeys: the interview flow, the recruiter's side, the wrong-rejection appeal.
+   list of adjacent journeys to map next.
 
 ---
 
