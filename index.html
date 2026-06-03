@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Journey — a living customer journey map, in conversation</title>
+<meta name="description" content="A Claude Code skill that builds, updates, and expresses customer journey maps in plain conversation — a living document that grows with your project.">
+<style>
+:root{
+  --paper:#f4efe7;--panel:#faf6ef;--ink:#1f1c1a;--muted:#7c7468;--line:#e4ddcf;
+  --accent:#d9683f;--accent-2:#e2a04a;--tag:#efe7d8;--dark:#211d1a;
+  --serif:Georgia,"Times New Roman",serif;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:0 22px}
+.narrow{max-width:760px;margin:0 auto;padding:0 22px}
+h1,h2,h3{font-family:var(--serif);font-weight:400;letter-spacing:-.01em}
+em{font-style:italic;color:var(--accent)}
+a{color:inherit}
+.kicker{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+.btn{display:inline-block;font-size:14px;padding:11px 22px;border-radius:999px;text-decoration:none;border:1px solid transparent;transition:.15s}
+.btn.dark{background:var(--dark);color:var(--paper)}
+.btn.dark:hover{background:#000}
+.btn.ghost{border-color:var(--line);background:#fff;color:var(--ink)}
+.btn.ghost:hover{border-color:var(--muted)}
+
+/* nav */
+nav{position:sticky;top:0;z-index:20;background:rgba(244,239,231,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+.brand{font-family:var(--serif);font-size:19px}
+nav .links{display:flex;gap:26px;align-items:center}
+nav .links a{font-size:13px;color:var(--muted);text-decoration:none}
+nav .links a:hover{color:var(--ink)}
+@media(max-width:640px){nav .links a:not(.btn){display:none}}
+
+/* hero */
+.hero{text-align:center;padding:72px 0 30px}
+.hero h1{font-size:clamp(34px,6vw,58px);line-height:1.08;margin:14px auto 18px;max-width:13ch}
+.hero p.sub{color:var(--muted);font-size:17px;max-width:540px;margin:0 auto 26px}
+.hero .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.heroart{height:300px;margin:46px 0 0;border-radius:18px;position:relative;overflow:hidden;
+  background:
+   radial-gradient(120% 130% at 28% 25%,#f6c9a6 0%,rgba(246,201,166,0) 45%),
+   radial-gradient(90% 120% at 72% 38%,#e98a5e 0%,rgba(233,138,94,0) 50%),
+   radial-gradient(120% 140% at 60% 95%,#a9b6d6 0%,rgba(169,182,214,0) 55%),
+   linear-gradient(120deg,#eadfce,#dfe3ec)}
+.heroart svg{position:absolute;inset:0;width:100%;height:100%}
+
+/* sections */
+section{padding:64px 0}
+.sec-head{text-align:center;margin-bottom:34px}
+.sec-head h2{font-size:clamp(26px,4vw,38px);margin:.25em 0 .15em}
+.sec-head p{color:var(--muted);max-width:560px;margin:0 auto}
+
+/* foundations strip */
+.foundations{padding:26px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);text-align:center}
+.foundations .names{display:flex;gap:30px;justify-content:center;flex-wrap:wrap;margin-top:12px;color:var(--muted);font-size:13px;letter-spacing:.02em}
+
+/* stage list */
+.stages{display:flex;flex-direction:column;gap:2px}
+.stage{display:grid;grid-template-columns:200px 1fr;gap:28px;padding:24px 4px;border-top:1px solid var(--line);align-items:start}
+.stage:last-child{border-bottom:1px solid var(--line)}
+.stage .where{font-family:var(--serif);font-size:21px}
+.stage .where .tag{display:block;font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-top:6px}
+.stage .say{font-style:italic;color:var(--ink);margin:0 0 8px;font-size:15px}
+.stage .does{color:var(--muted);font-size:15px;margin:0}
+@media(max-width:640px){.stage{grid-template-columns:1fr;gap:8px}}
+
+/* capability */
+.caps{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.cap h3{font-size:20px;margin:0 0 6px}
+.cap p{color:var(--muted);margin:0;font-size:15px}
+@media(max-width:640px){.caps{grid-template-columns:1fr}}
+.snippet{background:var(--dark);color:#e8e2d6;border-radius:14px;padding:20px 22px;margin:30px 0 0;
+  font-family:var(--mono);font-size:12.5px;line-height:1.7;overflow:auto}
+.snippet .k{color:#e2a04a}.snippet .c{color:#8b8378}
+
+/* schema (injected render target) */
+#schema .tools{display:flex;justify-content:center;gap:14px;align-items:center;margin:0 0 30px;flex-wrap:wrap}
+#schema input{font-size:14px;padding:10px 16px;border:1px solid var(--line);border-radius:999px;background:#fff;width:300px;max-width:80vw;color:var(--ink)}
+#schema .count{font-size:12px;color:var(--muted)}
+.cat{border-top:1px solid var(--line);padding:22px 0 4px}
+.cat h3{display:flex;align-items:baseline;gap:12px;font-size:20px;margin:0}
+.badge{font-family:var(--sans);font-size:11px;font-weight:600;background:var(--ink);color:var(--paper);width:23px;height:23px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+.cat .n{margin-left:auto;font-size:12px;color:var(--muted)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 28px;margin-top:12px}
+@media(max-width:680px){.fgrid{grid-template-columns:1fr}}
+.f{display:grid;grid-template-columns:150px 1fr;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.f .nm{font-family:var(--mono);font-size:12.5px}
+.f .tp{font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:var(--tag);padding:1px 6px;border-radius:4px;margin-left:6px}
+.f .de{font-size:12.5px;color:var(--muted)}
+
+/* renderings gallery */
+.gallery{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:740px){.gallery{grid-template-columns:1fr}}
+.shot{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.shot img{width:100%;display:block;border-bottom:1px solid var(--line)}
+.shot .body{padding:16px 18px}
+.shot .say{font-style:italic;font-size:14px;margin:0 0 10px}
+.shot a.view{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);text-decoration:none}
+.shot a.view:hover{text-decoration:underline}
+
+/* comparison */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:640px){.vs{grid-template-columns:1fr}}
+.card{border-radius:18px;padding:30px 28px;min-height:200px}
+.card.old{background:#2a2622;color:#cfc8bd}
+.card.new{background:linear-gradient(150deg,#e98a5e,#d9683f);color:#fff}
+.card h3{color:inherit;font-size:22px;margin:0 0 12px}
+.card ul{margin:0;padding-left:18px;font-size:14px;line-height:1.9}
+.card.old li{color:#a59c8f}
+
+/* faq */
+.faq details{border-top:1px solid var(--line);padding:18px 2px}
+.faq details:last-child{border-bottom:1px solid var(--line)}
+.faq summary{cursor:pointer;font-family:var(--serif);font-size:18px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--accent);font-size:22px}
+.faq details[open] summary::after{content:"–"}
+.faq p{color:var(--muted);margin:12px 0 2px;font-size:15px}
+.faq code{font-family:var(--mono);font-size:12.5px;background:var(--tag);padding:1px 6px;border-radius:4px}
+
+/* cta */
+.cta-final{text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:50px 24px;margin:20px 0}
+.cta-final h2{font-size:clamp(26px,4vw,36px);margin:0 0 18px}
+.install{display:inline-block;background:var(--dark);color:#e8e2d6;font-family:var(--mono);font-size:13px;padding:12px 18px;border-radius:10px;margin:0 0 20px;text-align:left}
+.install .c{color:#8b8378}
+
+footer{border-top:1px solid var(--line);padding:40px 0;color:var(--muted);font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px}
+footer a{color:var(--muted);text-decoration:none;margin-right:18px}
+footer a:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <div class="brand">Journey</div>
+  <div class="links">
+    <a href="#stages">How it works</a>
+    <a href="#schema">Schema</a>
+    <a href="#demos">Demos</a>
+    <a class="btn dark" href="#install">Install</a>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="narrow">
+  <div class="kicker">A Claude Code skill · open source</div>
+  <h1>From scattered notes to a <em>living</em> map.</h1>
+  <p class="sub">Build, update, and express customer journey maps in plain conversation — a living document that grows with your project, then renders for whoever's in the room.</p>
+  <div class="cta">
+    <a class="btn dark" href="#install">Install</a>
+    <a class="btn ghost" href="#demos">See it work</a>
+  </div>
+  <div class="heroart">
+    <svg viewBox="0 0 1000 300" preserveAspectRatio="none"><path d="M0 210 C 140 120, 210 90, 320 150 S 520 250, 640 120 S 850 40, 1000 110" fill="none" stroke="rgba(33,29,26,.5)" stroke-width="2.5"/><circle cx="640" cy="120" r="7" fill="#d9683f"/></svg>
+  </div>
+</div></header>
+
+<div class="foundations"><div class="wrap">
+  <span class="kicker">Built on decades of service-design practice</span>
+  <div class="names"><span>NN/g Journey Mapping</span><span>Forrester CX</span><span>Shostack Service Blueprints</span><span>Jobs-to-be-Done</span><span>Double Diamond</span></div>
+</div></div>
+
+<section id="stages"><div class="narrow">
+  <div class="sec-head"><div class="kicker">What it does</div><h2>It meets you <em>where you are</em>.</h2>
+    <p>You don't invoke modes or learn commands. You describe your situation; the skill does the structure.</p></div>
+  <div class="stages">
+    <div class="stage"><div class="where">Kicking off<span class="tag">Build</span></div><div><p class="say">"Map how a first-time buyer sets up online payments."</p><p class="does">Builds a structured journey from the conversation — milestone by milestone, no form to fill.</p></div></div>
+    <div class="stage"><div class="where">Something changed<span class="tag">Update</span></div><div><p class="say">"We just launched instant verification — fold it in."</p><p class="does">Updates with a diff: what changed, why, and the downstream steps it touches — never a silent redraw.</p></div></div>
+    <div class="stage"><div class="where">Bringing others along<span class="tag">Express</span></div><div><p class="say">"Turn this into something for Monday's kickoff."</p><p class="does">Renders the same map for that audience — a story, a one-pager, a spec, or an interactive map.</p></div></div>
+    <div class="stage"><div class="where">The map matured<span class="tag">Review</span></div><div><p class="say">"Where's it weak, and what should we map next?"</p><p class="does">Reviews it for soft spots and proposes the adjacent journeys worth mapping.</p></div></div>
+  </div>
+</div></section>
+
+<section style="background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="narrow">
+  <div class="sec-head"><div class="kicker">Under your words</div><h2>What you're actually <em>working with</em>.</h2></div>
+  <div class="caps">
+    <div class="cap"><h3>A real, structured map</h3><p>Describe the flow in plain words; the skill keeps a canonical journey file — milestones, steps, and the fields that matter on each.</p></div>
+    <div class="cap"><h3>A vocabulary you never learn</h3><p>~100 service-design fields sit underneath. You never pick from a menu — they surface only when the conversation calls for them.</p></div>
+    <div class="cap"><h3>A living document</h3><p>It's a file that persists across sessions and grows by diff. Come back in three weeks and it's still your collaborator, not a blank slate.</p></div>
+    <div class="cap"><h3>Provenance, automatically</h3><p>Every field tracks what you asserted, what's evidence-backed, and what the model guessed — so it won't dress a guess up as a statistic.</p></div>
+  </div>
+  <div class="snippet"><span class="c">### Step: wait-for-bank-verification</span><br>- persona: [Maya]<br>- <span class="k">emotion</span>: Anxiety → suspicion → abandonment<br>- <span class="k">duration</span>: 3 business days<br>- <span class="k">painPoint</span>: "No feedback during the wait — most people think it's broken"<br>- <span class="k">failureMode</span>: Assumes verification failed and abandons setup<br>- <span class="k">momentOfTruth</span>: The single biggest drop-off point in the journey</div>
+</div></section>
+
+<section id="schema"><div class="wrap">
+  <div class="sec-head"><div class="kicker">The schema</div><h2>~100 fields. You <em>never</em> pick from a menu.</h2>
+    <p>The depth underneath every map — 13 categories from service-design practice.</p></div>
+  <div class="tools"><input id="q" placeholder="Search fields…" autocomplete="off"><span class="count" id="c"></span></div>
+  <div id="schemaRoot"></div>
+</div></section>
+
+<section id="demos" style="background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap">
+  <div class="sec-head"><div class="kicker">Express</div><h2>One map, rendered for <em>the room</em>.</h2>
+    <p>The same journey renders however the audience needs — just ask. Click any to explore it live.</p></div>
+  <div class="gallery">
+    <div class="shot"><img src="img/hero-multiview.png" alt="Multi-view interactive map"><div class="body"><p class="say">"Make an interactive map our team can pull up in the review."</p><a class="view" href="renderings/job-application--multiview.html">Explore live →</a></div></div>
+    <div class="shot"><img src="img/swimlane-themed.png" alt="Brand-themed swimlane"><div class="body"><p class="say">"Render it as a swimlane, themed to our brand colors."</p><a class="view" href="renderings/food-delivery--swimlane-themed.html">Explore live →</a></div></div>
+    <div class="shot"><img src="img/timeline-dark.png" alt="Dark-mode timeline"><div class="body"><p class="say">"Give me a dark timeline where the weeks-long wait dwarfs every step."</p><a class="view" href="renderings/job-application--timeline-dark.html">Explore live →</a></div></div>
+    <div class="shot"><img src="img/storyboard.png" alt="Film storyboard"><div class="body"><p class="say">"Turn it into a storyboard — frame by frame, like a film."</p><a class="view" href="renderings/job-application--storyboard.html">Explore live →</a></div></div>
+  </div>
+</div></section>
+
+<section><div class="narrow">
+  <div class="sec-head"><div class="kicker">Why it's different</div><h2>A Figma file vs. a <em>living</em> map.</h2></div>
+  <div class="vs">
+    <div class="card old"><h3>A static map</h3><ul><li>Beautiful the week it's made</li><li>Stale by the next sprint</li><li>Re-drawn from scratch when things change</li><li>One format, one audience</li><li>Lives in a file nobody reopens</li></ul></div>
+    <div class="card new"><h3>Journey</h3><ul><li>Built from a conversation</li><li>Updated by diff as you learn</li><li>Persists and grows across sessions</li><li>Renders for any audience on demand</li><li>Knows evidence from guesswork</li></ul></div>
+  </div>
+</div></section>
+
+<section id="faq" style="background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="narrow">
+  <div class="sec-head"><div class="kicker">FAQ</div><h2>Your questions, <em>answered</em>.</h2></div>
+  <div class="faq">
+    <details><summary>Do I need to be technical to use it?</summary><p>No. You talk; it writes the structure. You never touch the schema, a form, or a diagram tool.</p></details>
+    <details><summary>Does it need npm or a build step?</summary><p>No. It's a Claude Code skill — pure markdown and static templates, zero runtime dependencies. You install it by cloning into your skills folder.</p></details>
+    <details><summary>Where do my maps get saved?</summary><p>To <code>./.journey/&lt;name&gt;.md</code> in your project — a plain markdown file you own. No storage? It works entirely in the conversation and hands the map back to you to save.</p></details>
+    <details><summary>Can my team share one map?</summary><p>Today it's tuned for an individual building deep, durable understanding. Shared, multi-contributor maps (Notion/Drive) are on the roadmap.</p></details>
+    <details><summary>What does it cost?</summary><p>It's open source under MIT. You bring Claude Code.</p></details>
+  </div>
+</div></section>
+
+<section id="install"><div class="narrow">
+  <div class="cta-final">
+    <div class="kicker">Get started</div>
+    <h2>Start mapping <em>today</em>.</h2>
+    <div class="install">git clone --depth 1 https://github.com/cguodesign/customer-journey-map-skill ~/.claude/skills/journey</div>
+    <div style="margin-top:6px"><span style="color:var(--muted);font-size:14px">then just say <em>"help me map the onboarding journey for new users."</em></span></div>
+    <div style="margin-top:24px"><a class="btn dark" href="https://github.com/cguodesign/customer-journey-map-skill">View on GitHub</a></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div><span class="brand">Journey</span> &nbsp;·&nbsp; a living customer journey map, in conversation</div>
+  <div>
+    <a href="https://github.com/cguodesign/customer-journey-map-skill">GitHub</a>
+    <a href="#schema">Schema</a>
+    <a href="#demos">Demos</a>
+    <span>MIT · cguodesign</span>
+  </div>
+</div></footer>
+
+<script>
+const CATS = [{"letter": "A", "name": "Emotional / Cognitive", "fields": [{"field": "emotion", "type": "string", "description": "Named emotion (frustrated, delighted, anxious...)", "when": "User mentions feeling/reaction"}, {"field": "emotionValence", "type": "number", "description": "Rating scale -2 (very negative) to +2 (very positive)", "when": "Quantifying emotional journey"}, {"field": "emotionIntensity", "type": "enum", "description": "low / medium / high", "when": "Distinguishing mild from strong reactions"}, {"field": "thinking", "type": "string", "description": "Internal monologue, self-talk, mental model", "when": "User describes what someone is \"wondering\""}, {"field": "cognitiveLoad", "type": "enum", "description": "low / medium / high", "when": "Step involves complexity or many options"}, {"field": "motivation", "type": "string", "description": "What drives the person forward", "when": "User mentions goals or urgency"}, {"field": "anxiety", "type": "string", "description": "Specific fears or doubts", "when": "User mentions worry or hesitation"}, {"field": "expectation", "type": "string", "description": "What person expects will happen", "when": "Gap between expected and actual matters"}, {"field": "trust", "type": "string", "description": "Level of trust in the provider", "when": "Trust dynamics are relevant"}, {"field": "effort", "type": "string", "description": "Perceived effort required", "when": "Friction is a key theme"}, {"field": "confidence", "type": "string", "description": "Self-assessed confidence", "when": "User mentions uncertainty about doing it right"}, {"field": "informationNeed", "type": "string", "description": "What information needed to proceed", "when": "Knowledge gaps block progress"}]}, {"letter": "B", "name": "Physical / Spatial / Channel", "fields": [{"field": "channel", "type": "string", "description": "Interaction channel (web, mobile, phone, in-store, email...)", "when": "User mentions where something happens"}, {"field": "touchpoint", "type": "string", "description": "Specific branded interaction point within a channel", "when": "Distinguishing specific UI/artifact"}, {"field": "device", "type": "string", "description": "Physical device used (phone, laptop, kiosk...)", "when": "Device context matters"}, {"field": "place", "type": "string", "description": "Physical location (home, office, store, transit...)", "when": "Physical context affects behavior"}, {"field": "environment", "type": "string", "description": "Environmental context (noisy, private, public, on-the-go...)", "when": "Context shapes experience"}, {"field": "physicalEvidence", "type": "string", "description": "Tangible artifacts encountered (receipt, signage, packaging...)", "when": "Service blueprint depth needed"}, {"field": "channelTransition", "type": "string", "description": "Cross-channel handoff description", "when": "Multi-channel journey"}]}, {"letter": "C", "name": "Temporal", "fields": [{"field": "duration", "type": "string", "description": "How long this step takes", "when": "Time is a factor in experience"}, {"field": "waitTime", "type": "string", "description": "Idle/waiting time (not value-adding)", "when": "Waiting is a pain point"}, {"field": "frequency", "type": "string", "description": "How often this occurs (once, daily, per-transaction)", "when": "Repeated vs one-time matters"}, {"field": "trigger", "type": "string", "description": "What initiates this step", "when": "Causation between steps is non-obvious"}, {"field": "deadline", "type": "string", "description": "Time pressure or urgency", "when": "Deadline shapes behavior"}, {"field": "pacing", "type": "enum", "description": "rushed / normal / leisurely / stalled", "when": "Pace affects emotional state"}]}, {"letter": "D", "name": "People / Actors", "fields": [{"field": "coActors", "type": "array", "description": "Other people present or involved", "when": "Multiple people in the scene"}, {"field": "frontlineStaff", "type": "string", "description": "Customer-facing employee(s) involved", "when": "Human service delivery"}, {"field": "backstageStaff", "type": "string", "description": "Non-visible staff supporting this step", "when": "Backstage is relevant"}, {"field": "responsibleTeam", "type": "string", "description": "Internal team/department owning this step", "when": "Ownership/accountability matters"}, {"field": "thirdParty", "type": "string", "description": "External partners or vendors involved", "when": "External dependencies"}, {"field": "handoff", "type": "string", "description": "Person-to-person or team-to-team transfer", "when": "Handoff is a failure risk"}]}, {"letter": "E", "name": "Actions / Behaviors", "fields": [{"field": "doing", "type": "string", "description": "What person is physically doing (verb-based)", "when": "Describing specific actions"}, {"field": "frontstageAction", "type": "string", "description": "Visible employee action", "when": "Service blueprint detail"}, {"field": "backstageAction", "type": "string", "description": "Invisible employee action", "when": "Hidden work needs visibility"}, {"field": "supportProcess", "type": "string", "description": "Internal process supporting this step", "when": "Process mapping depth"}, {"field": "inputRequired", "type": "string", "description": "Information/material person must provide", "when": "User must give something"}, {"field": "outputProduced", "type": "string", "description": "What is produced or delivered at this step", "when": "Step has tangible output"}, {"field": "workaround", "type": "string", "description": "Unofficial user-invented alternative path", "when": "Users not using designed path"}, {"field": "decision", "type": "string", "description": "Choice the person must make", "when": "Decision point in the flow"}]}, {"letter": "F", "name": "Systems / Technology", "fields": [{"field": "systems", "type": "array", "description": "Backend systems involved (CRM, database...)", "when": "Technical context matters"}, {"field": "tools", "type": "string", "description": "Tools used by staff or customer", "when": "Tooling is part of the experience"}, {"field": "technology", "type": "string", "description": "Specific technology enabling this step", "when": "Tech stack is relevant"}, {"field": "dataFlow", "type": "string", "description": "What data moves where", "when": "Data handling matters"}, {"field": "automation", "type": "string", "description": "What is automated vs manual", "when": "Automation boundary is interesting"}, {"field": "dependencies", "type": "array", "description": "Technical dependencies that must be met", "when": "Dependencies create fragility"}, {"field": "notification", "type": "string", "description": "System notifications triggered (email, SMS, push)", "when": "Notification is part of flow"}, {"field": "policy", "type": "string", "description": "Business rules governing this step", "when": "Rules constrain behavior"}]}, {"letter": "G", "name": "Service Design Layers", "fields": [{"field": "frontstage", "type": "string", "description": "Everything visible to customer (composite summary)", "when": "High-level blueprint view"}, {"field": "backstage", "type": "string", "description": "Everything invisible but directly supporting (composite)", "when": "High-level blueprint view"}, {"field": "supportProcesses", "type": "string", "description": "Organizational processes enabling backstage", "when": "Deep blueprint view"}, {"field": "lineOfVisibility", "type": "string", "description": "What is/isn't visible to customer at this step", "when": "Visibility boundary matters"}, {"field": "valueExchange", "type": "string", "description": "What value is exchanged (money, data, time, attention)", "when": "Value dynamics are relevant"}, {"field": "serviceRecovery", "type": "string", "description": "Designed recovery action if failure occurs", "when": "Recovery is planned"}, {"field": "orchestration", "type": "string", "description": "How multiple channels/actors are coordinated", "when": "Multi-channel complexity"}]}, {"letter": "H", "name": "Business / Metrics", "fields": [{"field": "kpi", "type": "string", "description": "Key performance indicator measured here", "when": "Measuring this step"}, {"field": "metric", "type": "string", "description": "Specific quantitative measurement", "when": "Data exists for this step"}, {"field": "conversionRate", "type": "string", "description": "Conversion or progression rate", "when": "Funnel analysis"}, {"field": "cost", "type": "string", "description": "Cost to serve at this step", "when": "Cost optimization"}, {"field": "revenueImpact", "type": "string", "description": "Revenue generated or at risk", "when": "Revenue attribution"}, {"field": "dropoffRate", "type": "string", "description": "Percentage who abandon at this step", "when": "Retention/churn analysis"}, {"field": "volumePerPeriod", "type": "string", "description": "Transaction volume", "when": "Scale context"}, {"field": "owner", "type": "string", "description": "Business owner of this step", "when": "Accountability mapping"}]}, {"letter": "I", "name": "Design / Opportunities", "fields": [{"field": "painPoint", "type": "string", "description": "Specific friction or problem", "when": "User mentions frustration or blockers"}, {"field": "opportunity", "type": "string", "description": "Design or business improvement opportunity", "when": "Improvement ideas surface"}, {"field": "momentOfTruth", "type": "string", "description": "Critical make-or-break moment", "when": "Step has outsized impact"}, {"field": "insight", "type": "string", "description": "Research insight relevant here", "when": "Research connects to this step"}, {"field": "desiredOutcome", "type": "string", "description": "What ideal success looks like (JTBD-style)", "when": "Defining \"done well\""}, {"field": "recommendation", "type": "string", "description": "Specific recommended action", "when": "Actionable suggestion exists"}, {"field": "priority", "type": "enum", "description": "must-fix / should-fix / nice-to-have", "when": "Prioritization needed"}]}, {"letter": "J", "name": "Failure / Risk", "fields": [{"field": "failureMode", "type": "string", "description": "What can go wrong at this step", "when": "Fragility is worth capturing"}, {"field": "failureProbability", "type": "enum", "description": "low / medium / high", "when": "Quantifying risk"}, {"field": "failureImpact", "type": "enum", "description": "low / medium / high", "when": "Severity assessment"}, {"field": "recoveryPath", "type": "string", "description": "What happens after failure (cross-ref to step)", "when": "Recovery flow exists"}, {"field": "escalation", "type": "string", "description": "Escalation path when things go wrong", "when": "Escalation procedures matter"}, {"field": "fallback", "type": "string", "description": "System fallback if primary path fails", "when": "Redundancy exists"}, {"field": "bottleneck", "type": "string", "description": "Capacity constraint at this step", "when": "Capacity is a known issue"}, {"field": "risk", "type": "string", "description": "Named risk", "when": "Risk register integration"}]}, {"letter": "K", "name": "Path / Flow", "fields": [{"field": "next", "type": "string", "description": "What follows (cross-ref: `→ step-id`)", "when": "Default next step"}, {"field": "previous", "type": "string", "description": "What preceded (cross-ref: `→ step-id`)", "when": "Backtracking matters"}, {"field": "branchCondition", "type": "string", "description": "What determines which path is taken", "when": "Branching logic"}, {"field": "parallelPath", "type": "string", "description": "Steps happening simultaneously", "when": "Concurrent activities"}, {"field": "entryPoint", "type": "boolean", "description": "Can users enter the journey here", "when": "Multiple entry points"}, {"field": "exitPoint", "type": "boolean", "description": "Can users leave the journey here", "when": "Multiple exit points"}, {"field": "optionality", "type": "enum", "description": "required / optional / conditional", "when": "Step isn't always taken"}]}, {"letter": "L", "name": "Communication / Content", "fields": [{"field": "message", "type": "string", "description": "What is communicated to customer", "when": "Communication design"}, {"field": "tone", "type": "string", "description": "Tone of communication (formal, friendly, urgent)", "when": "Tone matters"}, {"field": "contentType", "type": "string", "description": "Type of content (help article, video, tooltip, email)", "when": "Content strategy"}, {"field": "cta", "type": "string", "description": "Call-to-action presented", "when": "Conversion context"}]}, {"letter": "M", "name": "Accessibility / Inclusion", "fields": [{"field": "accessibilityBarrier", "type": "string", "description": "Barriers for people with disabilities", "when": "Accessibility review"}, {"field": "inclusionConsideration", "type": "string", "description": "Who might be excluded at this step", "when": "Inclusion audit"}, {"field": "literacyRequirement", "type": "string", "description": "Reading/digital literacy needed", "when": "Literacy varies across users"}, {"field": "economicBarrier", "type": "string", "description": "Cost or resource barriers", "when": "Economic access varies"}, {"field": "culturalConsideration", "type": "string", "description": "Cultural norms affecting this step", "when": "Cross-cultural deployment"}]}];
+const root=document.getElementById('schemaRoot'),q=document.getElementById('q'),c=document.getElementById('c');
+const total=CATS.reduce((a,x)=>a+x.fields.length,0);
+function render(term){term=(term||'').toLowerCase();let shown=0;root.innerHTML='';
+ CATS.forEach(cat=>{const fs=cat.fields.filter(f=>!term||(f.field+f.description+f.when).toLowerCase().includes(term));
+  if(!fs.length)return;shown+=fs.length;
+  const sec=document.createElement('section');sec.className='cat';sec.style.padding='22px 0 4px';
+  sec.innerHTML=`<h3><span class="badge">${cat.letter}</span>${cat.name}<span class="n">${fs.length} field${fs.length>1?'s':''}</span></h3>`;
+  const g=document.createElement('div');g.className='fgrid';
+  fs.forEach(f=>{const d=document.createElement('div');d.className='f';
+   d.innerHTML=`<div><span class="nm">${f.field}</span><span class="tp">${f.type}</span></div><div class="de">${f.description}</div>`;g.appendChild(d);});
+  sec.appendChild(g);root.appendChild(sec);});
+ c.textContent=term?`${shown} / ${total}`:`${total} fields · 13 categories`;}
+q.addEventListener('input',e=>render(e.target.value));render('');
+</script>
+</body>
+</html>

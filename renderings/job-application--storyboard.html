@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Storyboard — Applying for a Job</title>
+<style>
+  :root{
+    --paper:#f7f5ef; --ink:#1b1b1a; --rule:#cfc9bd; --muted:#6b6459;
+    --v-2:#f3b0b0; --v-1:#f5cda0; --v0:#dcd8cf; --vp1:#a9e3bd; --vp2:#7bd99a;
+    --frame-bg:#ece8df; --accent:#1b1b1a;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:#e6e2d8;color:var(--ink);
+    font-family:"Courier New",ui-monospace,monospace;line-height:1.4;padding:28px 16px}
+  .sheet{max-width:1040px;margin:0 auto;background:var(--paper);
+    border:1.5px solid var(--ink);box-shadow:0 10px 40px rgba(0,0,0,.18)}
+  header.top{display:flex;justify-content:space-between;align-items:baseline;
+    padding:18px 22px 12px;border-bottom:1.5px solid var(--ink);gap:16px;flex-wrap:wrap}
+  header.top .ttl{font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:15px}
+  header.top .meta{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .colhead{display:grid;grid-template-columns:46px 280px 1fr 1fr 64px;
+    font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    border-bottom:1.5px solid var(--ink)}
+  .colhead>div{padding:8px 12px;border-right:1px dotted var(--rule);text-align:center}
+  .colhead>div:last-child{border-right:0}
+  .row{display:grid;grid-template-columns:46px 280px 1fr 1fr 64px;
+    border-bottom:1.5px solid var(--ink);min-height:150px}
+  .row>div{border-right:1px dotted var(--rule);padding:12px}
+  .row>div:last-child{border-right:0}
+  .cut{font-weight:700;font-size:15px;text-align:center}
+  .cut small{display:block;font-size:8.5px;letter-spacing:.1em;color:var(--muted);
+    text-transform:uppercase;margin-top:6px;font-weight:400}
+  /* film frame */
+  .frame{position:relative;aspect-ratio:16/9;border:1px solid var(--ink);
+    background:var(--frame-bg);overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .frame .scope{position:absolute;left:6px;top:5px;font-size:8px;letter-spacing:.1em;
+    color:var(--muted);text-transform:uppercase}
+  .frame .wash{position:absolute;inset:0;opacity:.5}
+  .frame svg{position:relative;width:46%;height:46%;stroke:#2a2a28;stroke-width:5;
+    fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+  .frame .cap{position:absolute;left:0;right:0;bottom:0;background:rgba(20,20,18,.78);
+    color:#f3efe6;font-size:9px;letter-spacing:.04em;padding:4px 7px;line-height:1.3}
+  .frame .pers{position:absolute;right:6px;top:5px;display:flex;gap:3px}
+  .pers .chip{width:15px;height:15px;border-radius:50%;background:#2a2a28;color:#f3efe6;
+    font-size:8px;display:flex;align-items:center;justify-content:center;border:1px solid #f3efe6}
+  .marks{position:absolute;left:6px;bottom:24px;display:flex;gap:4px}
+  .mk{font-size:8px;letter-spacing:.08em;text-transform:uppercase;padding:1px 5px;border:1px solid;border-radius:2px;background:rgba(247,245,239,.9)}
+  .mk.mot{color:#b42318;border-color:#b42318}
+  .mk.fail{color:#8b6914;border-color:#8b6914}
+  .action{font-size:12px}
+  .action .ph{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 5px}
+  .dlg{font-size:12px}
+  .dlg .q{font-style:italic;color:#2a2a28;margin:0 0 8px;
+    border-left:2px solid var(--ink);padding-left:8px}
+  .dlg .note{font-size:11px;color:var(--muted);margin:0 0 6px}
+  .dlg .emo{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .time{font-weight:700;font-size:12px;text-align:center}
+  .time small{display:block;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:4px;font-weight:400}
+  .mstone{background:var(--ink);color:var(--paper);font-size:10px;letter-spacing:.22em;
+    text-transform:uppercase;padding:6px 14px}
+  footer.foot{padding:12px 22px;font-size:10px;color:var(--muted);letter-spacing:.04em;
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  @media (max-width:720px){
+    .colhead{display:none}
+    .row{grid-template-columns:1fr;min-height:0}
+    .row>div{border-right:0;border-bottom:1px dotted var(--rule)}
+    .frame{max-width:320px}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <header class="top">
+    <div class="ttl">Applying for a Job — The Black Hole</div>
+    <div class="meta">Persona: Maya &nbsp;·&nbsp; Storyboard &nbsp;·&nbsp; Page 1</div>
+  </header>
+  <div class="colhead">
+    <div>Cut</div><div>Frame</div><div>Action</div><div>Dialogue / Notes</div><div>Time</div>
+  </div>
+  <div id="board"></div>
+  <footer class="foot">
+    <span>Generated from <code>journey.md</code> — one frame per step. Provenance: model-authored draft; figures are hypotheses, not measured.</span>
+    <span>2.39:1 — SCOPE</span>
+  </footer>
+</div>
+
+<script>
+const G = {
+  screen:'<svg viewBox="0 0 100 100"><rect x="18" y="22" width="64" height="44" rx="3"/><line x1="40" y1="78" x2="60" y2="78"/><line x1="50" y1="66" x2="50" y2="78"/></svg>',
+  doc:'<svg viewBox="0 0 100 100"><path d="M30 16h28l14 14v54H30z"/><path d="M58 16v14h14"/><line x1="38" y1="44" x2="64" y2="44"/><line x1="38" y1="54" x2="64" y2="54"/><line x1="38" y1="64" x2="56" y2="64"/></svg>',
+  lock:'<svg viewBox="0 0 100 100"><rect x="30" y="46" width="40" height="34" rx="4"/><path d="M38 46v-8a12 12 0 0 1 24 0v8"/><circle cx="50" cy="62" r="4"/></svg>',
+  form:'<svg viewBox="0 0 100 100"><rect x="26" y="18" width="48" height="64" rx="3"/><line x1="34" y1="32" x2="66" y2="32"/><line x1="34" y1="44" x2="66" y2="44"/><line x1="34" y1="56" x2="66" y2="56"/><line x1="34" y1="68" x2="52" y2="68"/></svg>',
+  send:'<svg viewBox="0 0 100 100"><path d="M22 50 78 26 62 78 48 58z"/><line x1="48" y1="58" x2="78" y2="26"/></svg>',
+  mail:'<svg viewBox="0 0 100 100"><rect x="22" y="30" width="56" height="40" rx="3"/><path d="M22 34l28 22 28-22"/></svg>',
+  ai:'<svg viewBox="0 0 100 100"><rect x="34" y="30" width="32" height="32" rx="5"/><line x1="50" y1="20" x2="50" y2="30"/><line x1="40" y1="62" x2="34" y2="78"/><line x1="60" y1="62" x2="66" y2="78"/><circle cx="44" cy="44" r="2.5" fill="#2a2a28"/><circle cx="56" cy="44" r="2.5" fill="#2a2a28"/></svg>',
+  clock:'<svg viewBox="0 0 100 100"><circle cx="50" cy="52" r="28"/><line x1="50" y1="52" x2="50" y2="34"/><line x1="50" y1="52" x2="64" y2="58"/></svg>',
+  refresh:'<svg viewBox="0 0 100 100"><path d="M70 40a24 24 0 1 0 4 18"/><path d="M70 26v16H54"/></svg>',
+  fork:'<svg viewBox="0 0 100 100"><path d="M50 22v22"/><path d="M50 44 32 70"/><path d="M50 44 68 70"/><circle cx="50" cy="20" r="4"/><circle cx="30" cy="74" r="4"/><circle cx="70" cy="74" r="4"/></svg>',
+  star:'<svg viewBox="0 0 100 100"><path d="M50 22l9 19 21 3-15 15 4 21-19-10-19 10 4-21-15-15 21-3z"/></svg>',
+  void:'<svg viewBox="0 0 100 100"><circle cx="50" cy="52" r="26" stroke-dasharray="4 7"/><line x1="40" y1="52" x2="60" y2="52"/></svg>',
+};
+const VAL = {'-2':'var(--v-2)','-1':'var(--v-1)','0':'var(--v0)','1':'var(--vp1)','2':'var(--vp2)'};
+const initials = n => n.split(/[\s-]/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+
+const board = [
+ {m:'Discovery'},
+ {cut:'1.1',g:'screen',v:1,pers:['Maya'],scene:'Maya spots the posting on LinkedIn',
+   action:'Comes across the role on a job board, LinkedIn, or careers page.',
+   q:'This could actually be a good fit — let me see what they want.',emo:'Spark of interest',time:'—'},
+ {cut:'1.2',g:'doc',v:0,pers:['Maya'],scene:'Reading the description, weighing herself',fail:1,
+   action:'Reads the JD and self-assesses whether to apply.',
+   q:'I hit most of these, but not all — is it worth my time?',
+   note:'Pain: vague / inflated requirements. Risk: talks herself out of it.',emo:'Excitement + self-doubt',time:'—'},
+ {m:'Application'},
+ {cut:'2.1',g:'screen',v:1,pers:['Maya','ATS'],scene:'"Apply" → a clunky third-party portal',
+   action:'Clicks Apply, routed into the company application portal.',
+   note:'Pain: redirect to a clunky portal breaks the flow.',emo:'Readiness, slight bracing',time:'—'},
+ {cut:'2.2',g:'lock',v:-1,pers:['Maya','ATS'],scene:'An account gate before the form',fail:1,
+   action:'Forced to create an account before she can apply.',
+   q:'Another login and password? Before I’ve even seen the form?',
+   note:'Risk: abandons here rather than make an account.',emo:'Mild irritation',time:'—'},
+ {cut:'2.3',g:'form',v:-1,pers:['Maya','ATS'],scene:'Re-typing the resume she just uploaded',mot:1,
+   action:'Fills the form, re-entering work history field by field.',
+   q:'I just uploaded my resume — why am I typing it all again?',
+   note:'High cognitive load. Risk: timeout wipes entries → start over.',emo:'Tedium → frustration',time:'20–40m'},
+ {cut:'2.4',g:'send',v:1,pers:['Maya','ATS'],scene:'The instant after Submit',mot:1,
+   action:'Reviews and submits. ATS records it, fires a confirmation.',
+   q:'Okay… it went through. Now what?',emo:'Relief, hope',time:'—'},
+ {m:'The Wait'},
+ {cut:'3.1',g:'mail',v:0,pers:['Maya','ATS'],scene:'A generic auto-reply lands (or doesn’t)',
+   action:'Gets an automated "we received your application" email.',
+   note:'Pain: generic auto-reply, no timeline, no next steps.',emo:'Reassured / uneasy',time:'—'},
+ {cut:'3.2',g:'ai',v:0,pers:['ATS','AI Screener'],scene:'An algorithm decides, invisibly',mot:1,fail:1,
+   action:'AI screen scores the resume against criteria. Non-matches auto-rejected; matches pass to the queue.',
+   note:'Fork: match vs. no match. High-impact failure — a qualified applicant killed by a parsing miss.',emo:'—',time:'<24h'},
+ {cut:'3.3a',g:'mail',v:-1,pers:['Maya','AI Screener'],scene:'A fast "no" by email',
+   action:'Auto-rejected within ~24h because the AI flagged a non-match.',
+   q:'At least I know now — but did a person ever actually look at this?',
+   note:'No reason given; no disclosure an AI decided. Opportunity: honest fast rejection preserves goodwill.',emo:'Sting, but real closure',time:'<24h'},
+ {cut:'3.3b',g:'clock',v:-2,pers:['Maya','Recruiter'],scene:'Submit → silence. Days. Then weeks.',mot:1,fail:1,
+   action:'Passed the AI screen, lands in the recruiter queue — and nothing comes back. The black hole.',
+   q:'Did anyone even look at it? Did I do something wrong? Should I follow up, or will that annoy them?',
+   note:'No status, no timeline, no closure. Make-or-break of the whole experience.',emo:'Hope → anxiety → resignation',time:'Weeks+'},
+ {cut:'3.4',g:'refresh',v:-1,pers:['Maya'],scene:'Refreshing a status that never changes',
+   action:'Logs back in or musters the nerve to follow up; portal reads "Under review" indefinitely.',
+   note:'Workaround: DMs an employee for a signal. Follow-ups go unanswered too.',emo:'Powerlessness',time:'—'},
+ {m:'Resolution'},
+ {cut:'4.0',g:'fork',v:0,pers:['Maya','Recruiter'],scene:'Three ways the story can end',
+   action:'Eventually an outcome arrives — rejection, an interview, or nothing at all.',
+   note:'Branch: rejection · advance · permanent silence.',emo:'Depends entirely on what arrives',time:'—'},
+ {cut:'4.1',g:'mail',v:-1,pers:['Maya','ATS'],scene:'A form-letter rejection',
+   action:'Receives a rejection — best case clear, worst case a cold template.',
+   note:'Pain: no feedback after weeks. Opportunity: a timely, human note preserves goodwill.',emo:'Disappointment, but closure',time:'—'},
+ {cut:'4.2',g:'void',v:-2,pers:['Maya'],scene:'Nothing. Ever. It just dissolves.',mot:1,
+   action:'Never hears anything. Left to assume rejection.',
+   note:'Ghosting — the single most corrosive outcome for employer brand.',emo:'Resentment, lasting brand damage',time:'∞'},
+ {cut:'4.3',g:'star',v:2,pers:['Maya','Recruiter'],scene:'"We’d love to talk." The door opens.',
+   action:'Invited to a screen or interview — the journey continues.',
+   q:'Finally — someone actually saw me.',
+   note:'Continues into the interview journey (separate map).',emo:'Elation, validation',time:'—'},
+];
+
+const el = document.getElementById('board');
+board.forEach(s=>{
+  if(s.m){const d=document.createElement('div');d.className='mstone';d.textContent='Milestone — '+s.m;el.appendChild(d);return;}
+  const row=document.createElement('div');row.className='row';
+  const marks=[s.mot?'<span class="mk mot">★ moment of truth</span>':'',s.fail?'<span class="mk fail">⚠ failure</span>':''].join('');
+  const pers=s.pers.map(p=>`<span class="chip" title="${p}">${initials(p)}</span>`).join('');
+  row.innerHTML=`
+   <div class="cut">${s.cut}</div>
+   <div>
+     <div class="frame">
+       <span class="scope">2.39:1 — SCOPE</span>
+       <span class="wash" style="background:${VAL[String(s.v)]}"></span>
+       <span class="pers">${pers}</span>
+       ${G[s.g]||''}
+       <div class="marks">${marks}</div>
+       <div class="cap">${s.scene}</div>
+     </div>
+   </div>
+   <div class="action"><p class="ph">Action</p>${s.action}</div>
+   <div class="dlg">${s.q?`<p class="q">“${s.q}”</p>`:''}${s.note?`<p class="note">${s.note}</p>`:''}<p class="emo">${s.emo}</p></div>
+   <div class="time">${s.time}<small>time</small></div>`;
+  el.appendChild(row);
+});
+</script>
+</body>
+</html>
