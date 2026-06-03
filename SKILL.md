@@ -128,6 +128,7 @@ Transform journey understanding into audience-appropriate output.
    - Active categories include frontstage/backstage/support → Swimlane
    - Primary dimension is temporal/duration → Timeline
    - Emotional arc is focus → Emotion curve (or as overlay/multi-view tab)
+   - Narrative / empathy, strong arc with per-step scenes → Storyboard (a film-storyboard table; the visual cousin of the Storyline)
 
    **Interaction** (from step count):
    - ≤ 15 steps → Scroll-driven
@@ -220,7 +221,7 @@ fields or dumping a menu. Bias what you surface to the project phase:
 - **Building Interactive HTML** — after stating your rendering/interaction pick, name
   the options the user can't see: "I can also theme it to your brand, add a dark
   version, or switch the view — swimlane (backstage), timeline (the wait), emotion
-  curve (the arc)."
+  curve (the arc), or a storyboard (frame-by-frame, like a film)."
 - **Actively changing (development)** — invite updates plainly ("tell me what
   changed"), stay quiet otherwise, lean on the diff.
 - **Mature / stable map** — proactively offer Review: "want me to check the whole map

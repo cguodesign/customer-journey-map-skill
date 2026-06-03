@@ -16,6 +16,7 @@ The Interactive HTML output combines one **rendering mode** (layout structure) w
 | **Timeline** | Horizontal axis, steps as nodes | Duration/temporal dimension is primary |
 | **Swimlane** | Horizontal lanes per service layer | Active categories include frontstage/backstage/support |
 | **Emotion curve** | Valence line chart over steps | Emotional arc is the focus. Also works as overlay on other modes |
+| **Storyboard** | Film-storyboard table: one frame per step (Cut / Frame / Action / Dialogue / Time) | Narrative journey where the audience should move through it frame by frame — the visual cousin of the Storyline. Kickoffs, empathy, presentations |
 
 ### Interaction Modes
 
@@ -34,6 +35,7 @@ The Interactive HTML output combines one **rendering mode** (layout structure) w
 | **Timeline**     | ✓ | ✓ | ✓ | — |
 | **Swimlane**     | ✓ | ✓ | ✓ | — |
 | **Emotion curve**| ✓ | — | — | ✓ |
+| **Storyboard**   | ✓ | ✓ | — | — |
 
 ### Selection Logic
 
@@ -51,6 +53,10 @@ if active_categories include service-layers (frontstage, backstage, support):
 
 if primary_analysis_dimension == temporal/duration:
     rendering = timeline
+
+if audience should move through the journey frame-by-frame (narrative/empathy,
+   the journey has a strong emotional arc and per-step "scenes"):
+    rendering = storyboard   # the visual cousin of the Storyline express format
 
 # Step 3: Overlays and multi-view
 if active_categories include emotional AND rendering != emotion-curve:
@@ -245,6 +251,28 @@ Divider lines between lanes:
 | `emotionValence` | Y-axis value (-2 to +2) |
 | `emotion` (text) | Tooltip on hover |
 | Milestone boundaries | Vertical divider lines with labels |
+
+### Storyboard Mapping
+
+One row ("cut") per step, in a Cut / Frame / Action / Dialogue / Time table.
+
+| Schema field | Visual |
+|--------------|--------|
+| Step index / `id` | Cut number |
+| `emotionValence` (or inferred from `emotion`) | Frame background wash (diverging valence palette) |
+| `description` / `touchpoint` / setting | Scene caption inside the frame (the "shot") + a stock line-art glyph chosen from `channel`/`doing`/`emotion` |
+| `persona` | Initial chips, top-right of the frame |
+| `momentOfTruth` | ★ marker (red) in the frame |
+| `failureMode` present | ⚠ marker (dark yellow) in the frame |
+| `description` + `doing` | Action column |
+| `thinking` | Dialogue (the character's line) |
+| `painPoint` / `failureMode` / `opportunity` | Notes under the dialogue |
+| `emotion` | Emotion label |
+| `duration` / `waitTime` | Time column |
+| Milestone | Dark band separating cut groups |
+
+The "Frame" is a stylized scene, not a real illustration — emotion wash + glyph +
+caption + persona + markers. Template: `assets/templates/rendering/storyboard.html`.
 
 ---
 

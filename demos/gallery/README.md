@@ -23,6 +23,7 @@ shown three ways — proof that rendering is a choice, not a fixed output.
 | `job-application--timeline-dark.html` | Job application | Timeline, scroll, **dark mode** | The weeks-long wait dwarfing the minute-long steps |
 | `job-application--swimlane-zoompan.html` | Job application | Swimlane × **zoom-pan** | Pannable wall-display service blueprint |
 | `food-delivery--swimlane-themed.html` | Food delivery | Swimlane, scroll, **brand-themed** (`#6C2BD9`) | Customer lane vs. hidden backstage machinery |
+| `job-application--storyboard.html` | Job application | **Storyboard**, scroll | Film-frame "cuts" (Cut / Frame / Action / Dialogue / Time) — the visual cousin of the Storyline |
 
 Source journeys for these live alongside: `job-application-portal.md`, `food-delivery-order.md`.
 

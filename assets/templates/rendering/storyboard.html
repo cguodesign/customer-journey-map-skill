@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Storyboard rendering — reference template</title>
+<!--
+  STORYBOARD rendering (5th rendering mode). A film-storyboard layout: one frame per
+  step, in a CUT / FRAME / ACTION / DIALOGUE / TIME table. Best for narrative journeys
+  where the audience should move through the experience frame by frame (the visual
+  cousin of the Storyline express format). Pairs with Scroll-driven or Focus+Context.
+
+  DATA MAPPING (journey field → storyboard cell):
+    cut      ← step index / id            FRAME wash ← emotionValence (or inferred from `emotion`)
+    scene    ← short paraphrase of `description` / `touchpoint` / setting (the "shot")
+    glyph    ← a stock line-art icon chosen from channel/doing/emotion (screen, mail, lock, clock, fork, void, star…)
+    pers     ← `persona` names → initial chips
+    action   ← `description` + `doing`
+    q        ← `thinking` (rendered as the character's dialogue)
+    note     ← `painPoint` / `failureMode` / `opportunity`
+    emo      ← `emotion` label
+    time     ← `duration` / `waitTime`
+    mot/fail ← `momentOfTruth` → ★ marker · `failureMode` present → ⚠ marker
+  Markers are semantic & fixed (red ★ moment of truth, dark-yellow ⚠ failure), per the color guide.
+  Replace the placeholder `board` array below with the journey's steps. Insert {m:'…'} rows for milestone bands.
+-->
+<style>
+  :root{--paper:#f7f5ef;--ink:#1b1b1a;--rule:#cfc9bd;--muted:#6b6459;
+    --v-2:#f3b0b0;--v-1:#f5cda0;--v0:#dcd8cf;--vp1:#a9e3bd;--vp2:#7bd99a;--frame-bg:#ece8df}
+  *{box-sizing:border-box}
+  body{margin:0;background:#e6e2d8;color:var(--ink);font-family:"Courier New",ui-monospace,monospace;line-height:1.4;padding:28px 16px}
+  .sheet{max-width:1040px;margin:0 auto;background:var(--paper);border:1.5px solid var(--ink);box-shadow:0 10px 40px rgba(0,0,0,.18)}
+  header.top{display:flex;justify-content:space-between;align-items:baseline;padding:18px 22px 12px;border-bottom:1.5px solid var(--ink);gap:16px;flex-wrap:wrap}
+  header.top .ttl{font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:15px}
+  header.top .meta{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .colhead,.row{display:grid;grid-template-columns:46px 280px 1fr 1fr 64px}
+  .colhead{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border-bottom:1.5px solid var(--ink)}
+  .colhead>div{padding:8px 12px;border-right:1px dotted var(--rule);text-align:center}
+  .colhead>div:last-child{border-right:0}
+  .row{border-bottom:1.5px solid var(--ink);min-height:150px}
+  .row>div{border-right:1px dotted var(--rule);padding:12px}
+  .row>div:last-child{border-right:0}
+  .cut{font-weight:700;font-size:15px;text-align:center}
+  .frame{position:relative;aspect-ratio:16/9;border:1px solid var(--ink);background:var(--frame-bg);overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .frame .scope{position:absolute;left:6px;top:5px;font-size:8px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+  .frame .wash{position:absolute;inset:0;opacity:.5}
+  .frame svg{position:relative;width:46%;height:46%;stroke:#2a2a28;stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+  .frame .cap{position:absolute;left:0;right:0;bottom:0;background:rgba(20,20,18,.78);color:#f3efe6;font-size:9px;padding:4px 7px;line-height:1.3}
+  .frame .pers{position:absolute;right:6px;top:5px;display:flex;gap:3px}
+  .pers .chip{width:15px;height:15px;border-radius:50%;background:#2a2a28;color:#f3efe6;font-size:8px;display:flex;align-items:center;justify-content:center;border:1px solid #f3efe6}
+  .marks{position:absolute;left:6px;bottom:24px;display:flex;gap:4px}
+  .mk{font-size:8px;letter-spacing:.08em;text-transform:uppercase;padding:1px 5px;border:1px solid;border-radius:2px;background:rgba(247,245,239,.9)}
+  .mk.mot{color:#b42318;border-color:#b42318}.mk.fail{color:#8b6914;border-color:#8b6914}
+  .action{font-size:12px}.action .ph{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 5px}
+  .dlg{font-size:12px}.dlg .q{font-style:italic;margin:0 0 8px;border-left:2px solid var(--ink);padding-left:8px}
+  .dlg .note{font-size:11px;color:var(--muted);margin:0 0 6px}.dlg .emo{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .time{font-weight:700;font-size:12px;text-align:center}.time small{display:block;font-size:8px;color:var(--muted);text-transform:uppercase;margin-top:4px;font-weight:400}
+  .mstone{background:var(--ink);color:var(--paper);font-size:10px;letter-spacing:.22em;text-transform:uppercase;padding:6px 14px}
+  @media (max-width:720px){.colhead{display:none}.row{grid-template-columns:1fr;min-height:0}.row>div{border-right:0;border-bottom:1px dotted var(--rule)}.frame{max-width:320px}}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <header class="top">
+    <div class="ttl">JOURNEY TITLE — Storyboard</div>
+    <div class="meta">Persona: NAME · Storyboard · Page 1</div>
+  </header>
+  <div class="colhead"><div>Cut</div><div>Frame</div><div>Action</div><div>Dialogue / Notes</div><div>Time</div></div>
+  <div id="board"></div>
+</div>
+<script>
+// Stock line-art glyphs — pick one per step from its channel/doing/emotion.
+const G = {
+  screen:'<svg viewBox="0 0 100 100"><rect x="18" y="22" width="64" height="44" rx="3"/><line x1="40" y1="78" x2="60" y2="78"/><line x1="50" y1="66" x2="50" y2="78"/></svg>',
+  mail:'<svg viewBox="0 0 100 100"><rect x="22" y="30" width="56" height="40" rx="3"/><path d="M22 34l28 22 28-22"/></svg>',
+  lock:'<svg viewBox="0 0 100 100"><rect x="30" y="46" width="40" height="34" rx="4"/><path d="M38 46v-8a12 12 0 0 1 24 0v8"/></svg>',
+  clock:'<svg viewBox="0 0 100 100"><circle cx="50" cy="52" r="28"/><line x1="50" y1="52" x2="50" y2="34"/><line x1="50" y1="52" x2="64" y2="58"/></svg>',
+  fork:'<svg viewBox="0 0 100 100"><path d="M50 22v22"/><path d="M50 44 32 70"/><path d="M50 44 68 70"/></svg>',
+  star:'<svg viewBox="0 0 100 100"><path d="M50 22l9 19 21 3-15 15 4 21-19-10-19 10 4-21-15-15 21-3z"/></svg>',
+  // …add: doc, form, send, refresh, void — see the gallery example for the full set.
+};
+const VAL = {'-2':'var(--v-2)','-1':'var(--v-1)','0':'var(--v0)','1':'var(--vp1)','2':'var(--vp2)'};
+const initials = n => n.split(/[\s-]/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+
+// PLACEHOLDER DATA — replace with the journey's steps (one object per step; {m:'…'} = milestone band).
+const board = [
+  {m:'Milestone One'},
+  {cut:'1.1',g:'screen',v:1,pers:['Persona'],scene:'Opening shot — describe the setting',
+   action:'What happens at this step (description + doing).',
+   q:"The character's inner line (from `thinking`).",emo:'Emotion label',time:'—'},
+  {cut:'1.2',g:'lock',v:-1,pers:['Persona','System'],scene:'A friction beat',fail:1,
+   action:'Where it breaks.',note:'Pain point / failure mode (from the step).',emo:'Frustration',time:'~5m'},
+  {m:'Milestone Two'},
+  {cut:'2.1',g:'clock',v:-2,pers:['Persona'],scene:'The low point',mot:1,fail:1,
+   action:'The make-or-break moment.',q:'The line the audience should feel.',
+   note:'Why this is the moment of truth.',emo:'Resignation',time:'Weeks+'},
+  {cut:'2.2',g:'star',v:2,pers:['Persona'],scene:'Resolution',
+   action:'How it ends, when it ends well.',emo:'Relief',time:'—'},
+];
+
+const el = document.getElementById('board');
+board.forEach(s=>{
+  if(s.m){const d=document.createElement('div');d.className='mstone';d.textContent='Milestone — '+s.m;el.appendChild(d);return;}
+  const row=document.createElement('div');row.className='row';
+  const marks=[s.mot?'<span class="mk mot">★ moment of truth</span>':'',s.fail?'<span class="mk fail">⚠ failure</span>':''].join('');
+  const pers=(s.pers||[]).map(p=>`<span class="chip" title="${p}">${initials(p)}</span>`).join('');
+  row.innerHTML=`<div class="cut">${s.cut}</div>
+   <div><div class="frame"><span class="scope">2.39:1 — SCOPE</span>
+     <span class="wash" style="background:${VAL[String(s.v)]}"></span>
+     <span class="pers">${pers}</span>${G[s.g]||''}
+     <div class="marks">${marks}</div><div class="cap">${s.scene}</div></div></div>
+   <div class="action"><p class="ph">Action</p>${s.action}</div>
+   <div class="dlg">${s.q?`<p class="q">"${s.q}"</p>`:''}${s.note?`<p class="note">${s.note}</p>`:''}<p class="emo">${s.emo||''}</p></div>
+   <div class="time">${s.time||'—'}<small>time</small></div>`;
+  el.appendChild(row);
+});
+</script>
+</body>
+</html>
