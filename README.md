@@ -17,10 +17,10 @@ Four things, detected from how you talk to it — no commands to memorize:
 
 | | | |
 |---|---|---|
-| 🟢 **Build** | "Map how a first-time buyer sets up online payments." | A structured journey appears, milestone by milestone, from plain conversation. |
-| ✏️ **Update** | "We just launched instant verification — fold it in." | A *diff*, not a redraw: what changed, why, and what it ripples into. |
-| 🎭 **Express** | "Turn this into something for Monday's kickoff." | One map → four audiences (below). |
-| 🔭 **Review** | "What are we missing — and what should we map next?" | Soft-spot review + a shortlist of adjacent journeys worth mapping. |
+| **Build** | "Map how a first-time buyer sets up online payments." | A structured journey appears, milestone by milestone, from plain conversation. |
+| **Update** | "We just launched instant verification — fold it in." | A *diff*, not a redraw: what changed, why, and what it ripples into. |
+| **Express** | "Turn this into something for Monday's kickoff." | One map → four audiences (below). |
+| **Review** | "What are we missing — and what should we map next?" | Soft-spot review + a shortlist of adjacent journeys worth mapping. |
 
 ---
 
@@ -28,26 +28,26 @@ Four things, detected from how you talk to it — no commands to memorize:
 
 The same journey, rendered for whoever's in the room. (Full versions in [`demos/gallery/`](demos/gallery/).)
 
-**🎬 Storyline** — makes a team *feel* the experience. For kickoffs, empathy-building.
+**Storyline** — makes a team *feel* the experience. For kickoffs, empathy-building.
 > *Maya runs a small online store. She is not a developer… A customer fills a cart, gets
 > to the payment screen, asks "Wait, you don't take card?" — and disappears.*
 > *…She hits submit. And then the story stops. No progress bar. No estimate. Just a screen,
 > and silence. So Maya does what anyone does in a silence that long: she assumes it's
 > broken.*[^1]
 
-**📄 One-page brief** — for a VP with 90 seconds and a decision to make.
+**One-page brief** — for a VP with 90 seconds and a decision to make.
 > **Ask:** Approve 2 sprints to add status feedback to bank verification.
 > **The problem in one line:** New merchants finish signup, hit a 3-business-day wait with
 > *zero feedback*, conclude the product is broken, and quit — one step before going live.
 > **Cost of inaction:** the highest-impact drop-off in the funnel, at peak intent.
 
-**🛠️ Engineering handoff** — spec-shaped, for the team that has to build it.
+**Engineering handoff** — spec-shaped, for the team that has to build it.
 > **Acceptance criteria**
 > - [ ] After KYC submission, the owner sees a status page with current state + estimated completion date.
 > - [ ] Status reflects **real** backend state, not a fake progress bar.
 > - [ ] On `verification.completed`, send email/SMS with a deep link to take the first payment.
 
-**🖥️ Interactive HTML** — a self-contained, explorable map for workshops and reference.
+**Interactive HTML** — a self-contained, explorable map for workshops and reference.
 
 ![Interactive journey map — emotion curve view](demos/gallery/img/hero-multiview.png)
 
