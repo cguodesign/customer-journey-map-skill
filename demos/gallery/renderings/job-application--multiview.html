@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Application Black Hole — Maya's Journey</title>
+<!--
+  Journey: Applying for a job through an online application portal
+  Expression: Interactive HTML — Multi-view (Emotion Curve / Timeline / Cards), scroll-driven within each tab.
+  Audience: internal hiring team, review meeting. Goal: feel how brutal the silent wait is.
+  Rendering guide: references/html-rendering-guide.md. Self-contained, zero dependencies.
+-->
+<style>
+  :root {
+    /* Tier 1: brand seed (override to re-theme) */
+    --brand-primary: #3b4cca;
+    --brand-surface: #ffffff;
+    --brand-text: #1a1a1a;
+
+    /* Tier 2: semantic */
+    --bg: #f4f5f7;
+    --surface: var(--brand-surface);
+    --text: var(--brand-text);
+    --text-muted: #6b7280;
+    --border: #e3e5e9;
+
+    --valence-neg2: #fecaca;
+    --valence-neg1: #fed7aa;
+    --valence-neutral: #e5e7eb;
+    --valence-pos1: #bbf7d0;
+    --valence-pos2: #86efac;
+    --valence-neg2-line: #dc2626;
+    --valence-neg1-line: #ea580c;
+    --valence-neutral-line: #9ca3af;
+    --valence-pos1-line: #16a34a;
+    --valence-pos2-line: #15803d;
+
+    --mot-color: #ef4444;
+    --fail-color: #8b6914;
+    --pain-color: #ea580c;
+    --opp-color: #16a34a;
+
+    --frontstage-bg: #fff9e6;
+    --backstage-bg: #f9f9f9;
+    --void-bg: #0f1115;
+    --void-text: #c7ccd6;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121212; --surface: #1e1e1e; --text: #ffffff; --text-muted: #9aa0aa; --border: #333;
+      --valence-neg2: #991b1b; --valence-neg1: #9a3412; --valence-neutral: #4b5563;
+      --valence-pos1: #166534; --valence-pos2: #15803d;
+      --frontstage-bg: #2a2518; --backstage-bg: #242424;
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 22px 24px 0; }
+  .head-inner { max-width: 860px; margin: 0 auto; }
+  header h1 { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.01em; }
+  header .sub { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+  .persona-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 4px; }
+  .persona-pill { font-size: 0.7rem; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border); color: var(--text-muted); display: inline-flex; align-items: center; gap: 6px; }
+  .persona-pill .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .pp-primary .dot { background: var(--brand-primary); }
+  .pp-system .dot { background: #9ca3af; }
+  .pp-backstage .dot { background: #b08900; }
+
+  .tab-bar { display: flex; gap: 0; max-width: 860px; margin: 16px auto 0; padding: 0; }
+  .tab { padding: 10px 18px; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); cursor: pointer; border: none; background: none; border-bottom: 3px solid transparent; user-select: none; }
+  .tab.active { color: var(--text); border-bottom-color: var(--brand-primary); }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  .legend { max-width: 860px; margin: 0 auto; padding: 10px 24px 16px; display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.68rem; color: var(--text-muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .legend .mk { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .legend .mk.mot { background: var(--mot-color); }
+  .legend .mk.fail { background: var(--fail-color); }
+
+  main { max-width: 860px; margin: 0 auto; padding: 8px 24px 80px; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ---------- Emotion Curve view ---------- */
+  .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 8px 8px; margin-bottom: 20px; }
+  .chart-wrap svg { display: block; width: 100%; height: auto; }
+  .chart-caption { font-size: 0.8rem; color: var(--text-muted); padding: 8px 12px 4px; }
+  .curve-point { cursor: pointer; transition: r .12s; }
+  .curve-point:hover { r: 9; }
+
+  /* ---------- Timeline view ---------- */
+  .tl-note { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; }
+  .tl-band { display: flex; gap: 3px; margin-bottom: 6px; }
+  .tl-seg { font-size: 0.68rem; font-weight: 600; color: var(--text-muted); text-align: center; padding: 5px 4px; border-radius: 4px; background: var(--valence-neutral); white-space: nowrap; }
+  .tl-row { position: relative; }
+  .tl-step { display: flex; align-items: stretch; gap: 12px; margin-bottom: 3px; }
+  .tl-bar { border-radius: 5px; min-width: 40px; display: flex; align-items: center; padding: 8px 12px; font-size: 0.78rem; font-weight: 600; color: #1a1a1a; position: relative; }
+  .tl-meta { font-size: 0.7rem; color: var(--text-muted); align-self: center; white-space: nowrap; }
+  .tl-wait { flex: 1; }
+  .tl-wait .tl-bar { background: var(--void-bg); color: var(--void-text); width: 100%; flex-direction: column; align-items: flex-start; padding: 16px; gap: 6px; }
+  .tl-wait .big { font-size: 1.05rem; font-weight: 700; }
+  .tl-wait .small { font-size: 0.72rem; color: #8b93a3; font-weight: 400; }
+
+  /* ---------- The Void (signature feel-it block) ---------- */
+  .void { background: var(--void-bg); border-radius: 12px; margin: 22px 0; padding: 0; overflow: hidden; }
+  .void-head { padding: 22px 24px 10px; }
+  .void-head h2 { color: #fff; font-size: 1.05rem; font-weight: 700; }
+  .void-head p { color: #8b93a3; font-size: 0.8rem; margin-top: 4px; }
+  .void-body { padding: 30px 24px 50px; min-height: 360px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .void-counter { font-variant-numeric: tabular-nums; font-size: 2.6rem; font-weight: 700; color: #e7e9ee; letter-spacing: 0.02em; }
+  .void-counter .unit { font-size: 1rem; color: #6b7280; font-weight: 500; margin-left: 6px; }
+  .void-status { margin-top: 18px; font-size: 0.92rem; color: #c7ccd6; min-height: 1.4em; transition: opacity .4s; }
+  .void-sub { margin-top: 6px; font-size: 0.78rem; color: #6b7280; }
+  .void-dots { margin-top: 26px; display: flex; gap: 7px; }
+  .void-dots i { width: 6px; height: 6px; border-radius: 50%; background: #2a2f38; }
+  .void-dots i.on { background: #4b5563; }
+  .void-controls { padding: 0 24px 22px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .void-btn { background: #232830; color: #c7ccd6; border: 1px solid #353c47; border-radius: 6px; padding: 7px 13px; font-size: 0.76rem; cursor: pointer; font-weight: 600; }
+  .void-btn:hover { background: #2c323c; }
+  .void-btn.live { background: var(--mot-color); color: #fff; border-color: var(--mot-color); }
+  .void-hint { font-size: 0.72rem; color: #6b7280; }
+
+  /* ---------- Cards view ---------- */
+  .milestone { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); padding: 8px 0 4px; margin: 22px 0 10px; border-bottom: 1px solid var(--border); }
+  .milestone:first-child { margin-top: 4px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px 14px 18px; margin-bottom: 4px; position: relative; border-left: 4px solid var(--valence-neutral); cursor: pointer; }
+  .card.v-neg2 { border-left-color: var(--valence-neg2-line); }
+  .card.v-neg1 { border-left-color: var(--valence-neg1-line); }
+  .card.v-neutral { border-left-color: var(--valence-neutral-line); }
+  .card.v-pos1 { border-left-color: var(--valence-pos1-line); }
+  .card.v-pos2 { border-left-color: var(--valence-pos2-line); }
+  .card.selected { box-shadow: 0 0 0 2px var(--brand-primary); }
+  .card h3 { font-size: 0.95rem; font-weight: 600; padding-right: 18px; }
+  .card .desc { font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 8px; }
+  .card .meta { display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.72rem; color: var(--text-muted); align-items: center; }
+  .card .badge { padding: 2px 9px; border-radius: 10px; font-size: 0.68rem; font-weight: 600; color: #1a1a1a; }
+  .card .chip { padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); }
+  .marker { position: absolute; width: 9px; height: 9px; border-radius: 50%; }
+  .marker.mot { background: var(--mot-color); top: 10px; right: 10px; }
+  .marker.fail { background: var(--fail-color); top: 10px; left: -4px; }
+  .flow-arrow { text-align: center; color: var(--border); font-size: 1.1rem; line-height: 1; padding: 1px 0; }
+  .detail { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); font-size: 0.8rem; }
+  .card.expanded .detail { display: block; }
+  .detail .row { margin-bottom: 9px; }
+  .detail .lbl { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 2px; }
+  .detail ul { margin: 0 0 0 16px; }
+  .pain { color: var(--pain-color); text-decoration: underline; text-decoration-color: var(--pain-color); text-underline-offset: 2px; }
+  .opp { border: 1px dashed var(--opp-color); border-radius: 4px; padding: 6px 8px; color: var(--text); display: inline-block; }
+  .layer { background: var(--backstage-bg); border-radius: 5px; padding: 9px 11px; margin-top: 6px; }
+  .layer.frontstage { background: var(--frontstage-bg); }
+
+  /* outcome branch row */
+  .branch-note { font-size: 0.78rem; color: var(--text-muted); margin: 8px 0 12px; }
+  .outcomes { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+  .outcomes .card { margin-bottom: 0; cursor: pointer; }
+
+  footer { max-width: 860px; margin: 0 auto; padding: 0 24px 60px; font-size: 0.72rem; color: var(--text-muted); }
+
+  @media (max-width: 600px) {
+    .void-counter { font-size: 2rem; }
+    header h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-inner">
+    <h1>The Application Black Hole</h1>
+    <div class="sub">Maya's journey applying for a job through our online portal &mdash; built for the hiring team review.</div>
+    <div class="persona-row">
+      <span class="persona-pill pp-primary"><span class="dot"></span>Maya &middot; mid-career applicant, job-hunting while employed</span>
+      <span class="persona-pill pp-system"><span class="dot"></span>ATS &middot; tracking system</span>
+      <span class="persona-pill pp-backstage"><span class="dot"></span>Recruiter</span>
+      <span class="persona-pill pp-backstage"><span class="dot"></span>Hiring Manager</span>
+    </div>
+  </div>
+</header>
+
+<nav class="tab-bar" id="tabBar">
+  <button class="tab active" data-tab="curve">Emotion Curve</button>
+  <button class="tab" data-tab="timeline">Timeline</button>
+  <button class="tab" data-tab="cards">Detail Cards</button>
+</nav>
+
+<div class="legend">
+  <span><span class="mk mot"></span>Moment of truth</span>
+  <span><span class="mk fail"></span>Failure point</span>
+  <span>Border color = emotional valence (green positive &rarr; red negative)</span>
+</div>
+
+<main>
+
+<!-- =================== EMOTION CURVE =================== -->
+<section class="view active" id="view-curve">
+  <div class="chart-wrap">
+    <!-- valence per step (-2..+2), x by sequence. Hope crests at submit, then collapses across The Wait. -->
+    <svg viewBox="0 0 820 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Emotional valence across the journey">
+      <defs>
+        <linearGradient id="vg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#86efac" stop-opacity="0.40"/>
+          <stop offset="45%" stop-color="#e5e7eb" stop-opacity="0.14"/>
+          <stop offset="100%" stop-color="#fecaca" stop-opacity="0.45"/>
+        </linearGradient>
+      </defs>
+
+      <!-- y labels -->
+      <text x="58" y="48" text-anchor="end" font-size="10" fill="#888">+2</text>
+      <text x="58" y="106" text-anchor="end" font-size="10" fill="#888">+1</text>
+      <text x="58" y="164" text-anchor="end" font-size="10" fill="#888">0</text>
+      <text x="58" y="222" text-anchor="end" font-size="10" fill="#888">&minus;1</text>
+      <text x="58" y="280" text-anchor="end" font-size="10" fill="#888">&minus;2</text>
+
+      <!-- gridlines -->
+      <line x1="68" y1="44" x2="800" y2="44" stroke="#eee"/>
+      <line x1="68" y1="102" x2="800" y2="102" stroke="#eee"/>
+      <line x1="68" y1="160" x2="800" y2="160" stroke="#ccc"/>
+      <line x1="68" y1="218" x2="800" y2="218" stroke="#eee"/>
+      <line x1="68" y1="276" x2="800" y2="276" stroke="#eee"/>
+      <line x1="68" y1="40" x2="68" y2="282" stroke="#ccc"/>
+
+      <!-- milestone bands: Discovery | Application | The Wait | Resolution -->
+      <line x1="200" y1="36" x2="200" y2="282" stroke="#ddd" stroke-dasharray="4,4"/>
+      <line x1="430" y1="36" x2="430" y2="282" stroke="#ddd" stroke-dasharray="4,4"/>
+      <line x1="690" y1="36" x2="690" y2="282" stroke="#ddd" stroke-dasharray="4,4"/>
+      <text x="134" y="34" text-anchor="middle" font-size="10" fill="#999" font-weight="600">Discovery</text>
+      <text x="315" y="34" text-anchor="middle" font-size="10" fill="#999" font-weight="600">Application</text>
+      <text x="560" y="34" text-anchor="middle" font-size="10" fill="#999" font-weight="600">The Wait</text>
+      <text x="745" y="34" text-anchor="middle" font-size="10" fill="#999" font-weight="600">Resolution</text>
+
+      <!-- area fill. points: see circles below -->
+      <path d="M 100,102 L 168,118 L 250,135 L 330,170 L 410,102 L 500,135 L 600,247 L 660,265 L 760,222 L 760,160 L 100,160 Z" fill="url(#vg)" stroke="none"/>
+      <!-- curve -->
+      <polyline points="100,102 168,118 250,135 330,170 410,102 500,135 600,247 660,265 760,222"
+        fill="none" stroke="#555" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+
+      <!-- data points (cy: +2=44,+1=102,0=160,-1=218,-2=276) -->
+      <circle class="curve-point" cx="100" cy="102" r="6.5" fill="#bbf7d0" stroke="#444" stroke-width="1.5" data-id="see-the-posting"/>
+      <circle class="curve-point" cx="168" cy="118" r="6.5" fill="#bbf7d0" stroke="#444" stroke-width="1.5" data-id="read-and-assess-fit"/>
+      <circle class="curve-point" cx="250" cy="135" r="6.5" fill="#e5e7eb" stroke="#444" stroke-width="1.5" data-id="create-account"/>
+      <circle class="curve-point" cx="330" cy="170" r="6.5" fill="#fed7aa" stroke="#444" stroke-width="1.5" data-id="fill-application-form"/>
+      <circle class="curve-point" cx="410" cy="102" r="6.5" fill="#86efac" stroke="#444" stroke-width="1.5" data-id="submit-application"/>
+      <circle class="curve-point" cx="500" cy="135" r="6.5" fill="#bbf7d0" stroke="#444" stroke-width="1.5" data-id="receive-confirmation"/>
+      <!-- The Wait: deepest collapse + moment of truth -->
+      <circle class="curve-point" cx="600" cy="247" r="8" fill="#fecaca" stroke="#ef4444" stroke-width="2.5" data-id="wait-in-silence"/>
+      <circle class="curve-point" cx="660" cy="265" r="6.5" fill="#fecaca" stroke="#444" stroke-width="1.5" data-id="check-status-or-follow-up"/>
+      <circle class="curve-point" cx="760" cy="222" r="6.5" fill="#fed7aa" stroke="#444" stroke-width="1.5" data-id="hear-back"/>
+
+      <!-- x labels -->
+      <text x="100" y="300" text-anchor="middle" font-size="9" fill="#888">Posting</text>
+      <text x="168" y="300" text-anchor="middle" font-size="9" fill="#888">Assess fit</text>
+      <text x="250" y="300" text-anchor="middle" font-size="9" fill="#888">Account</text>
+      <text x="330" y="300" text-anchor="middle" font-size="9" fill="#888">Form</text>
+      <text x="410" y="300" text-anchor="middle" font-size="9" fill="#888">Submit</text>
+      <text x="500" y="300" text-anchor="middle" font-size="9" fill="#888">Confirm</text>
+      <text x="600" y="300" text-anchor="middle" font-size="9" fill="#ef4444" font-weight="600">Silence</text>
+      <text x="660" y="300" text-anchor="middle" font-size="9" fill="#888">Follow-up</text>
+      <text x="760" y="300" text-anchor="middle" font-size="9" fill="#888">Outcome</text>
+    </svg>
+    <div class="chart-caption">Hope peaks the instant Maya hits <strong>Submit</strong>, holds while the confirmation email lands &mdash; then collapses through <strong>The Wait</strong>. The lowest point isn't a rejection. It's the silence. <em>Click any point to jump to its card.</em></div>
+  </div>
+
+  <!-- The signature feel-it block -->
+  <div class="void" id="void">
+    <div class="void-head">
+      <h2>Sit in the silence with her</h2>
+      <p>After Submit, the experience goes dark. Press play and let it run during the meeting &mdash; this is what "under review" actually feels like.</p>
+    </div>
+    <div class="void-body">
+      <div class="void-counter"><span id="voidNum">0</span><span class="unit" id="voidUnit">days of silence</span></div>
+      <div class="void-status" id="voidStatus">Application submitted. Confirmation email received.</div>
+      <div class="void-sub" id="voidSub">Status in portal: &ldquo;Under review&rdquo;</div>
+      <div class="void-dots" id="voidDots"></div>
+    </div>
+    <div class="void-controls">
+      <button class="void-btn" id="voidPlay">&#9654;&nbsp; Play the wait</button>
+      <button class="void-btn" id="voidReset">Reset</button>
+      <span class="void-hint">Each second &asymp; ~3 days of real silence. No update ever arrives on its own.</span>
+    </div>
+  </div>
+</section>
+
+<!-- =================== TIMELINE =================== -->
+<section class="view" id="view-timeline">
+  <p class="tl-note">Bar length is roughly proportional to how long each step takes. Notice the problem: the steps that demand effort from Maya are minutes long. The step where <strong>we</strong> owe her something stretches into weeks &mdash; and it's the darkest bar on the board.</p>
+  <div class="tl-row" id="tlRow"></div>
+</section>
+
+<!-- =================== CARDS =================== -->
+<section class="view" id="view-cards">
+  <div id="cardRoot"></div>
+</section>
+
+</main>
+
+<footer>
+  Source: Maya journey map (<code>job-application-portal.md</code>), milestones Discovery &rarr; Application &rarr; The Wait &rarr; Resolution. Emotional valence and durations are mapped from the journey's emotion/waitTime fields; treat un-instrumented timing as hypothesis until measured against real ATS data.
+</footer>
+
+<script>
+// ---------- Journey data ----------
+const STEPS = [
+  { id:'see-the-posting', milestone:'Discovery', title:'See the posting', valence:1,
+    desc:'Comes across the role on a job board, LinkedIn, or the careers page.',
+    emotion:'Spark of interest, cautious optimism', personas:['Maya'],
+    channel:'LinkedIn / job board / careers page', dur:'moments', durW:1,
+    thinking:'"This could actually be a good fit — let me see what they want."' },
+  { id:'read-and-assess-fit', milestone:'Discovery', title:'Read & assess fit', valence:1,
+    desc:'Reads the description and self-assesses whether to apply.',
+    emotion:'Excitement mixed with self-doubt', personas:['Maya'], dur:'~5 min', durW:1,
+    thinking:'"I hit most of these, but not all — is it worth my time?"',
+    pain:['Vague or inflated requirements make it hard to judge fit'],
+    fail:'Talks herself out of applying ("I only meet 7 of 10 bullets")' },
+  { id:'click-apply', milestone:'Application', title:'Click Apply', valence:0,
+    desc:'Clicks Apply and is routed into the company’s application portal.',
+    emotion:'Readiness, slight bracing', personas:['Maya','ATS'], dur:'1 min', durW:1,
+    channel:'Careers portal (ATS-hosted)',
+    pain:['Redirected to a clunky third-party portal that breaks the flow'],
+    backstage:'ATS creates a candidate session; may require account creation.' },
+  { id:'create-account', milestone:'Application', title:'Create account', valence:0,
+    desc:'Forced to create an account before she can even see the form.',
+    emotion:'Mild irritation', personas:['Maya','ATS'], dur:'2–4 min', durW:1,
+    pain:['Account gate before she’s seen the form','Yet another login and password'],
+    fail:'Abandons here rather than make an account' },
+  { id:'fill-application-form', milestone:'Application', title:'Fill the application form', valence:-1,
+    desc:'Re-types her resume into the form field by field.',
+    emotion:'Tedium, growing frustration', personas:['Maya','ATS'], dur:'~20–40 min', durW:3,
+    pain:['"I just uploaded my resume — why am I typing it all again?"','Parser mangles formatting; she fixes it by hand'],
+    fail:'Session times out or form errors wipe entries', recovery:'Start over, often from scratch', mot:true },
+  { id:'submit-application', milestone:'Application', title:'Submit', valence:2,
+    desc:'Reviews and submits the completed application.',
+    emotion:'Relief, hope, a small sense of accomplishment', personas:['Maya','ATS'], dur:'instant', durW:1,
+    backstage:'ATS records the submission and fires the automated confirmation email.', mot:true },
+  { id:'receive-confirmation', milestone:'The Wait', title:'Receive confirmation', valence:1,
+    desc:'Gets (or doesn’t get) an automated "we received your application" email.',
+    emotion:'Reassured if it arrives, uneasy if it doesn’t', personas:['Maya','ATS'], channel:'Email', dur:'minutes', durW:1,
+    pain:['A generic auto-reply with no timeline and no sense of next steps'],
+    backstage:'ATS sends a templated confirmation — or none is configured, or it lands in spam.' },
+  { id:'wait-in-silence', milestone:'The Wait', title:'Wait in silence — the black hole', valence:-2,
+    desc:'Days, then weeks pass with no update at all. The application black hole.',
+    emotion:'Hope curdling into anxiety, then resignation', personas:['Maya','Recruiter','ATS'],
+    dur:'Days to several weeks — often indefinite', durW:14,
+    thinking:'"Did anyone even look at it? Did I do something wrong? Should I follow up, or will that annoy them?"',
+    pain:['No acknowledgment that a human ever reviewed it','No status, no timeline, no closure'],
+    backstage:'Application sits in a queue; status changes internally but is never surfaced to Maya. Recruiter screens or filters — many applications never get human eyes.',
+    fail:'Company never sends any further communication at all', mot:true,
+    motText:'This silence — not the rejection — is the make-or-break of the whole experience.' },
+  { id:'check-status-or-follow-up', milestone:'The Wait', title:'Check status / follow up', valence:-2,
+    desc:'Logs back into the portal, or musters the nerve to follow up.',
+    emotion:'Powerlessness, frustration', personas:['Maya'], dur:'recurring', durW:2,
+    pain:['Portal status is stale or meaningless ("Submitted" / "Under review" forever)','No way to get a real answer'],
+    workaround:'Emails a recruiter or messages an employee on LinkedIn to get any signal.',
+    fail:'Follow-ups go unanswered too' },
+  { id:'hear-back', milestone:'Resolution', title:'Hear back — or never', valence:-1,
+    desc:'Eventually receives an outcome — or never does.',
+    emotion:'Depends entirely on what arrives, if anything', personas:['Maya','Recruiter','ATS'],
+    channel:'Email, or silence', dur:'—',
+    branch:'Splits three ways: rejection, advance to interview, or permanent silence (ghosting).' }
+];
+
+const OUTCOMES = [
+  { id:'outcome-rejection', title:'Rejection', valence:-1,
+    desc:'A rejection arrives — best case clear and timely, worst case a cold template.',
+    emotion:'Disappointment, but closure is its own relief', personas:['Maya','ATS'], channel:'Email',
+    pain:['Form-letter rejection with no feedback after weeks of waiting'],
+    opp:'A timely, human, even slightly personalized rejection preserves goodwill.' },
+  { id:'outcome-ghosted', title:'Ghosted', valence:-2,
+    desc:'She never hears anything. The application simply dissolves into silence.',
+    emotion:'Resentment; lasting damage to how she sees the brand', personas:['Maya'],
+    pain:['No closure ever — she’s left to assume rejection'],
+    mot:true, motText:'Ghosting is the single most corrosive outcome for employer brand.' },
+  { id:'outcome-advance', title:'Advance to interview', valence:2,
+    desc:'Invited to a screen or interview — the journey continues into the hiring process.',
+    emotion:'Elation, validation', personas:['Maya','Recruiter'], channel:'Email / recruiter call',
+    next:'Continues into the interview journey (separate map).' }
+];
+
+const VCLASS = {'-2':'v-neg2','-1':'v-neg1','0':'v-neutral','1':'v-pos1','2':'v-pos2'};
+const VBADGE = {'-2':'#fecaca','-1':'#fed7aa','0':'#e5e7eb','1':'#bbf7d0','2':'#86efac'};
+const VLABEL = {'-2':'Very negative','-1':'Negative','0':'Neutral','1':'Positive','2':'Very positive'};
+
+// ---------- Shared state ----------
+const state = { selectedId: null };
+
+// ---------- Render Cards ----------
+function detailHTML(s){
+  let h = '<div class="detail">';
+  if (s.thinking) h += `<div class="row"><div class="lbl">Thinking</div>${s.thinking}</div>`;
+  if (s.pain) h += `<div class="row"><div class="lbl">Pain points</div><ul>${s.pain.map(p=>`<li class="pain">${p}</li>`).join('')}</ul></div>`;
+  if (s.fail) h += `<div class="row"><div class="lbl">Failure mode</div>${s.fail}${s.recovery?` &rarr; <em>${s.recovery}</em>`:''}</div>`;
+  if (s.workaround) h += `<div class="row"><div class="lbl">Workaround</div>${s.workaround}</div>`;
+  if (s.motText) h += `<div class="row"><div class="lbl" style="color:var(--mot-color)">Moment of truth</div>${s.motText}</div>`;
+  if (s.opp) h += `<div class="row"><div class="lbl">Opportunity</div><span class="opp">${s.opp}</span></div>`;
+  if (s.next) h += `<div class="row"><div class="lbl">Next</div>${s.next}</div>`;
+  if (s.channel) h += `<div class="layer frontstage"><div class="lbl">Frontstage / channel</div>${s.channel}</div>`;
+  if (s.backstage) h += `<div class="layer"><div class="lbl">Backstage</div>${s.backstage}</div>`;
+  h += '</div>';
+  return h;
+}
+function cardHTML(s){
+  const personas = s.personas.map(p=>`<span class="chip">${p}</span>`).join('');
+  return `<div class="card ${VCLASS[s.valence]}" data-id="${s.id}">
+    ${s.mot?'<span class="marker mot" title="Moment of truth"></span>':''}
+    ${s.fail?'<span class="marker fail" title="Failure point"></span>':''}
+    <h3>${s.title}</h3>
+    <p class="desc">${s.desc}</p>
+    <div class="meta">
+      <span class="badge" style="background:${VBADGE[s.valence]}">${s.emotion}</span>
+      ${s.dur&&s.dur!=='—'?`<span class="chip">⏱ ${s.dur}</span>`:''}
+      ${personas}
+    </div>
+    ${detailHTML(s)}
+  </div>`;
+}
+function renderCards(){
+  const root = document.getElementById('cardRoot');
+  let html = '', lastM = null;
+  STEPS.forEach((s,i)=>{
+    if (s.milestone !== lastM){ html += `<div class="milestone">${s.milestone}</div>`; lastM = s.milestone; }
+    html += cardHTML(s);
+    if (i < STEPS.length-1 && STEPS[i+1].milestone === s.milestone) html += '<div class="flow-arrow">&darr;</div>';
+  });
+  // resolution branch
+  html += `<p class="branch-note">From <strong>Hear back</strong>, the journey forks into three endings:</p><div class="outcomes">`;
+  OUTCOMES.forEach(o=>{ html += cardHTML(o); });
+  html += `</div>`;
+  root.innerHTML = html;
+}
+
+// ---------- Render Timeline ----------
+function renderTimeline(){
+  const all = STEPS;
+  let html = '';
+  all.forEach(s=>{
+    if (s.id === 'wait-in-silence'){
+      html += `<div class="tl-step"><div class="tl-wait"><div class="tl-bar" data-id="${s.id}">
+        <span class="big">${s.title}</span>
+        <span class="small">${s.dur} &mdash; while every step before it took minutes.</span>
+        </div></div></div>`;
+    } else {
+      const w = Math.max(40, s.durW*22);
+      html += `<div class="tl-step">
+        <div class="tl-bar" data-id="${s.id}" style="width:${w}px;background:${VBADGE[s.valence]}">${s.title}</div>
+        <div class="tl-meta">${s.dur||''}</div>
+      </div>`;
+    }
+  });
+  document.getElementById('tlRow').innerHTML = html;
+}
+
+// ---------- Tabs ----------
+const tabs = document.querySelectorAll('.tab');
+const views = document.querySelectorAll('.view');
+function activateTab(id){
+  tabs.forEach(t=>t.classList.toggle('active', t.dataset.tab===id));
+  views.forEach(v=>v.classList.toggle('active', v.id===`view-${id}`));
+}
+document.getElementById('tabBar').addEventListener('click', e=>{
+  const t = e.target.closest('.tab'); if (t) activateTab(t.dataset.tab);
+});
+document.addEventListener('keydown', e=>{
+  if ((e.ctrlKey||e.metaKey) && e.key>='1' && e.key<='3'){ e.preventDefault(); activateTab(['curve','timeline','cards'][+e.key-1]); }
+});
+
+// ---------- Cross-view selection ----------
+function selectStep(id, jump){
+  state.selectedId = id;
+  document.querySelectorAll('.card').forEach(c=>c.classList.toggle('selected', c.dataset.id===id));
+  if (jump){
+    activateTab('cards');
+    const card = document.querySelector(`.card[data-id="${id}"]`);
+    if (card){ card.classList.add('expanded'); card.scrollIntoView({behavior:'smooth', block:'center'}); }
+  }
+}
+document.addEventListener('click', e=>{
+  const card = e.target.closest('.card');
+  if (card){ card.classList.toggle('expanded'); selectStep(card.dataset.id, false); return; }
+  const pt = e.target.closest('.curve-point') || e.target.closest('.tl-bar[data-id]');
+  if (pt) selectStep(pt.dataset.id, true);
+});
+
+// ---------- The Void (silence counter) ----------
+const STAGES = [
+  { d:0,  status:'Application submitted. Confirmation email received.', sub:'Status in portal: “Under review”' },
+  { d:3,  status:'Still nothing. She rereads the confirmation email.', sub:'Status in portal: “Under review”' },
+  { d:7,  status:'One week. "Did anyone even look at it?"', sub:'Status in portal: “Under review” — unchanged' },
+  { d:14, status:'Two weeks. She drafts a follow-up, then deletes it.', sub:'No reply. No timeline. No human.' },
+  { d:21, status:'Three weeks. Hope has curdled into resignation.', sub:'She assumes it’s a no — but no one has said so.' },
+  { d:30, status:'A month of silence. The black hole is complete.', sub:'Backstage: status changed internally — she was never told.' }
+];
+let voidTimer = null, voidDays = 0;
+const numEl = document.getElementById('voidNum');
+const unitEl = document.getElementById('voidUnit');
+const statusEl = document.getElementById('voidStatus');
+const subEl = document.getElementById('voidSub');
+const dotsEl = document.getElementById('voidDots');
+const playBtn = document.getElementById('voidPlay');
+dotsEl.innerHTML = STAGES.map(()=>'<i></i>').join('');
+function paintVoid(){
+  numEl.textContent = voidDays;
+  unitEl.textContent = voidDays===1 ? 'day of silence' : 'days of silence';
+  let stage = STAGES[0], idx = 0;
+  STAGES.forEach((s,i)=>{ if (voidDays >= s.d){ stage = s; idx = i; } });
+  statusEl.style.opacity = 0;
+  setTimeout(()=>{ statusEl.textContent = stage.status; subEl.textContent = stage.sub; statusEl.style.opacity = 1; }, 120);
+  dotsEl.querySelectorAll('i').forEach((d,i)=>d.classList.toggle('on', i<=idx));
+}
+function stopVoid(){ clearInterval(voidTimer); voidTimer=null; playBtn.innerHTML='&#9654;&nbsp; Play the wait'; playBtn.classList.remove('live'); }
+playBtn.addEventListener('click', ()=>{
+  if (voidTimer){ stopVoid(); return; }
+  playBtn.innerHTML='&#10073;&#10073;&nbsp; Pause'; playBtn.classList.add('live');
+  voidTimer = setInterval(()=>{
+    voidDays += 3;
+    if (voidDays >= 30){ voidDays = 30; paintVoid(); stopVoid(); return; }
+    paintVoid();
+  }, 1000);
+});
+document.getElementById('voidReset').addEventListener('click', ()=>{ stopVoid(); voidDays=0; paintVoid(); });
+
+// ---------- Init ----------
+renderCards();
+renderTimeline();
+paintVoid();
+</script>
+</body>
+</html>

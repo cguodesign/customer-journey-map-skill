@@ -41,6 +41,15 @@ what that mode needs, surface the affordances for the user's phase.
 Load on demand — never read every reference up front. Pull a reference only when the
 row calls for it.
 
+**Naming new fields.** Before writing any field that is not in the schema vocabulary,
+recognize it as a custom field and route through the custom-field flow (propose a
+namespace, register it in the preamble) — this includes ad-hoc summaries like
+`backstageSummary`. For a high-level summary of detail already captured **on a step**
+(frontstage / backstage / support), use that **composite field** with
+`_provenance: auto-composite` instead of inventing one; the schema has no
+milestone-level composite, so a cross-step rollup is either a registered custom field
+or a step-level composite — never an unregistered ad-hoc field.
+
 ---
 
 ## Plan mode

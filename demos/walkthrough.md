@@ -84,7 +84,24 @@ invent a statistic to make the slide look better. Now give it a real number:
 Re-open the map: that figure lands with `_provenance: source: …`. The skill draws a hard line
 between what you *described* and what you *measured*.
 
-## Scene 5 — It's not about payments (2 min, optional)
+## Scene 5 — Step back and review (2 min)
+
+Weeks later, the map has been through a few rounds. Ask it to take stock.
+
+**Paste:**
+> Step back and review the whole journey — where's it still weak or thin? And what other journeys should we be mapping?
+
+It won't flatter you. It names the soft spots: claims with no evidence behind them,
+steps that are too thin, failures with no recovery path — and it ranks the
+make-or-break moments so you know what to fix first. Then it does the strategic move:
+a short list of **adjacent journeys worth mapping** — the dispute flow behind the
+payment, the returning customer, the support agent's side of the same system — each
+with a reason. It proposes; it doesn't act. Pick one and it starts building.
+
+This is the gear for a mature map: the skill stops being a scribe and starts being a
+strategist about your whole portfolio of customer understanding.
+
+## Scene 6 — It's not about payments (2 min, optional)
 
 Open a **new session** and run the first two turns of `scripts/03-new-domain-healthcare.md`
 (a patient's first specialist visit) or `scripts/04-new-domain-onboarding.md` (an employee's
@@ -98,6 +115,7 @@ domain with no software in it at all.
 - Facts persisted as structured data, not chat fluff.
 - One journey expressed for four different audiences.
 - Provenance that tells description apart from evidence.
+- A review that finds real soft spots and points to the next journeys to map.
 - The same engine working across wildly different domains.
 
 Next: skim `gallery/` for the finished artifacts, or `scripts/` to run any piece on its own.

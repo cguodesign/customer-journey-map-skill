@@ -11,6 +11,21 @@ you can see the range of what a single map turns into.
 | `payments-handoff.md` | Express → **Engineering handoff** | *(regenerate via `scripts/02`)* spec with `- [ ]` acceptance criteria. |
 | `payments-journey.html` | Express → **Interactive HTML** | *(regenerate via `scripts/02`)* self-contained explorable map. |
 
+## Rendering showcase — `renderings/`
+
+The same skill, the same kind of map, rendered as interactive HTML across the modes.
+Open any file in a browser. The first three are **one journey** (`job-application-portal.md`)
+shown three ways — proof that rendering is a choice, not a fixed output.
+
+| File | Journey | Rendering × interaction | Shows |
+|------|---------|-------------------------|-------|
+| `job-application--multiview.html` | Job application | Multi-view (emotion / timeline / cards), scroll | Mixed-stakeholder view with a "sit in the silence" counter |
+| `job-application--timeline-dark.html` | Job application | Timeline, scroll, **dark mode** | The weeks-long wait dwarfing the minute-long steps |
+| `job-application--swimlane-zoompan.html` | Job application | Swimlane × **zoom-pan** | Pannable wall-display service blueprint |
+| `food-delivery--swimlane-themed.html` | Food delivery | Swimlane, scroll, **brand-themed** (`#6C2BD9`) | Customer lane vs. hidden backstage machinery |
+
+Source journeys for these live alongside: `job-application-portal.md`, `food-delivery-order.md`.
+
 ## How these were made / how to refresh them
 
 The storyline and brief here are real skill outputs, lightly curated. The interactive

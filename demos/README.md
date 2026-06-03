@@ -15,11 +15,13 @@ See the `journey` skill in action. Three ways in, depending on whether you want 
 
 | Script | Demonstrates | Output |
 |--------|--------------|--------|
+| [`00-hero-lifecycle`](scripts/00-hero-lifecycle.md) ⭐ | **The flagship** — one journey through all four modes (build → express → update → review) | a journey + interactive HTML |
 | [`01-build-payments-journey`](scripts/01-build-payments-journey.md) | Plan mode: build from conversation, fact persistence, clean provenance | `./.journey/online-payments-setup.md` |
 | [`02-express-four-ways`](scripts/02-express-four-ways.md) | Express: one map → Storyline, Brief, Handoff, Interactive HTML | 4 artifacts |
 | [`03-new-domain-healthcare`](scripts/03-new-domain-healthcare.md) | Same skill, a patient's first specialist visit; backstage emergence; cited-vs-casual provenance | a healthcare journey |
 | [`04-new-domain-onboarding`](scripts/04-new-domain-onboarding.md) | A new hire's first week; **Plan vs Modify** (diff, not redraw) | an HR journey |
 | [`05-degraded-pasteback`](scripts/05-degraded-pasteback.md) | No storage: paste a journey in, get the whole thing back | conversation only |
+| [`06-review-and-discover`](scripts/06-review-and-discover.md) | Review mode: health review + discover adjacent journeys | conversation only |
 
 ## What every demo is really showing
 
