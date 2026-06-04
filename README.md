@@ -120,21 +120,26 @@ runs this end to end):
 
 ## Quickstart
 
-Install so Claude Code discovers the skill:
+It's a standard **Agent Skill** — Claude Code and Codex both read the format, just from
+different folders:
 
 ```bash
-# Personal (every project)
+# Claude Code
 git clone --depth 1 https://github.com/cguodesign/customer-journey-map-skill ~/.claude/skills/journey
-# …or per-project
-git clone --depth 1 https://github.com/cguodesign/customer-journey-map-skill .claude/skills/journey
+
+# Codex
+git clone --depth 1 https://github.com/cguodesign/customer-journey-map-skill ~/.agents/skills/journey
 ```
+
+Use both? Clone once into `~/.agents/skills/journey` and symlink `~/.claude/skills/journey` to it.
 
 Then just start talking:
 
 > "Help me map the journey of a small business owner setting up online payments for the first time."
 
-It activates automatically; the map is written to `./.journey/`. **New here?** Take the
-10-minute guided tour in [`demos/walkthrough.md`](demos/walkthrough.md).
+It activates automatically from its description; the map is written to `./.journey/`. In
+Codex you can also type `$journey` to invoke it, or `/skills` to browse. **New here?** Take
+the 10-minute guided tour in [`demos/walkthrough.md`](demos/walkthrough.md).
 
 > Team collaboration (one shared, synthesized map across many contributors) is on the
 > roadmap. Today the skill is tuned for an individual building deep, durable customer

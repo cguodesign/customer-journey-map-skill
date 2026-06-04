@@ -87,13 +87,13 @@ Detect user environment and select storage adapter:
 
 | Signal | Storage | Action |
 |--------|---------|--------|
-| Running in Claude Code | `./.journey/<name>.md` | Read/write directly |
+| Local file access (Claude Code, Codex, any shell agent) | `./.journey/<name>.md` | Read/write directly |
 | Notion MCP connected | Shared workspace page | Read/write via MCP |
 | Drive MCP connected | Shared folder .md file | Read/write via MCP |
 | No storage detected | Conversation paste | Ask user to paste previous journey.md; output updated version for user to save |
 
-When running in Claude Code, always write journey files inside the `./.journey/` directory —
-create it if it does not exist — never to the project root. The path is
+When you have local file access, always write journey files inside the `./.journey/`
+directory — create it if it does not exist — never to the project root. The path is
 `./.journey/<slugified-name>.md`. Read existing journeys from the same directory.
 
 When `./.journey/` holds more than one journey, do not assume the most recent. If the user's

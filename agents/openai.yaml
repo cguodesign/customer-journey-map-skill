@@ -1,0 +1,11 @@
+# Codex skill metadata (optional). Claude Code ignores this file; Codex reads it.
+interface:
+  display_name: "Customer Journey Map"
+  short_description: "Build, update, and express living customer journey maps in plain conversation."
+  brand_color: "#d9683f"
+  default_prompt: "Help me map the journey of a small business owner setting up online payments for the first time."
+
+policy:
+  # Auto-trigger from the SKILL.md description (the skill's whole design). Users can still
+  # invoke explicitly with `$journey`.
+  allow_implicit_invocation: true
