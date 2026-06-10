@@ -47,13 +47,28 @@ _journey_file() {
   printf '%s' "$f"
 }
 
-# The author for a changelog entry: --author flag, else git, else $USER.
-_default_author() {
-  local a
-  a="$(git config user.name 2>/dev/null || true)"
-  [ -n "$a" ] && { printf '%s' "$a"; return; }
-  printf '%s' "${USER:-unknown}"
+# Where the per-user saved author lives. MUST be per-machine (home config), never
+# inside the shared ./.journey/ dataset — otherwise shared data would collide on a
+# single author and attribution would be wrong. Override with JOURNEY_AUTHOR_FILE.
+_author_file() {
+  printf '%s' "${JOURNEY_AUTHOR_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/journey-skill/author}"
 }
+
+# Resolve author + its source. Precedence: saved config > git > OS-user fallback.
+# (An explicit --author flag overrides all of this, handled at the call site.)
+# Prints "<name>\t<source>".
+_resolve_author() {
+  local cf saved g
+  cf="$(_author_file)"
+  if [ -f "$cf" ]; then
+    saved="$(awk 'NF{print; exit}' "$cf")"
+    [ -n "$saved" ] && { printf '%s\tsaved' "$saved"; return; }
+  fi
+  g="$(git config user.name 2>/dev/null || true)"
+  [ -n "$g" ] && { printf '%s\tgit' "$g"; return; }
+  printf '%s\tfallback' "${USER:-unknown}"
+}
+_default_author() { _resolve_author | cut -f1; }
 
 _now_utc() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 _today_utc() { date -u +%Y-%m-%d; }
@@ -81,15 +96,14 @@ _field_list() {
 # ---------------------------------------------------------------------------
 # validate
 # ---------------------------------------------------------------------------
-# Structural validity + field-name vocabulary + provenance notation + id rules +
-# cross-ref integrity. Exit 0 = OK, 1 = errors found.
-cmd_validate() {
-  [ $# -ge 1 ] || die "usage: journey.sh validate <journey>"
-  local f fields
-  f="$(_journey_file "$1")"
+# Validate a journey file. Args: <file> <display-name> <quiet:0|1>.
+# Structural validity + field-name vocabulary (+ registered custom fields) +
+# provenance notation + id rules + cross-ref integrity.
+# Exit 0 = OK (prints summary unless quiet), 1 = errors (always printed).
+_validate_path() {
+  local f="$1" disp="$2" quiet="$3" fields
   fields="$(_field_list)"
-
-  awk -v FNAME="$1" '
+  awk -v FNAME="$disp" -v quiet="$quiet" '
     NR==FNR { if ($0!="") vocab[$0]=1; next }
 
     function add(l,m){ NE++; EL[NE]=l; EM[NE]=m }
@@ -112,11 +126,17 @@ cmd_validate() {
           if (!p_c) add(1,"preamble missing required key: created")
           if (!p_l) add(1,"preamble missing required key: last-modified")
           if (!p_p) add(1,"preamble missing required key: personas")
-          ctx=""
+          ctx=""; incf=0
         }
         next
       }
       if (fc<2) {
+        # collect registered custom fields from the custom-fields: block
+        if ($0 ~ /^custom-fields:/) { incf=1; next }
+        if (incf) {
+          if ($0 ~ /^[ \t]+-/) { cn=$0; sub(/^[ \t]+-[ \t]*/,"",cn); sub(/:.*/,"",cn); gsub(/[ \t]/,"",cn); if (cn!="") reg[cn]=1; next }
+          else incf=0
+        }
         if ($0 ~ /^journey:/)       p_j=1
         if ($0 ~ /^created:/)       p_c=1
         if ($0 ~ /^last-modified:/) p_l=1
@@ -162,8 +182,14 @@ cmd_validate() {
         } else if (ctx=="step") {
           if (fname=="persona") hP=1
           if (fname=="description") hD=1
-          if (fname !~ /_/ && !(fname in vocab))
-            add(FNR,"unknown field (not in schema): \"" fname "\"")
+          if (!(fname in vocab)) {
+            if (fname ~ /_/) {
+              if (!(fname in reg))
+                add(FNR,"custom field not registered in preamble: \"" fname "\" — run: journey.sh commit <journey> register-field " fname " \"<description>\"")
+            } else {
+              add(FNR,"unknown field (not in schema): \"" fname "\" — if user-confirmed, register it as a custom field with a namespace prefix (e.g. team_" fname ") via register-field")
+            }
+          }
         }
       }
 
@@ -184,17 +210,20 @@ cmd_validate() {
       for (i=1;i<=NR2;i++) if (!(RT[i] in sseen)) add(RL[i],"dangling cross-ref: → " RT[i] " (no such step)")
       ns=0; for (k in sseen) ns++
       nm=0; for (k in mseen) nm++
-      if (NE==0) { printf "OK: %s (%d steps, %d milestones)\n", FNAME, ns, nm; exit 0 }
-      # print errors in line order
-      for (i=1;i<=NE;i++) {
-        # simple insertion sort by line for readability
+      if (NE==0) { if (!quiet) printf "OK: %s (%d steps, %d milestones)\n", FNAME, ns, nm; exit 0 }
+      for (i=1;i<=NE;i++)
         for (j=i+1;j<=NE;j++) if (EL[j]<EL[i]) { tl=EL[i];EL[i]=EL[j];EL[j]=tl; tm=EM[i];EM[i]=EM[j];EM[j]=tm }
-      }
       for (i=1;i<=NE;i++) printf "ERROR %s:%d: %s\n", FNAME, EL[i], EM[i]
-      printf "FAILED: %d error(s)\n", NE
+      if (!quiet) printf "FAILED: %d error(s)\n", NE
       exit 1
     }
   ' "$fields" "$f"
+}
+
+cmd_validate() {
+  [ $# -ge 1 ] || die "usage: journey.sh validate <journey>"
+  local f; f="$(_journey_file "$1")"
+  _validate_path "$f" "$1" 0
 }
 
 # ---------------------------------------------------------------------------
@@ -243,7 +272,7 @@ _finalize() {
   ' "$tmp" > "$tmp.stamp" && mv "$tmp.stamp" "$tmp"
 
   # validate the candidate before it touches the real file
-  if ! JOURNEY_DIR="$(dirname "$f")" cmd_validate_file "$tmp" >/tmp/journey-validate.$$ 2>&1; then
+  if ! _validate_path "$tmp" "$name" 1 >/tmp/journey-validate.$$ 2>&1; then
     cat /tmp/journey-validate.$$ >&2
     rm -f "$tmp" /tmp/journey-validate.$$
     die "commit rejected: result would be invalid (no changes written)"
@@ -258,47 +287,13 @@ _finalize() {
   printf 'committed %s %s on %s — logged to %s\n' "$op" "$target" "$name" "$log"
 }
 
-# Validate an arbitrary file path (used for the pre-write candidate check).
-cmd_validate_file() {
-  local f="$1" fields
-  fields="$(_field_list)"
-  awk -v FNAME="$f" '
-    NR==FNR { if ($0!="") vocab[$0]=1; next }
-    function add(l,m){ NE++; EL[NE]=l; EM[NE]=m }
-    function flush(){
-      if (ctx=="milestone") { if(!hT) add(bl,"milestone \"" cid "\": missing title"); if(!hD) add(bl,"milestone \"" cid "\": missing description") }
-      else if (ctx=="step") { if(!hP) add(bl,"step \"" cid "\": missing persona"); if(!hD) add(bl,"step \"" cid "\": missing description") }
-    }
-    {
-      if ($0=="---") { fc++; if(fc==2){ if(!p_j)add(1,"missing journey"); if(!p_c)add(1,"missing created"); if(!p_l)add(1,"missing last-modified"); if(!p_p)add(1,"missing personas"); ctx="" } next }
-      if (fc<2) { if($0~/^journey:/)p_j=1; if($0~/^created:/)p_c=1; if($0~/^last-modified:/)p_l=1; if($0~/^personas:/)p_p=1; next }
-      if ($0 ~ /^## Milestone:/) { flush(); ctx="milestone"; bl=FNR; hT=0;hD=0; id=$0;sub(/^## Milestone:[ \t]*/,"",id);gsub(/[ \t]+$/,"",id);cid=id
-        if(id!~/^[a-z0-9]+(-[a-z0-9]+)*$/)add(FNR,"milestone id not kebab: \"" id "\""); if(id in mseen)add(FNR,"dup milestone id: \"" id "\""); mseen[id]=1; next }
-      if ($0 ~ /^### Step:/) { flush(); ctx="step"; bl=FNR; hP=0;hD=0; id=$0;sub(/^### Step:[ \t]*/,"",id);gsub(/[ \t]+$/,"",id);cid=id
-        if(id!~/^[a-z0-9]+(-[a-z0-9]+)*$/)add(FNR,"step id not kebab: \"" id "\""); if(id in sseen)add(FNR,"dup step id: \"" id "\""); sseen[id]=1; next }
-      if ($0 ~ /_provenance:/) { pv=$0;sub(/^.*_provenance:[ \t]*/,"",pv);gsub(/[ \t]+$/,"",pv)
-        if(pv~/^user-modified, [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$/){} else if(pv~/^source:[ \t]*.+/){} else if(pv~/^auto-composite$/){} else add(FNR,"malformed _provenance: \"" pv "\""); next }
-      if ($0 ~ /^- [a-zA-Z][a-zA-Z0-9_-]*:/) { fname=$0;sub(/^- /,"",fname);sub(/:.*/,"",fname)
-        if(ctx=="milestone"){ if(fname=="title")hT=1; if(fname=="description")hD=1 }
-        else if(ctx=="step"){ if(fname=="persona")hP=1; if(fname=="description")hD=1; if(fname!~/_/ && !(fname in vocab))add(FNR,"unknown field: \"" fname "\"") } }
-      if (index($0,"→")>0){ n=split($0,P,"→"); for(i=2;i<=n;i++){ t=P[i];sub(/^[ \t]+/,"",t); if(match(t,/^[a-z0-9][a-z0-9-]*/)){ NR2++;RT[NR2]=substr(t,1,RLENGTH);RL[NR2]=FNR } } }
-    }
-    END {
-      flush()
-      for(i=1;i<=NR2;i++) if(!(RT[i] in sseen)) add(RL[i],"dangling cross-ref: → " RT[i])
-      if(NE==0){ exit 0 }
-      for(i=1;i<=NE;i++) printf "ERROR %s:%d: %s\n", FNAME, EL[i], EM[i]
-      exit 1
-    }
-  ' "$fields" "$f"
-}
-
 cmd_commit() {
   [ $# -ge 2 ] || die "usage: journey.sh commit <journey> <op> [args]   (op: insert-step|replace-step|remove-step|insert-milestone|remove-milestone)"
   local name="$1" op="$2"; shift 2
   local f; f="$(_journey_file "$name")"
 
   local anchor="" pos="" target="" note="" author="" blockfile=""
+  local -a pos_args=()
   while [ $# -gt 0 ]; do
     case "$1" in
       --after)      pos="after"; anchor="$2"; shift 2;;
@@ -307,15 +302,16 @@ cmd_commit() {
       --note)       note="$2"; shift 2;;
       --author)     author="$2"; shift 2;;
       --*)          die "unknown flag: $1";;
-      *)            target="$1"; shift;;   # positional id (for replace/remove)
+      *)            pos_args+=("$1"); shift;;   # positionals (id; field+desc for register-field)
     esac
   done
+  [ ${#pos_args[@]} -gt 0 ] && target="${pos_args[0]}"
   [ -n "$author" ] || author="$(_default_author)"
 
   # block content (insert/replace) from --block-file or stdin
   local blk=""
   case "$op" in
-    insert-*|replace-*)
+    insert-step|replace-step|insert-milestone)
       blk="$(mktemp)"
       if [ -n "$blockfile" ]; then cp "$blockfile" "$blk"; else cat > "$blk"; fi
       # strip trailing blank lines from the supplied block
@@ -406,6 +402,44 @@ cmd_commit() {
         END{ if(!found) exit 3 }
       ' "$f" > "$tmp" || { rm -f "$tmp"; die "remove-milestone: not found: $target"; }
       [ -z "$note" ] && note="removed milestone $target"
+      ;;
+
+    register-field)
+      local field="${pos_args[0]:-}" desc="${pos_args[1]:-}"
+      [ -n "$field" ] || die "register-field requires: <field_name> \"<description>\""
+      [ -n "$desc" ]  || die "register-field requires a description: register-field $field \"<description>\""
+      target="$field"
+      case "$field" in
+        *_*) ;;
+        *) printf 'journey.sh: warning: custom field "%s" has no namespace prefix (team_/vertical_/experiment_); registering as-is (suggested, not enforced).\n' "$field" >&2;;
+      esac
+      # idempotency: already in the preamble custom-fields block?
+      if awk -v ff="$field" 'BEGIN{fc=0} /^---$/{fc++} fc==1 && $0 ~ ("^[ \t]*-[ \t]*" ff ":") {print "Y"; exit}' "$f" | grep -q Y; then
+        rm -f "$tmp"; die "custom field already registered: $field"
+      fi
+      awk -v field="$field" -v desc="$desc" '
+        BEGIN{ fc=0; inserted=0; has_cf=0; in_cf=0 }
+        function newline(){ return "  - " field ": \"" desc "\"" }
+        /^---$/ {
+          fc++
+          if (fc==2 && !inserted) {
+            if (!has_cf) { print "custom-fields:"; print newline() }
+            else if (in_cf) { print newline() }
+            inserted=1
+          }
+          print; next
+        }
+        fc==1 {
+          if ($0 ~ /^custom-fields:[ \t]*$/) { has_cf=1; in_cf=1; print; next }
+          if (in_cf) {
+            if ($0 ~ /^[ \t]+-/) { print; next }
+            else { if (!inserted) { print newline(); inserted=1 } in_cf=0; print; next }
+          }
+          print; next
+        }
+        { print }
+      ' "$f" > "$tmp"
+      [ -z "$note" ] && note="registered custom field $field"
       ;;
 
     *) rm -f "$tmp" "$blk" 2>/dev/null || true; die "unknown op: $op";;
@@ -525,6 +559,31 @@ cmd_audit() {
 }
 
 # ---------------------------------------------------------------------------
+# whoami / set-author — change attribution identity
+# ---------------------------------------------------------------------------
+cmd_whoami() {
+  local line name src
+  line="$(_resolve_author)"
+  name="$(printf '%s' "$line" | cut -f1)"
+  src="$(printf '%s' "$line" | cut -f2)"
+  printf 'author: %s\nsource: %s\n' "$name" "$src"
+  if [ "$src" = fallback ]; then
+    printf 'note: no git user.name and no saved author — using the OS username as a guess.\n'
+    printf '      ask the user what name/team to attribute changes to, then run:\n'
+    printf '        journey.sh set-author "<name>"\n'
+  fi
+}
+
+cmd_set_author() {
+  [ $# -ge 1 ] || die "usage: journey.sh set-author <name>"
+  local name="$1" cf dir
+  cf="$(_author_file)"; dir="$(dirname "$cf")"
+  mkdir -p "$dir"
+  printf '%s\n' "$name" > "$cf"
+  printf 'saved author: %s → %s\n' "$name" "$cf"
+}
+
+# ---------------------------------------------------------------------------
 # usage / dispatch
 # ---------------------------------------------------------------------------
 usage() {
@@ -537,6 +596,8 @@ USAGE
   journey.sh query    '<filter>'
   journey.sh search   <text>
   journey.sh audit    [--journey X] [--since DATE] [--author A] [--target T]
+  journey.sh whoami
+  journey.sh set-author <name>
 
 COMMIT OPS
   insert-step      --after <id> | --before <id>   (block from --block-file or stdin)
@@ -544,6 +605,7 @@ COMMIT OPS
   remove-step      <id>
   insert-milestone --after <id> | --before <id>    (block from --block-file or stdin)
   remove-milestone <id>
+  register-field   <field_name> "<description>"    (adds to preamble custom-fields)
   common flags: --note <text>  --author <name>
 
 QUERY FILTERS
@@ -551,8 +613,9 @@ QUERY FILTERS
   persona:<name>        field:<name>         missing:<name>
 
 ENV
-  JOURNEY_DIR     dataset dir (default ./.journey)
-  JOURNEY_SCHEMA  schema file (default <script>/../references/journey.schema.md)
+  JOURNEY_DIR          dataset dir (default ./.journey)
+  JOURNEY_SCHEMA       schema file (default <script>/../references/journey.schema.md)
+  JOURNEY_AUTHOR_FILE  saved-author file (default $XDG_CONFIG_HOME/journey-skill/author)
 EOF
 }
 
@@ -560,11 +623,13 @@ main() {
   [ $# -ge 1 ] || { usage; exit 2; }
   local cmd="$1"; shift
   case "$cmd" in
-    validate) cmd_validate "$@";;
-    commit)   cmd_commit "$@";;
-    query)    cmd_query "$@";;
-    search)   cmd_search "$@";;
-    audit)    cmd_audit "$@";;
+    validate)   cmd_validate "$@";;
+    commit)     cmd_commit "$@";;
+    query)      cmd_query "$@";;
+    search)     cmd_search "$@";;
+    audit)      cmd_audit "$@";;
+    whoami)     cmd_whoami "$@";;
+    set-author) cmd_set_author "$@";;
     help|-h|--help) usage;;
     *) die "unknown command: $cmd (try: journey.sh help)";;
   esac

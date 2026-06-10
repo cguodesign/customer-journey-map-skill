@@ -15,11 +15,14 @@ stays with the model; mechanical/correctness work is deterministic here.
 | 1 | `commit` | Block-level node CRUD (`insert`/`replace`/`remove` a step or milestone by id) → place + validate + log. **The write path.** | ✅ built + tested |
 | 2 | `validate` | Well-formed file + field names ∈ schema (field list awk-extracted from `references/journey.schema.md`). Called by `commit`; also standalone. | ✅ built + tested |
 | 3 | `query` / `search` / `audit` | Filter/search across `./.journey/*.md`; `audit` reads the changelogs. | ✅ built + tested |
-| 4 | `render` | LLM picks mode/params; a fill step produces HTML. Lower priority (LLM does it today). | ⬜ stays LLM-side |
+| 4 | `render` | LLM picks mode/params; a fill step produces HTML. Lower priority (LLM does it today). | ⬜ stays LLM-side (no command) |
 
-Tests: `tests/journey.sh.test.sh` (in the outer repo) — 28 assertions over validate / CRUD /
-provenance-preserving replace / query / search / audit against the sandbox fixture.
-Run: `bash tests/journey.sh.test.sh`.
+Plus: `register-field` (commit op — registers a custom field in the preamble), and
+`whoami` / `set-author` (change-attribution identity, stored per-user, never in the dataset).
+
+Tests: `tests/journey.sh.test.sh` (in the outer repo) — 44 assertions over validate / CRUD /
+provenance-preserving replace / query / search / audit / author identity / custom-field
+registration, against the sandbox fixture. Run: `bash tests/journey.sh.test.sh`.
 
 ### Two deviations from the original design (be honest about the ceiling)
 - **Linear `next:` regeneration is deferred, not automatic.** Auto-rewriting `next:` from

@@ -111,6 +111,35 @@ Never assume storage adapter presence. Always support paste-back flow.
 
 ---
 
+## Deterministic write path (local files)
+
+When you have local file access, a shipped script does the mechanical work — prefer it over
+hand-editing or hand-maintaining a log:
+
+- **`scripts/journey.sh validate <journey>`** — check a map is well-formed before/after edits.
+- **`scripts/journey.sh commit <journey> <op>`** — block-level node CRUD (`insert-step` /
+  `replace-step` / `remove-step` / `insert-milestone` / `remove-milestone`). You compose the
+  full node block; the script places it, validates, and appends the changelog. **Logging is the
+  write path** — never hand-maintain a changelog. Emit only the one changed block, not the file.
+- **`scripts/journey.sh query …` / `search …` / `audit …`** — structured search across the
+  dataset and changelog (used heavily in Review).
+
+**Authorship.** `commit` attributes each change to an author (saved name → git → OS user). If
+`scripts/journey.sh whoami` reports `source: fallback`, ask the user **once** what name or team
+to attribute changes to, then run `scripts/journey.sh set-author "<name>"` (stored per-user,
+never inside the shared dataset). Don't ask when git already provides a name.
+
+**Registering a custom field.** When the user confirms a novel field, register it
+deterministically before using it: `scripts/journey.sh commit <journey> register-field
+<prefix_name> "<description>"` (namespace prefix `team_` / `vertical_` / `experiment_`).
+`validate` rejects both an unregistered custom field and an un-prefixed unknown field — route
+both through this flow.
+
+This script is the local / Codex adapter's write path; Notion/Drive adapters keep their MCP
+flow. Rendering stays model-side (there is no `render` command).
+
+---
+
 ## Provenance (automatic, exception-only)
 
 Track field-level provenance without user involvement. Markers are the **exception, not the rule** — in a typical file the large majority of fields carry no marker. A marker is a signal; if everything is marked, the signal is lost.
