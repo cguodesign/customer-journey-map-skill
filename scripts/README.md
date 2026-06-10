@@ -12,10 +12,21 @@ stays with the model; mechanical/correctness work is deterministic here.
 
 | # | `journey.sh …` | Does | Status |
 |---|----------------|------|--------|
-| 1 | `commit` | Block-level node CRUD (`insert`/`replace`/`remove` a step or milestone by id) → place + validate + log. **The write path.** | ⬜ |
-| 2 | `validate` | Well-formed file + field names ∈ schema (field list awk-extracted from `references/journey.schema.md`). Called by `commit`; also standalone. | ⬜ |
-| 3 | `query` / `search` | Filter/search across `./.journey/*.md` + the changelogs (audit). | ⬜ |
-| 4 | `render` | LLM picks mode/params; a fill step produces HTML. Lower priority (LLM does it today). | ⬜ |
+| 1 | `commit` | Block-level node CRUD (`insert`/`replace`/`remove` a step or milestone by id) → place + validate + log. **The write path.** | ✅ built + tested |
+| 2 | `validate` | Well-formed file + field names ∈ schema (field list awk-extracted from `references/journey.schema.md`). Called by `commit`; also standalone. | ✅ built + tested |
+| 3 | `query` / `search` / `audit` | Filter/search across `./.journey/*.md`; `audit` reads the changelogs. | ✅ built + tested |
+| 4 | `render` | LLM picks mode/params; a fill step produces HTML. Lower priority (LLM does it today). | ⬜ stays LLM-side |
+
+Tests: `tests/journey.sh.test.sh` (in the outer repo) — 28 assertions over validate / CRUD /
+provenance-preserving replace / query / search / audit against the sandbox fixture.
+Run: `bash tests/journey.sh.test.sh`.
+
+### Two deviations from the original design (be honest about the ceiling)
+- **Linear `next:` regeneration is deferred, not automatic.** Auto-rewriting `next:` from
+  document order corrupts branchy maps (failure steps, exit points). The LLM composes the
+  correct `next:` in the block it hands to `commit`; `commit` does not touch links. (phase 2)
+- **Provenance-preserving `replace` is top-level only.** Unchanged top-level field values keep
+  their `_provenance`; nested provenance (under `backstage:` etc.) is the LLM's to reproduce.
 
 ## Key decisions (see data-layer.md for the why)
 
