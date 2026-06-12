@@ -178,7 +178,7 @@ footer a:hover{color:var(--ink)}
   <div class="caps">
     <div class="cap"><h3>A real, structured map</h3><p>Describe the flow in plain words; the skill keeps a canonical journey file — milestones, steps, and the fields that matter on each.</p></div>
     <div class="cap"><h3>A vocabulary you never learn</h3><p>~100 service-design fields sit underneath. You never pick from a menu — they surface only when the conversation calls for them.</p></div>
-    <div class="cap"><h3>A living document</h3><p>It's a file that persists across sessions and grows by diff. Come back in three weeks and it's still your collaborator, not a blank slate.</p></div>
+    <div class="cap"><h3>A living document</h3><p>It's a file that persists across sessions and grows by diff — every change checked against the schema and recorded, so it grows without quietly drifting or breaking. Come back in three weeks and it's still your collaborator, not a blank slate.</p></div>
     <div class="cap"><h3>Provenance, automatically</h3><p>Every field tracks what you asserted, what's evidence-backed, and what the model guessed — so it won't dress a guess up as a statistic.</p></div>
   </div>
   <div class="snippet"><span class="c">### Step: wait-for-bank-verification</span><br>- persona: [Maya]<br>- <span class="k">emotion</span>: Anxiety → suspicion → abandonment<br>- <span class="k">duration</span>: 3 business days<br>- <span class="k">painPoint</span>: "No feedback during the wait — most people think it's broken"<br>- <span class="k">failureMode</span>: Assumes verification failed and abandons setup<br>- <span class="k">momentOfTruth</span>: The single biggest drop-off point in the journey</div>
@@ -205,8 +205,8 @@ footer a:hover{color:var(--ink)}
 <section><div class="narrow">
   <div class="sec-head"><div class="kicker">Why it's different</div><h2>A Figma file vs. a <em>living</em> map.</h2></div>
   <div class="vs">
-    <div class="card old"><h3>A static map</h3><ul><li>Beautiful the week it's made</li><li>Stale by the next sprint</li><li>Re-drawn from scratch when things change</li><li>One format, one audience</li><li>Lives in a file nobody reopens</li></ul></div>
-    <div class="card new"><h3>Journey</h3><ul><li>Built from a conversation</li><li>Updated by diff as you learn</li><li>Persists and grows across sessions</li><li>Renders for any audience on demand</li><li>Knows evidence from guesswork</li></ul></div>
+    <div class="card old"><h3>A static map</h3><ul><li>Beautiful the week it's made</li><li>Stale by the next sprint</li><li>Re-drawn from scratch when things change</li><li>No record of what changed, or why</li><li>One format, one audience</li><li>Lives in a file nobody reopens</li></ul></div>
+    <div class="card new"><h3>Journey</h3><ul><li>Built from a conversation</li><li>Updated by diff as you learn</li><li>Persists and grows across sessions</li><li>Every change validated and logged — never silently drifts</li><li>Renders for any audience on demand</li><li>Knows evidence from guesswork</li></ul></div>
   </div>
 </div></section>
 
@@ -214,9 +214,10 @@ footer a:hover{color:var(--ink)}
   <div class="sec-head"><div class="kicker">FAQ</div><h2>Your questions, <em>answered</em>.</h2></div>
   <div class="faq">
     <details><summary>Do I need to be technical to use it?</summary><p>No. You talk; it writes the structure. You never touch the schema, a form, or a diagram tool.</p></details>
-    <details><summary>Does it need npm or a build step?</summary><p>No. It's a Claude Code skill — pure markdown and static templates, zero runtime dependencies. You install it by cloning into your skills folder.</p></details>
+    <details><summary>Does it need npm or a build step?</summary><p>No. It's a Claude Code skill — pure markdown, static templates, and one POSIX shell script. Zero runtime dependencies: no npm, no Node, no Python. You install it by cloning into your skills folder.</p></details>
+    <details><summary>How do I know it won't make things up or corrupt my map?</summary><p>Writes don't run on the model's good intentions. Every edit goes through a small deterministic script that validates it against the schema, places it by stable id, and records it to a per-map changelog — so a malformed change is rejected before it lands, and you get a full who-changed-what-when history. Provenance is enforced the same way: a cited number carries its source; an un-evidenced one is flagged as a hypothesis, never dressed up as a statistic.</p></details>
     <details><summary>Where do my maps get saved?</summary><p>To <code>./.journey/&lt;name&gt;.md</code> in your project — a plain markdown file you own. No storage? It works entirely in the conversation and hands the map back to you to save.</p></details>
-    <details><summary>Can my team share one map?</summary><p>Today it's tuned for an individual building deep, durable understanding. Shared, multi-contributor maps (Notion/Drive) are on the roadmap.</p></details>
+    <details><summary>Can my team share one map?</summary><p>The foundation is already there — every change is attributed and logged, and maps are queryable across a whole portfolio. Full multi-writer merge and shared-storage sync (Notion/Drive) are what's next. Today it's tuned for an individual building deep, durable understanding.</p></details>
     <details><summary>What does it cost?</summary><p>It's open source under MIT. You bring Claude Code.</p></details>
   </div>
 </div></section>
