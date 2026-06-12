@@ -450,6 +450,37 @@ cmd_commit() {
 }
 
 # ---------------------------------------------------------------------------
+# new — create a journey file (the create path; commit edits an existing one)
+# ---------------------------------------------------------------------------
+# The LLM composes the full initial journey (preamble + milestones + steps); the
+# script validates it, writes it, and logs a `create` entry. Refuses to clobber an
+# existing journey — use `commit` to edit that.
+cmd_new() {
+  [ $# -ge 1 ] || die "usage: journey.sh new <name>   (full journey markdown via --block-file or stdin)"
+  local name="$1"; shift
+  local note="" author="" blockfile=""
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --block-file) blockfile="$2"; shift 2;;
+      --note)       note="$2"; shift 2;;
+      --author)     author="$2"; shift 2;;
+      --*)          die "unknown flag: $1";;
+      *)            die "unexpected arg: $1";;
+    esac
+  done
+  [ -n "$author" ] || author="$(_default_author)"
+  name="${name%.md}"
+  local f="$JOURNEY_DIR/$name.md"
+  [ -f "$f" ] && die "journey already exists: $name (use 'commit' to edit it)"
+  mkdir -p "$JOURNEY_DIR"
+  local tmp; tmp="$(mktemp)"
+  if [ -n "$blockfile" ]; then cp "$blockfile" "$tmp"; else cat > "$tmp"; fi
+  [ -s "$tmp" ] || { rm -f "$tmp"; die "empty journey content (provide via --block-file or stdin)"; }
+  [ -z "$note" ] && note="created journey"
+  _finalize "$name" "$f" "create" "$name" "$note" "$tmp" "$author"
+}
+
+# ---------------------------------------------------------------------------
 # search — free text across the dataset, with step context
 # ---------------------------------------------------------------------------
 cmd_search() {
@@ -592,6 +623,7 @@ journey.sh — deterministic toolbelt for the Journey Skill
 
 USAGE
   journey.sh validate <journey>
+  journey.sh new      <journey>            (full journey markdown via --block-file or stdin)
   journey.sh commit   <journey> <op> [args]
   journey.sh query    '<filter>'
   journey.sh search   <text>
@@ -624,6 +656,7 @@ main() {
   local cmd="$1"; shift
   case "$cmd" in
     validate)   cmd_validate "$@";;
+    new)        cmd_new "$@";;
     commit)     cmd_commit "$@";;
     query)      cmd_query "$@";;
     search)     cmd_search "$@";;

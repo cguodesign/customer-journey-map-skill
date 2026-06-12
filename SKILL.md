@@ -117,6 +117,8 @@ When you have local file access, a shipped script does the mechanical work — p
 hand-editing or hand-maintaining a log:
 
 - **`scripts/journey.sh validate <journey>`** — check a map is well-formed before/after edits.
+- **`scripts/journey.sh new <journey>`** — create a journey (Plan's first write). You compose the
+  full file (preamble + milestones + steps); the script validates, writes, and logs `create`.
 - **`scripts/journey.sh commit <journey> <op>`** — block-level node CRUD (`insert-step` /
   `replace-step` / `remove-step` / `insert-milestone` / `remove-milestone`). You compose the
   full node block; the script places it, validates, and appends the changelog. **Logging is the

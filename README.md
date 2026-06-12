@@ -142,8 +142,10 @@ Codex you can also type `$journey` to invoke it, or `/skills` to browse. **New h
 the 10-minute guided tour in [`demos/walkthrough.md`](demos/walkthrough.md).
 
 > Team collaboration (one shared, synthesized map across many contributors) is on the
-> roadmap. Today the skill is tuned for an individual building deep, durable customer
-> understanding.
+> roadmap — its data foundation is already in place: every change is attributed and logged
+> to a per-journey changelog, and the dataset is queryable across journeys. What's still
+> coming is multi-writer merge and shared-storage sync. Today the skill is tuned for an
+> individual building deep, durable customer understanding.
 
 ---
 
@@ -151,14 +153,25 @@ the 10-minute guided tour in [`demos/walkthrough.md`](demos/walkthrough.md).
 
 ```
 SKILL.md                          # Behavior contract (the entry point)
+scripts/
+  journey.sh                      # Deterministic backbone: validated writes + an audit log of every change
 references/
   journey.schema.md               # 13 categories, ~100 fields, provenance + composite rules
   journey.format.md               # Canonical markdown format
+  modes/                          # Per-mode playbooks (plan, modify, express, review), loaded on demand
   html-rendering-guide.md         # Interactive HTML: rendering matrix, color, data mapping
 assets/templates/                 # 5 rendering modes (card, timeline, swimlane, emotion, storyboard) + interaction + wireframe templates
 examples/                         # Golden examples
 demos/                            # Journey sources + expression examples (markdown), runnable scripts, guided walkthrough
 ```
+
+**A deterministic backbone, in pure bash.** Writes don't go through the model's best effort —
+they go through `scripts/journey.sh` (POSIX shell + awk, zero runtime deps): it validates every
+edit against the schema, places nodes by stable id, and appends a per-journey changelog. So edits
+are cheap (the model emits one changed block, not the whole file), a malformed write is rejected
+before it lands, and the map carries a real **who-changed-what-when history** — the foundation for
+many people sharing one set of journeys. The model still does the generative work (building from
+conversation, prose, rendering); the script does the mechanical work (place, validate, log, query).
 
 The interactive HTML renderings and screenshots live on the
 [showcase site](https://cguodesign.github.io/customer-journey-map-skill/) (the `gh-pages`

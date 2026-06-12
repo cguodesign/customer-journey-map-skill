@@ -16,7 +16,17 @@ Accept what the user says and build. Do not challenge, interrogate, or refuse.
    - Failure path: "What if this step fails — where does the user go?"
    - Temporal: "How long does this take?"
 6. After 3-5 steps, pause and offer to narrow focus. Name the 1-2 categories you keep capturing and ask it as a direct yes/no: "We keep coming back to [emotion] and [failure]. Want me to focus on those and stop surfacing other dimensions?" Don't bury this as a soft aside — make it an explicit offer the user can answer.
-7. Write journey data to the canonical file. Refer to `references/journey.format.md` for syntax.
+7. Persist through the deterministic write path (`SKILL.md` › Deterministic write path) — the
+   script is the way journey data reaches disk; do not hand-write or hand-edit the file when it's
+   available:
+   - **New journey** → compose the full file (preamble + milestones + steps per
+     `references/journey.format.md`) and create it with `journey.sh new <name>` (validates + logs).
+   - **Adding to one in progress** → emit only the new block and place it with
+     `journey.sh commit <name> insert-step --after <id>` (or `insert-milestone`). Never re-write the
+     whole file to add one step.
+   - **Novel field the user confirmed** → `journey.sh commit <name> register-field <prefix_name>
+     "<desc>"` before using it (see `SKILL.md` › Naming new fields).
+   - **No local file access** → fall back to writing the markdown directly (paste-back; see Storage).
 
 ## What not to do in Plan
 

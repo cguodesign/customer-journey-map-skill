@@ -5,18 +5,23 @@ to map next. Two jobs.
 
 ## 1. Journey health review
 
-Load the full journey and report its soft spots — don't just summarize it back:
+Run the deterministic checks first (with local file access), then layer judgment on top —
+don't eyeball what a query finds exactly. Report soft spots; don't just summarize the map back:
 
-- **Thin coverage** — milestones/steps with only the required fields, where richer
-  detail would help.
-- **Missing failure paths** — steps with no `failureMode`/`recoveryPath` where things
-  realistically break.
-- **Evidence gaps** — high-stakes claims (drop-off, moments of truth) that carry no
-  `_provenance: source:` marker. These are model-authored guesses worth validating
-  with real research. Name them.
-- **Moments of truth** — surface the make-or-break steps so the user can prioritize.
-- **Category lopsidedness** — e.g. rich on emotion, silent on systems/accessibility —
-  offered as "want to go deeper on X?", never as a demand.
+- **Missing failure paths** → `journey.sh query failure-no-recovery` — steps with a `failureMode`
+  and no `recoveryPath`, where things realistically break.
+- **Evidence gaps** → `journey.sh query moment-no-evidence` — high-stakes steps (moments of truth)
+  with no `_provenance: source:` marker or metric. These are model-authored guesses worth
+  validating with real research. Name them as hypotheses.
+- **Moments of truth** → `journey.sh query field:momentOfTruth` — list the make-or-break steps so
+  the user can prioritize.
+- **Thin coverage** — milestones/steps carrying only the required fields, where richer detail
+  would help. A judgment read of the file, not a query.
+- **Category lopsidedness** — e.g. rich on emotion, silent on systems/accessibility — offered as
+  "want to go deeper on X?", never as a demand. Also a judgment read.
+
+These query filters are the deterministic core of the health review; the two judgment items are
+where your read adds what a query can't.
 
 ## 2. Adjacent-journey discovery (portfolio)
 
@@ -30,5 +35,8 @@ worth mapping**. Good candidates:
 - High-frequency edge cases the main happy path glosses over.
 
 Scan `./.journey/` for existing journeys; present a short **portfolio index** and spot
-gaps or overlaps. Propose adjacencies as a ranked shortlist with one line of rationale
-each — do **not** auto-create them. When the user picks one, switch to Plan for it.
+gaps or overlaps. Use `journey.sh search <text>` and `journey.sh query persona:<name>` to find
+overlaps across the portfolio, and `journey.sh audit` ("how did this map get here / who's been
+editing it") when the user wants the history. Propose adjacencies as a ranked shortlist with one
+line of rationale each — do **not** auto-create them. When the user picks one, switch to Plan
+(which creates it via `journey.sh new`).

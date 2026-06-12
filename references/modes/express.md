@@ -36,7 +36,9 @@ Transform journey understanding into audience-appropriate output.
 
    Consult `assets/templates/rendering/` for HTML structure, `assets/templates/interaction/` for JS behavior, and `assets/templates/wireframes/` for combined layout reference. See `references/html-rendering-guide.md` for color system and data mapping.
 
-4. Render from journey file data. Include only active categories and filled fields.
+4. Render from journey file data. Include only active categories and filled fields. (Express only
+   reads — with local file access, `journey.sh validate <name>` first if you're unsure the file is
+   well-formed; rendering itself stays model-side, there is no `render` command.)
 5. Show provenance in output:
    - Storyline: footnotes/endnotes (preserve narrative flow)
    - Brief: inline attribution markers
