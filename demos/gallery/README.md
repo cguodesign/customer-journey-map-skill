@@ -1,46 +1,75 @@
 # Gallery — sample outputs
 
-Finished artifacts produced by the journey skill, all from **one** source journey, so
-you can see the range of what a single map turns into.
+Finished artifacts produced by the journey skill. The **canonical sample** is
+`job-application-portal.md` — 15 steps, 4 milestones, 2 forks, 5 endings, and the
+widest field coverage of any map here (12 of the schema's 13 categories). Everything
+in the rendering showcase below is drawn from that one file, so you can see the range
+of what a single map turns into.
 
 | File | Format | Shows |
 |------|--------|-------|
-| `payments-journey.md` | **Source journey** (Plan output) | The canonical map everything else is rendered from — 5 milestones, 15 steps, persona Maya. |
+| `job-application-portal.md` | **Canonical source journey** | The map every rendering below is built from — 15 steps, persona Maya, an AI screening fork, four ways it can end. |
+| `payments-journey.md` | Source journey (Plan output) | The narrative sample behind the storyline and brief. Thin on fields by design — it shows what a map looks like straight out of a first conversation. |
 | `payments-storyline.md` | Express → **Storyline** | Character-driven narrative for a kickoff; footnote provenance. |
 | `payments-brief.md` | Express → **One-page brief** | Leadership decision doc; problem→fix→ask→cost; inline attribution. |
+| `food-delivery-order.md` | Source journey (service blueprint) | A 5-step backstage fan-out, kept as the service-layer teaching example. |
 | `payments-handoff.md` | Express → **Engineering handoff** | *(regenerate via `scripts/02`)* spec with `- [ ]` acceptance criteria. |
-| `payments-journey.html` | Express → **Interactive HTML** | *(regenerate via `scripts/02`)* self-contained explorable map. |
 
 ## Rendering showcase — explore live
 
-The same skill, the same kind of map, rendered as interactive HTML across the modes —
-**[explore them live →](https://cguodesign.github.io/customer-journey-map-skill/#demos)**.
-The interactive HTML files live on the showcase site (kept out of the installed skill so
-clones stay lean); the source journeys stay here. The first three are **one journey**
-shown three ways — rendering is a choice, not a fixed output.
+**[Explore them live →](https://cguodesign.github.io/customer-journey-map-skill/#demos)**
+The interactive HTML lives on the showcase site (kept out of the installed skill so clones
+stay lean); the source journeys stay here.
 
-| Rendering × interaction | Journey | Live |
+**One journey, eight renderings.** Rendering is a choice, not a fixed output:
+
+| Rendering × interaction | Argument it makes | Live |
 |---|---|---|
-| Multi-view (emotion / timeline / cards), scroll | Job application | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--multiview.html) |
-| Timeline, scroll, **dark mode** | Job application | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--timeline-dark.html) |
-| Swimlane × **zoom-pan** | Job application | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--swimlane-zoompan.html) |
-| Swimlane, scroll, **brand-themed** | Food delivery | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/food-delivery--swimlane-themed.html) |
-| **Storyboard**, scroll | Job application | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--storyboard.html) |
+| Multi-view (emotion / timeline / cards), scroll | One map, three audiences | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--multiview.html) |
+| Timeline, scroll, **dark** | The wait dwarfs every step | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--timeline-dark.html) |
+| Swimlane × **zoom-pan** | What the customer never sees | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--swimlane-zoompan.html) |
+| **Storyboard**, scroll | Live it frame by frame | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--storyboard.html) |
+| **Flow graph** | A journey is not a line — one entry, two forks, five endings | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--flow-graph.html) |
+| **Time to scale** | An hour of work, then weeks of nothing | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--time-to-scale.html) |
+| **Coverage x-ray** | What the map knows, and how it knows it | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--coverage-xray.html) |
+| Swimlane, scroll, **brand-themed** | Any brand, one token swap *(food delivery)* | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/food-delivery--swimlane-themed.html) |
 
-Source journeys: `job-application-portal.md`, `food-delivery-order.md`. Regenerate any
-rendering with `../scripts/02-express-four-ways.md`.
+## Colour is a token, not a rewrite
+
+Every colour in **all eight** renderings resolves to
+[`assets/theme/journey-tokens.css`](../../assets/theme/journey-tokens.css) — Tier 1 is ten
+brand seed values, Tier 2 derives the semantic palette from them in OKLab, Tier 3 is local
+to each file. The renderings themselves contain **no literal colour values at all**, except where an
+artifact reseeds Tier 1 on purpose — which is the whole point of Tier 1:
+
+| Rendering | What it seeds | Result |
+|---|---|---|
+| `food-delivery--swimlane-themed` | 4 values (`#6C2BD9` + surface, text, on-primary) | a whole brand, derived |
+| `job-application--storyboard` | 4 values (warm paper) | a printed artifact that ignores the reader's theme |
+| `job-application--swimlane-zoompan` | 3 values (blue) | a second brand, same code |
+| `job-application--multiview` | nothing | the default palette, following the reader's preference |
+| `job-application--timeline-dark` | nothing (pins `data-theme="dark"`) | dark is a theme, not a file |
+| flow graph · time to scale · coverage x-ray | nothing (light/dark/auto switch) | re-theming, live, in the page |
+
+Semantic colours — `momentOfTruth`, `failureMode`, valence — are deliberately **not**
+derived from the brand: a marker that repaints itself when the logo changes is not a
+marker.
+
+The tokens and the journey data are inlined at build time by
+`site/build-renderings.py` (in the internal repo), so the files stay single-file and
+self-contained while still having one source of truth.
 
 ## How these were made / how to refresh them
 
 The storyline and brief here are real skill outputs, lightly curated. The interactive
-HTML and engineering handoff are best **generated live** (the HTML is a large
-self-contained file; the handoff is conversational) — run `../scripts/02-express-four-ways.md`
-in a session with the skill loaded and save the outputs here.
+HTML and engineering handoff are best **generated live** — run
+`../scripts/02-express-four-ways.md` in a session with the skill loaded and save the
+outputs here.
 
-To regenerate the whole set from scratch, run `../scripts/01-build-payments-journey.md`
-then `../scripts/02-express-four-ways.md`.
-
-> Provenance note: the source journey carries **no `_provenance: source:` markers** —
+> **Provenance note.** The source journeys carry **no `_provenance: source:` markers** —
 > every field is model-authored from conversation. That's why the storyline and brief
-> honestly frame the abandonment as a *hypothesis*, not a measured statistic. This is
-> the skill's provenance discipline on display, not a gap.
+> honestly frame the abandonment as a *hypothesis*, not a measured statistic, and why
+> the coverage x-ray shows the Business / Metrics column completely empty: with no
+> analytics behind the map, no drop-off number was invented to fill it. The only
+> provenance markers present are `auto-composite`, generated by the schema's own
+> composite rules. This is the skill's provenance discipline on display, not a gap.
