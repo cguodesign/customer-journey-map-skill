@@ -39,5 +39,7 @@ grep -c "_provenance" ./.journey/online-payments-setup.md   # expect 0 — pure 
 ```
 
 ✅ **Pass looks like:** the 3-day fact is in the file, and there are zero provenance markers.
-Keep this journey — Demo 02 expresses it four ways. (A reference copy lives at
-`../gallery/payments-journey.md`.)
+Keep this journey — it's the input for the Modify and Review demos, and it's a second
+domain to hold against the gallery's canonical map. (Demo 02 expresses the canonical
+`job-application-portal.md` four ways; this script is about *building* a map from
+nothing, so what it produces is deliberately thin — that's the point of it.)

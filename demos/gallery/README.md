@@ -8,12 +8,15 @@ of what a single map turns into.
 
 | File | Format | Shows |
 |------|--------|-------|
-| `job-application-portal.md` | **Canonical source journey** | The map every rendering below is built from — 15 steps, persona Maya, an AI screening fork, four ways it can end. |
-| `payments-journey.md` | Source journey (Plan output) | The narrative sample behind the storyline and brief. Thin on fields by design — it shows what a map looks like straight out of a first conversation. |
-| `payments-storyline.md` | Express → **Storyline** | Character-driven narrative for a kickoff; footnote provenance. |
-| `payments-brief.md` | Express → **One-page brief** | Leadership decision doc; problem→fix→ask→cost; inline attribution. |
-| `food-delivery-order.md` | Source journey (service blueprint) | A 5-step backstage fan-out, kept as the service-layer teaching example. |
-| `payments-handoff.md` | Express → **Engineering handoff** | *(regenerate via `scripts/02`)* spec with `- [ ]` acceptance criteria. |
+| `job-application-portal.md` | **Canonical source journey** | The map everything below is built from — 15 steps, persona Maya, an AI screening fork, four ways it can end. |
+| `job-application-storyline.md` | Express → **Storyline** | Character-driven narrative for a kickoff; footnote provenance. |
+| `job-application-brief.md` | Express → **One-page brief** | Leadership decision doc; problem→fix→ask→cost; inline attribution. |
+| `job-application-handoff.md` | Express → **Engineering handoff** | *(regenerate via `scripts/02`)* spec with `- [ ]` acceptance criteria. |
+| `food-delivery-order.md` | Source journey (service blueprint) | A 5-step backstage fan-out, kept as the service-layer teaching example and as the second brand in the theming demo. |
+
+Every artifact above comes from **one** journey file. The storyline, the brief and the
+eight renderings are the same fifteen steps read for different rooms — which is the
+claim the gallery exists to make.
 
 ## Rendering showcase — explore live
 

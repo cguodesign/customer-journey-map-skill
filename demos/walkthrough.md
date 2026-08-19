@@ -66,7 +66,7 @@ then reshape completely.
 → acceptance criteria as `- [ ]` checkboxes, edge cases, systems involved.
 
 **Paste:**
-> Finally, an interactive HTML version for a workshop. Save it to demos/gallery/payments-journey.html
+> Finally, an interactive HTML version for a workshop. Save it to demos/gallery/job-application-portal.html
 
 → a single self-contained file. Open it in a browser and click around.
 
