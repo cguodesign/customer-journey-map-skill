@@ -617,6 +617,239 @@ cmd_set_author() {
 # ---------------------------------------------------------------------------
 # usage / dispatch
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# theme — the token layer inside a rendering
+# ---------------------------------------------------------------------------
+
+THEME_DIR="${JOURNEY_THEME:-$SCRIPT_DIR/../assets/theme}"
+
+# A rendering must be self-contained (one file, works offline, survives being
+# emailed), so the token layer is inlined rather than linked. Two marked regions
+# carry it: tokens = the shipped three-tier system, theme = this artifact's own
+# Tier-1 seeds. Everything between the markers is generated; everything outside
+# is the author's.
+_TOK_BEGIN='/* tokens:begin */'
+_TOK_END='/* tokens:end */'
+_THM_BEGIN='/* theme:begin */'
+_THM_END='/* theme:end */'
+
+# Light or dark? Read it off the surface colour instead of asking, because the
+# answer decides a specificity fight the author cannot see: the token file's dark
+# blocks are selected by :root:not([data-theme="light"]), which out-specifies a
+# bare :root override. Seed a dark surface without pinning dark and the theme
+# silently does nothing for half the readers.
+_theme_mode_for_surface() {
+  local c="$1"
+  case "$c" in
+    oklch\(*)                                  # oklch(15% ...) — L is the first number
+      awk -v s="$c" 'BEGIN{ sub(/^[^(]*\(/,"",s); l=s+0; print (l<50)?"dark":"light" }' ;;
+    \#*)                                       # hex — perceived luminance.
+      # Hand-rolled hex parsing: strtonum() is a gawk extension and this script
+      # has to run under the awk that ships with macOS.
+      awk -v s="$c" 'function hx(p,   i,n,d){ n=0
+          for(i=1;i<=length(p);i++){ d=index("0123456789abcdef",substr(p,i,1))-1
+            if(d<0) d=0; n=n*16+d }
+          return n }
+        BEGIN{
+          gsub(/#/,"",s); s=tolower(s)
+          if (length(s)==3) s=substr(s,1,1) substr(s,1,1) substr(s,2,1) substr(s,2,1) substr(s,3,1) substr(s,3,1)
+          r=hx(substr(s,1,2)); g=hx(substr(s,3,2)); b=hx(substr(s,5,2))
+          print (0.2126*r + 0.7152*g + 0.0722*b < 128) ? "dark" : "light" }' ;;
+    *) printf 'light' ;;
+  esac
+}
+
+# Replace a marked region in place. Creates the region after <style> if absent.
+_theme_write_region() {
+  local file="$1" begin="$2" end="$3" body="$4" tmp
+  tmp="$(mktemp)"
+  BEGIN="$begin" END="$end" BODY="$body" awk '
+    BEGIN { b=ENVIRON["BEGIN"]; e=ENVIRON["END"]; body=ENVIRON["BODY"]; done=0; skip=0 }
+    index($0,b) { print b; if (body!="") print body; print e; skip=1; done=1; next }
+    skip && index($0,e) { skip=0; next }
+    skip { next }
+    { print }
+    END { if (!done) exit 3 }
+  ' "$file" > "$tmp" || { rm -f "$tmp"; return 3; }
+  mv "$tmp" "$file"
+}
+
+# Insert both regions into the first <style> of a file that has neither.
+_theme_scaffold() {
+  local file="$1" tmp
+  tmp="$(mktemp)"
+  awk -v tb="$_TOK_BEGIN" -v te="$_TOK_END" -v hb="$_THM_BEGIN" -v he="$_THM_END" '
+    !done && /<style>/ { print; print tb; print te; print hb; print he; done=1; next }
+    { print }
+    END { if (!done) exit 3 }
+  ' "$file" > "$tmp" || { rm -f "$tmp"; return 3; }
+  mv "$tmp" "$file"
+}
+
+# Pin (or clear) data-theme on <html>. This is the half of theming that is pure
+# mechanism, and the half authors get wrong.
+_theme_pin_mode() {
+  local file="$1" mode="$2" tmp
+  tmp="$(mktemp)"
+  awk -v mode="$mode" '
+    !done && /^[[:space:]]*<html[ >]/ {
+      sub(/ *data-theme="[a-z]*"/, "")
+      if (mode != "auto") sub(/<html/, "<html data-theme=\"" mode "\"")
+      done=1
+    }
+    { print }
+  ' "$file" > "$tmp"
+  mv "$tmp" "$file"
+}
+
+cmd_theme() {
+  local file="" preset="" mode="" clear=0 init=0 show=1
+  local primary="" surface="" text="" on_primary="" secondary="" positive="" negative=""
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --preset)      preset="${2:-}"; shift 2; show=0 ;;
+      --primary)     primary="${2:-}"; shift 2; show=0 ;;
+      --surface)     surface="${2:-}"; shift 2; show=0 ;;
+      --text)        text="${2:-}"; shift 2; show=0 ;;
+      --on-primary)  on_primary="${2:-}"; shift 2; show=0 ;;
+      --secondary)   secondary="${2:-}"; shift 2; show=0 ;;
+      --positive)    positive="${2:-}"; shift 2; show=0 ;;
+      --negative)    negative="${2:-}"; shift 2; show=0 ;;
+      --mode)        mode="${2:-}"; shift 2; show=0 ;;
+      --clear)       clear=1; shift; show=0 ;;
+      --init)        init=1; shift; show=0 ;;
+      -*)            die "theme: unknown flag: $1" ;;
+      *)             file="$1"; shift ;;
+    esac
+  done
+  [ -n "$file" ] || die "theme: need a file (journey.sh theme <file.html> [options])"
+  [ -f "$file" ] || die "theme: no such file: $file"
+
+  local tokens="$THEME_DIR/journey-tokens.css"
+  [ -f "$tokens" ] || die "theme: token file missing: $tokens (set JOURNEY_THEME)"
+
+  # --- show ---------------------------------------------------------------
+  if [ "$show" -eq 1 ]; then
+    local has_tok has_thm seeds pinned
+    has_tok=$(grep -cF "$_TOK_BEGIN" "$file" || true)
+    has_thm=$(grep -cF "$_THM_BEGIN" "$file" || true)
+    # first <html> line in the file — the token block's own header shows a
+    # `<html data-theme="light">` example, and that is documentation, not this
+    # document's tag
+    pinned=$(grep -m1 '<html' "$file" | sed -n 's/.*data-theme="\([a-z]*\)".*/\1/p')
+    printf '%s\n' "$file"
+    printf '  token layer : %s\n' "$([ "$has_tok" -gt 0 ] && echo present || echo 'MISSING — run --init')"
+    printf '  theme       : %s\n' "$([ "$has_thm" -gt 0 ] && echo 'region present' || echo 'no region')"
+    printf '  mode        : %s\n' "${pinned:-auto (follows the reader)}"
+    if [ "$has_thm" -gt 0 ]; then
+      seeds=$(awk -v b="$_THM_BEGIN" -v e="$_THM_END" 'index($0,b){f=1;next} index($0,e){f=0} f' "$file" \
+              | grep -o -- '--brand-[a-z-]*:[^;]*;' || true)
+      [ -n "$seeds" ] && printf '  seeds       :\n%s\n' "$(printf '%s\n' "$seeds" | sed 's/^/    /')" \
+                      || printf '  seeds       : none (default palette)\n'
+    fi
+    return 0
+  fi
+
+  # --- init / refresh the token layer ------------------------------------
+  if [ "$init" -eq 1 ] || ! grep -qF "$_TOK_BEGIN" "$file"; then
+    grep -qF "$_TOK_BEGIN" "$file" || _theme_scaffold "$file" \
+      || die "theme: no <style> block found in $file — add one, then re-run"
+    # add the theme region directly after the token region, once
+    if ! grep -qF "$_THM_BEGIN" "$file"; then
+      awk -v te="$_TOK_END" -v hb="$_THM_BEGIN" -v he="$_THM_END" '
+        { print }
+        index($0,te) && !d { print hb; print he; d=1 }
+      ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+    fi
+    _theme_write_region "$file" "$_TOK_BEGIN" "$_TOK_END" "$(cat "$tokens")" \
+      || die "theme: could not write the token region in $file"
+    printf 'journey.sh: token layer written to %s\n' "$file"
+  fi
+
+  # --init on its own is a complete job: the file now carries the default
+  # palette and follows the reader's theme. Nothing further to apply.
+  if [ "$init" -eq 1 ] && [ "$clear" -eq 0 ] \
+     && [ -z "$preset$primary$secondary$surface$text$on_primary$positive$negative" ]; then
+    [ -n "$mode" ] && _theme_pin_mode "$file" "$mode"
+    printf 'journey.sh: %s → default palette, mode %s\n' "$file" "${mode:-auto}"
+    return 0
+  fi
+
+  # --- clear --------------------------------------------------------------
+  if [ "$clear" -eq 1 ]; then
+    _theme_write_region "$file" "$_THM_BEGIN" "$_THM_END" "" || die "theme: no theme region in $file"
+    _theme_pin_mode "$file" "${mode:-auto}"
+    printf 'journey.sh: %s → default palette, mode %s\n' "$file" "${mode:-auto}"
+    return 0
+  fi
+
+  # --- preset -------------------------------------------------------------
+  local body=""
+  if [ -n "$preset" ]; then
+    local pf="$THEME_DIR/presets/$preset.css"
+    [ -f "$pf" ] || die "theme: no such preset: $preset (have: $(ls "$THEME_DIR/presets" 2>/dev/null | sed 's/\.css$//' | tr '\n' ' '))"
+    body="$(cat "$pf")"
+    [ -n "$mode" ] || mode="$(sed -n 's/.*mode: *\([a-z]*\).*/\1/p' "$pf" | head -1)"
+    [ -n "$surface" ] || surface="$(grep -o -- '--brand-surface: *[^;]*' "$pf" | head -1 | sed 's/.*: *//')"
+  fi
+
+  # --- explicit seeds -----------------------------------------------------
+  local seedlines=""
+  # `return 0` is load-bearing: under `set -e` a helper whose last command is a
+  # failed test takes the whole script down with it.
+  _seed() {
+    [ -n "$2" ] || return 0
+    seedlines="$seedlines  --brand-$1: $2;
+"
+    return 0
+  }
+  _seed primary    "$primary"
+  _seed secondary  "$secondary"
+  _seed surface    "$surface"
+  _seed text       "$text"
+  _seed on-primary "$on_primary"
+  _seed positive   "$positive"
+  _seed negative   "$negative"
+
+  if [ -n "$seedlines" ]; then
+    if [ -n "$body" ]; then body="$body
+$seedlines"; else body="$seedlines"; fi
+  fi
+  [ -n "$body" ] || die "theme: nothing to apply (give --preset, seed flags, or --clear)"
+
+  [ -n "$mode" ] || mode="$(_theme_mode_for_surface "${surface:-}")"
+
+  # The selector has to match the mode, and the asymmetry is the whole reason
+  # this command exists. Pinning light is enough on its own — the token file's
+  # dark blocks are :root:not([data-theme="light"]), which then cannot match.
+  # Pinning dark is NOT: :root[data-theme="dark"] out-specifies a bare :root, so
+  # a dark override written at :root loses to the defaults it meant to replace.
+  # Match that specificity and win on source order instead.
+  local sel
+  case "$mode" in
+    dark)  sel=':root, :root[data-theme="dark"]' ;;
+    light) sel=':root' ;;
+    *)     sel=':root, :root[data-theme="dark"], :root:not([data-theme="light"])' ;;
+  esac
+
+  # Wrap the seeds. The comment is not decoration: it tells the next reader that
+  # this is the ONE place a literal colour is allowed to live.
+  body="/* Tier 1 override — the whole theme. Every colour in this file derives
+   from these; nothing below Tier 1 may hold a literal. Written by
+   \`journey.sh theme\`; edit here or re-run the command. */
+$sel{
+$(printf '%s' "$body" | sed 's/^  *--/  --/')
+}"
+
+  _theme_write_region "$file" "$_THM_BEGIN" "$_THM_END" "$body" \
+    || die "theme: no theme region in $file — run with --init first"
+  _theme_pin_mode "$file" "$mode"
+
+  printf 'journey.sh: %s → %s, mode %s\n' "$file" "${preset:-custom seeds}" "$mode"
+  [ "$mode" = auto ] && printf 'journey.sh: note — mode auto means the reader'"'"'s dark preference re-seeds Tier 1 and your override is ignored in dark. Pin --mode light|dark to own the palette.\n' >&2
+  return 0
+}
+
 usage() {
   cat <<'EOF'
 journey.sh — deterministic toolbelt for the Journey Skill
@@ -630,6 +863,7 @@ USAGE
   journey.sh audit    [--journey X] [--since DATE] [--author A] [--target T]
   journey.sh whoami
   journey.sh set-author <name>
+  journey.sh theme    <file.html> [--init | --preset <name> | --clear | seed flags]
 
 COMMIT OPS
   insert-step      --after <id> | --before <id>   (block from --block-file or stdin)
@@ -639,6 +873,14 @@ COMMIT OPS
   remove-milestone <id>
   register-field   <field_name> "<description>"    (adds to preamble custom-fields)
   common flags: --note <text>  --author <name>
+
+THEME
+  --init                 write/refresh the shipped token layer into the file
+  --preset <name>        paper | midnight | blueprint | contrast
+  --primary/--surface/--text/--on-primary/--secondary/--positive/--negative <c>
+  --mode light|dark|auto pin the artifact's theme (default: read off the surface)
+  --clear                back to the default palette
+  (no flags)             report what theme the file currently carries
 
 QUERY FILTERS
   failure-no-recovery   moment-no-evidence   user-modified
@@ -663,6 +905,7 @@ main() {
     audit)      cmd_audit "$@";;
     whoami)     cmd_whoami "$@";;
     set-author) cmd_set_author "$@";;
+    theme)      cmd_theme "$@";;
     help|-h|--help) usage;;
     *) die "unknown command: $cmd (try: journey.sh help)";;
   esac

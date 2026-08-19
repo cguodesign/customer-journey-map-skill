@@ -36,6 +36,21 @@ Transform journey understanding into audience-appropriate output.
 
    Consult `assets/templates/rendering/` for HTML structure, `assets/templates/interaction/` for JS behavior, and `assets/templates/wireframes/` for combined layout reference. See `references/html-rendering-guide.md` for color system and data mapping.
 
+   **Colour comes from tokens, never from literals.** Write every colour as `var(--…)`
+   from the Tier-2 vocabulary, then let the script install the palette:
+
+   ```
+   journey.sh theme <file>.html --init          # default palette, follows the reader
+   journey.sh theme <file>.html --preset paper  # or the user's own brand:
+   journey.sh theme <file>.html --primary '<their colour>' --surface '<theirs>' --text '<theirs>'
+   ```
+
+   If the user mentions a brand colour, a house style, or "make it match our site", that
+   is a Tier-1 seed and one command — not a rewrite of the rendering. Without local file
+   access, inline `assets/theme/journey-tokens.css` verbatim between `/* tokens:begin */`
+   and `/* tokens:end */` and put the seeds in a `:root{}` after it (see the guide's
+   specificity note before pinning a dark theme by hand).
+
 4. Render from journey file data. Include only active categories and filled fields. (Express only
    reads — with local file access, `journey.sh validate <name>` first if you're unsure the file is
    well-formed; rendering itself stays model-side, there is no `render` command.)

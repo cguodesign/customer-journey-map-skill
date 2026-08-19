@@ -178,6 +178,9 @@ For field vocabulary, format syntax, and HTML rendering:
 - **`references/journey.schema.md`** — Complete field definitions (13 categories, ~100 fields), composite/atomic rules, namespace conventions, provenance system details.
 - **`references/journey.format.md`** — Canonical markdown format: preamble structure, milestone/step syntax, provenance notation, cross-references, complete example.
 - **`references/html-rendering-guide.md`** — Interactive HTML rendering: combination matrix, selection logic, color system, data-to-visual mapping.
+- **`assets/theme/`** — `journey-tokens.css` (the three-tier colour system every rendering
+  inlines) + `presets/` (paper, midnight, blueprint, contrast). Installed and re-seeded with
+  `journey.sh theme`; renderings themselves carry no literal colours.
 - **`assets/templates/rendering/`** — 5 rendering modes (card-grid, timeline, swimlane, emotion-curve, storyboard). HTML structure + CSS.
 - **`assets/templates/interaction/`** — 4 interaction modes (scroll-driven, focus+context, zoom-pan, multi-view). JS behavior patterns.
 - **`assets/templates/wireframes/`** — wireframes per valid combination. Minimal layout sketches with integration comments.

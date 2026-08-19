@@ -90,92 +90,94 @@ if audience is mixed (multiple needs):
 
 5. **Respect natural semantic associations.** Red = negative/hot/danger, green = positive/growth, orange = warning, blue = neutral/cold/trust. Violating these (e.g., green for loss) creates cognitive friction. When brand colors conflict with semantic expectations, use brand for chrome/identity and semantic colors for data.
 
-### Theming & White-label Architecture
+### The token layer — where colour actually comes from
 
-All colors must be defined as CSS custom properties at `:root`, organized in three tiers:
+**Renderings do not contain colours. They contain token names.** The palette ships as
+`assets/theme/journey-tokens.css` and is *inlined* into each rendering (a rendering must
+survive being emailed, so it cannot link a stylesheet). Two marked regions carry it:
 
 ```
-/* Tier 1: Brand seed (user provides these) */
---brand-primary: ...;
---brand-secondary: ...;
---brand-surface: ...;
---brand-text: ...;
-
-/* Tier 2: Semantic palette (derived from seed or overridden) */
---color-layer-frontstage-bg: ...;
---color-layer-backstage-bg: ...;
---color-valence-negative-2: ...;
---color-valence-positive-2: ...;
---color-marker-critical: ...;
---color-marker-warning: ...;
-
-/* Tier 3: Component scope (local overrides) */
---card-border: var(--color-layer-frontstage-border);
---minimap-dot-fill: var(--color-valence-neutral);
+/* tokens:begin */   the shipped three-tier system, written by the script   /* tokens:end */
+/* theme:begin */    this artifact's own Tier-1 seeds, usually empty        /* theme:end */
 ```
 
-**Derivation strategy when user provides only brand colors:**
-1. Use brand primary for chrome (headers, active tab, selected state).
-2. Derive sequential palette from brand primary by stepping lightness in LCH (5 stops, L from 95 down to 35).
-3. Keep semantic data colors (valence, markers) independent of brand — these must maintain universal meaning.
-4. Surface and text colors: respect brand surface/text for backgrounds and body text.
+Never write these regions by hand. `journey.sh theme <file>` owns them:
 
-**Swap themes by reassigning Tier 1 variables.** No rebuild, no code change. This enables white-label deployments where each client sets 3–4 brand values.
+```
+journey.sh theme map.html --init                 # default palette, follows the reader
+journey.sh theme map.html --preset paper         # paper | midnight | blueprint | contrast
+journey.sh theme map.html --primary '#6C2BD9' --surface '#fff' --text '#1a1320'
+journey.sh theme map.html --clear                # back to default
+journey.sh theme map.html                        # report what it currently carries
+```
 
-### Dark Mode
+**The three tiers**
 
-**Do not invert. Re-derive.**
+| Tier | What | Who writes it |
+|------|------|---------------|
+| 1 · seed | ~10 brand values | the user, or `journey.sh theme` — **the only place a literal colour belongs** |
+| 2 · semantic | valence, markers, layers, ink, rules — all derived from Tier 1 | the shipped token file |
+| 3 · component | local aliases inside one rendering (`--mot-color: var(--marker-critical)`) | you, when writing the rendering |
 
-- Background: use `#121212` or similar dark grey, never pure `#000000` (causes halation).
-- Surfaces: layer with subtle lightness increments (`#1e1e1e`, `#2a2a2a`, `#333333`).
-- Text: use `#e0e0e0` for body, `#ffffff` for headings. Never full-white body text on full-black.
-- Data colors: maintain the same hue and semantic meaning, but increase lightness by 10–15% and reduce chroma slightly so colors remain legible against dark backgrounds.
-- Borders: lighten to ~30% opacity white (`rgba(255,255,255,0.3)`).
-- Markers: keep the same hues but increase contrast against dark surface. Test every marker color pair against the dark surface for WCAG 3:1 minimum.
+**When you write a rendering, you consume Tier 2.** Every colour is `var(--…)`. If you
+find yourself typing `#` in a rendering, that value belongs in Tier 1 instead.
 
-Implement via `@media (prefers-color-scheme: dark)` overriding Tier 1 and Tier 2 variables. Alternatively, support a `.dark` class toggle on `<html>` for manual switching.
+**Tier 2 vocabulary**
 
-### Accessibility
+```
+ground      --bg  --surface-1  --surface-2  --surface-3
+ink         --ink  --ink-muted  --ink-faint  --ink-ghost
+rules       --line  --line-soft  --line-strong
+accent      --accent  --accent-soft  --accent-line  --accent-ink  --ink-on-accent
+valence     --valence-n2  --valence-n1  --valence-0  --valence-p1  --valence-p2
+markers     --marker-critical (momentOfTruth)   --marker-fail (failureMode)
+            --marker-opportunity                --marker-pain (painPoint)
+            --marker-machine (automation)
+layers      --layer-customer-bg/-ln  --layer-backstage-bg/-ln  --layer-support-bg/-ln
+actors      --actor-primary  --actor-system  --actor-backstage  --actor-none
+categorical --cat-1 … --cat-5 (+ -soft)  — unordered groups only: milestones, lanes, channels
+fixed       --ink-on-fill  --shadow-ink  — pair with data, NOT with the page; never flip these
+```
 
-- **Contrast minimums**: 3:1 for data visualization shapes (≥ 3×3px). 4.5:1 for text labels. Test all color pairs in both light and dark modes.
-- **Colorblind safety**: Blue-orange is universally safe across deuteranopia, protanopia, and tritanopia. Avoid red-green combinations as sole differentiators. When the palette requires red and green (e.g., valence), always pair with a secondary encoding (icon, pattern, position).
-- **Reference palettes**: Okabe-Ito (8 colors, universally distinguishable), Cividis (sequential, colorblind-optimized).
-- **Test tools**: Sim Daltonism, Coblis, or browser DevTools color vision simulation.
+**Three rules that are not style preferences:**
 
-### Default Palette
+1. **Semantic colours are independent of the brand.** `--marker-critical` seeds from
+   `--brand-attention`, not `--brand-primary`. A marker that repaints itself when the
+   logo changes is not a marker.
+2. **Valence is the field; markers are annotations laid on top of it.** The valence stops
+   are held one step back from full strength on purpose. A marker that reads as just
+   another data point has failed.
+3. **`--ink-on-fill` and `--shadow-ink` do not flip with the theme.** They pair with
+   saturated data fills and with shadows, both of which stay put. Inverting them is the
+   classic dark-mode bug.
 
-The following defaults are provided for use when no brand colors are specified. All values are CSS custom property names — override at Tier 1 to theme.
+### Dark mode, and the specificity trap
 
-**Service layers (categorical):**
+Dark is a *theme*, not a file. The token file re-derives the dark palette from the same
+seeds — mixing toward ink instead of toward surface, never an inversion — and is selected
+by **both** `prefers-color-scheme` and `[data-theme]`, so a manual toggle wins in either
+direction.
 
-| Layer | Light bg | Light border | Dark bg | Dark border |
-|-------|----------|-------------|---------|------------|
-| Customer / Frontstage | `#fff9e6` | `#c9a227` | `#2a2518` | `#d4a72c` |
-| Backstage | `#ffffff` | `#aaaaaa` | `#1e1e1e` | `#666666` |
-| Support / Infrastructure | `#f3f3f3` | `#999999` | `#252525` | `#777777` |
-| Evidence / Physical | `#fafafa` | `#cccccc` | `#1a1a1a` | `#555555` |
-| Muted / Optional | `#f5f5f5` | dashed `#cccccc` | `#1c1c1c` | dashed `#555555` |
+The trap, which `journey.sh theme` exists to handle for you: the dark blocks are selected
+by `:root:not([data-theme="light"])` and `:root[data-theme="dark"]`, and **both
+out-specify a bare `:root`**. So
 
-**Emotion valence (diverging):**
+- an artifact that reseeds Tier 1 must also pin `data-theme` on `<html>`, or its theme
+  silently does nothing for every reader whose system is set to dark;
+- and a **dark** reseed must additionally match that specificity
+  (`:root, :root[data-theme="dark"]{…}`), because pinning dark alone still loses.
 
-| Valence | Light | Dark |
-|---------|-------|------|
-| -2 (very negative) | `#fecaca` | `#991b1b` |
-| -1 (negative) | `#fed7aa` | `#9a3412` |
-| 0 (neutral) | `#e5e7eb` | `#4b5563` |
-| +1 (positive) | `#bbf7d0` | `#166534` |
-| +2 (very positive) | `#86efac` | `#15803d` |
+Pinning light is enough on its own. Pinning dark is not. The command derives the mode from
+the surface colour and writes the matching selector; hand-edit and you own this.
 
-**Markers (semantic, fixed across themes):**
+### Accessibility floor (unchanged by theming)
 
-| Marker | Visual | Position | Trigger field |
-|--------|--------|----------|---------------|
-| Moment of truth | Red dot `#ef4444` | Top-right | `momentOfTruth: true` |
-| Failure point | Dark yellow dot `#8b6914` | Top-left | `failureMode` present |
-| Pain point | Orange underline | Below field text | `painPoint` present |
-| Opportunity | Green dashed border | Around field text | `opportunity` present |
-| Source provenance | 📎 icon | Inline after field | `_provenance: source: ...` |
-| User-modified | ✏️ icon | Inline after field | `_provenance: user-modified` |
+- 3:1 contrast for data shapes, 4.5:1 for text, in **both** themes.
+- Colour is never the sole encoding — pair with position, a glyph, a numeral, or a label.
+- The categorical seeds are Okabe-Ito: distinguishable under all three common
+  colour-vision deficiencies. A brand that overrides them owns redoing that check.
+- Blue-orange is the safe pair. Red-green always needs a second channel.
+
 
 ### Color Application Rules
 
@@ -224,10 +226,10 @@ How journey schema fields map to visual elements in the HTML output.
 
 | Lane | Source fields | Color |
 |------|-------------|-------|
-| Customer Actions | `description`, `doing` | `#fff9e6` / `#c9a227` |
-| Frontstage | `frontstage`, `frontstageAction` | `#fff9e6` / `#c9a227` |
-| Backstage | `backstage`, `backstageAction` | `#ffffff` / `#aaaaaa` |
-| Support Processes | `supportProcess`, `systems` | `#f3f3f3` / `#999999` |
+| Customer Actions | `description`, `doing` | `--layer-customer-bg` / `--layer-customer-ln` |
+| Frontstage | `frontstage`, `frontstageAction` | `--layer-customer-bg` / `--layer-customer-ln` |
+| Backstage | `backstage`, `backstageAction` | `--layer-backstage-bg` / `--layer-backstage-ln` |
+| Support Processes | `supportProcess`, `systems` | `--layer-support-bg` / `--layer-support-ln` |
 
 Divider lines between lanes:
 - **Line of Interaction** — between Customer and Frontstage

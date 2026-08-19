@@ -15,10 +15,22 @@ stays with the model; mechanical/correctness work is deterministic here.
 | 1 | `commit` | Block-level node CRUD (`insert`/`replace`/`remove` a step or milestone by id) → place + validate + log. **The write path.** | ✅ built + tested |
 | 2 | `validate` | Well-formed file + field names ∈ schema (field list awk-extracted from `references/journey.schema.md`). Called by `commit`; also standalone. | ✅ built + tested |
 | 3 | `query` / `search` / `audit` | Filter/search across `./.journey/*.md`; `audit` reads the changelogs. | ✅ built + tested |
-| 4 | `render` | LLM picks mode/params; a fill step produces HTML. Lower priority (LLM does it today). | ⬜ stays LLM-side (no command) |
+| 4 | `theme` | Install / re-seed the colour token layer inside a rendering; pins `data-theme` and writes the selector the specificity rules demand. | ✅ built + tested |
+| 5 | `render` | LLM picks mode/params; a fill step produces HTML. Lower priority (LLM does it today). | ⬜ stays LLM-side (no command) |
 
 Plus: `register-field` (commit op — registers a custom field in the preamble), and
 `whoami` / `set-author` (change-attribution identity, stored per-user, never in the dataset).
+
+### Why `theme` is a script and not a prompt
+
+Colour in a rendering is two jobs. Choosing the palette is judgment — the model's, or the
+user's brand book. *Installing* it is mechanism, and the mechanism has a trap in it: the
+token file's dark blocks are selected by `:root:not([data-theme="light"])`, which
+out-specifies the bare `:root` an author would naturally write, so a hand-written brand
+override silently does nothing for readers on dark — and a hand-written **dark** override
+loses even after pinning `data-theme="dark"`, because `:root[data-theme="dark"]` outranks
+it too. The command reads the mode off the surface colour and emits the selector that
+wins. That is exactly the split this toolbelt exists for.
 
 Tests: `tests/journey.sh.test.sh` (in the outer repo) — 44 assertions over validate / CRUD /
 provenance-preserving replace / query / search / audit / author identity / custom-field
