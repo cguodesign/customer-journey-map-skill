@@ -1,0 +1,2004 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>To scale — Applying for a job through an online application portal</title>
+<meta name="description" content="The same journey map with its time fields drawn to true scale: forty minutes of work, then weeks of nothing.">
+<style>
+/* tokens:begin */
+/* ============================================================================
+   journey-tokens.css — the single source of truth for every journey rendering.
+
+   Tier 1  brand seed      ~10 values. The only thing a user/brand ever changes.
+   Tier 2  semantic        derived from Tier 1. Renderings consume THESE.
+   Tier 3  component       declared locally inside each rendering, from Tier 2.
+
+   Rule for renderings: zero literal colors. If you type a hex, it belongs here.
+   Themes: base = light. Dark re-derives (never inverts) via prefers-color-scheme
+   and [data-theme], so a manual toggle wins in both directions.
+
+   OVERRIDING TIER 1 (brand themes, paper artifacts): the dark blocks below are
+   selected by :root:not([data-theme="light"]) and :root[data-theme="dark"],
+   both of which out-specify a bare :root. So an artifact that reseeds Tier 1
+   must also pin its theme on the element:
+
+       <html data-theme="light">   ← now the dark blocks cannot match, and a
+                                     later :root{...} override wins on order
+
+   Reseeding at :root without pinning a theme silently does nothing for readers
+   whose system is set to dark. See renderings/food-delivery--swimlane-themed
+   (a brand reseed) and renderings/job-application--storyboard (a paper reseed).
+   ========================================================================= */
+
+/* ── Tier 1 · brand seed ───────────────────────────────────────────────── */
+:root{
+  --brand-primary:    oklch(70% 0.148 52);      /* chrome, accent, selection   */
+  --brand-secondary:  oklch(63% 0.115 248);     /* second categorical hue      */
+  --brand-surface:    oklch(98.6% 0.006 80);    /* page ground                 */
+  --brand-text:       oklch(21% 0.014 62);      /* body ink                    */
+  --brand-positive:   oklch(64% 0.118 158);     /* semantic good               */
+  --brand-negative:   oklch(58% 0.168 25);      /* semantic bad                */
+  --brand-machine:    oklch(60% 0.096 285);     /* automated / no-human paths  */
+  --brand-on-primary: oklch(22% 0.014 70);      /* text that sits ON the primary */
+  --brand-attention:  oklch(72% 0.152 62);      /* momentOfTruth — NOT the brand:
+                                                   a marker that repaints itself
+                                                   when the logo changes is not a
+                                                   marker (guide § colour) */
+  /* categorical seed — Okabe-Ito, distinguishable under all three common
+     colour-vision deficiencies. Independent of brand on purpose (see
+     html-rendering-guide § accessibility); override only if the brand's own
+     categorical palette has been checked for the same. */
+  --brand-cat-1:      oklch(56% 0.108 248);     /* blue            */
+  --brand-cat-2:      oklch(62% 0.155 42);      /* vermillion      */
+  --brand-cat-3:      oklch(60% 0.098 168);     /* bluish green    */
+  --brand-cat-4:      oklch(72% 0.145 78);      /* orange          */
+  --brand-cat-5:      oklch(56% 0.112 340);     /* reddish purple  */
+  --brand-font:       "Söhne","Inter var",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,sans-serif;
+  --brand-font-mono:  ui-monospace,"SF Mono","Berkeley Mono",Menlo,Consolas,monospace;
+  --brand-radius:     3px;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --brand-primary:   oklch(76% 0.138 55);
+    --brand-secondary: oklch(70% 0.105 248);
+    --brand-surface:   oklch(17.5% 0.008 66);
+    --brand-text:      oklch(94% 0.008 80);
+    --brand-positive:  oklch(72% 0.108 158);
+    --brand-negative:  oklch(67% 0.150 26);
+    --brand-machine:   oklch(70% 0.088 285);
+    --brand-attention: oklch(78% 0.140 64);
+    --brand-cat-1:     oklch(70% 0.098 248);
+    --brand-cat-2:     oklch(72% 0.140 42);
+    --brand-cat-3:     oklch(70% 0.090 168);
+    --brand-cat-4:     oklch(78% 0.130 78);
+    --brand-cat-5:     oklch(68% 0.102 340);
+  }
+}
+:root[data-theme="dark"]{
+  --brand-primary:   oklch(76% 0.138 55);
+  --brand-secondary: oklch(70% 0.105 248);
+  --brand-surface:   oklch(17.5% 0.008 66);
+  --brand-text:      oklch(94% 0.008 80);
+  --brand-positive:  oklch(72% 0.108 158);
+  --brand-negative:  oklch(67% 0.150 26);
+  --brand-machine:   oklch(70% 0.088 285);
+  --brand-attention: oklch(78% 0.140 64);
+  --brand-cat-1:     oklch(70% 0.098 248);
+  --brand-cat-2:     oklch(72% 0.140 42);
+  --brand-cat-3:     oklch(70% 0.090 168);
+  --brand-cat-4:     oklch(78% 0.130 78);
+  --brand-cat-5:     oklch(68% 0.102 340);
+}
+
+/* ── Tier 2 · semantic ─────────────────────────────────────────────────── */
+:root{
+  /* ground & elevation — dark re-derives by mixing toward ink, not by inverting */
+  --bg:          var(--brand-surface);
+  --surface-1:   color-mix(in oklab, var(--brand-surface) 97%, var(--brand-text));
+  --surface-2:   color-mix(in oklab, var(--brand-surface) 93%, var(--brand-text));
+  --surface-3:   color-mix(in oklab, var(--brand-surface) 88%, var(--brand-text));
+
+  /* ink */
+  --ink:         var(--brand-text);
+  --ink-muted:   color-mix(in oklab, var(--brand-text) 58%, var(--brand-surface));
+  --ink-faint:   color-mix(in oklab, var(--brand-text) 36%, var(--brand-surface));
+  --ink-ghost:   color-mix(in oklab, var(--brand-text) 20%, var(--brand-surface));
+
+  /* rules */
+  --line:        color-mix(in oklab, var(--brand-text) 16%, var(--brand-surface));
+  --line-soft:   color-mix(in oklab, var(--brand-text) 9%,  var(--brand-surface));
+  --line-strong: color-mix(in oklab, var(--brand-text) 34%, var(--brand-surface));
+
+  /* accent */
+  --accent:       var(--brand-primary);
+  --accent-soft:  color-mix(in oklab, var(--brand-primary) 16%, var(--brand-surface));
+  --accent-line:  color-mix(in oklab, var(--brand-primary) 55%, var(--brand-surface));
+  --accent-ink:   color-mix(in oklab, var(--brand-primary) 18%, var(--brand-text));
+  --ink-on-accent: var(--brand-on-primary);
+
+  /* emotion valence — diverging, 5 stops. Deliberately held one step back from
+     full strength: valence is the *field*, markers are annotations laid on top of
+     it, and a marker that reads as just another data point has failed. NEVER the
+     sole encoding either — always pair with position, a numeral, or a glyph
+     (see html-rendering-guide § accessibility). */
+  --valence-n2:  color-mix(in oklab, var(--brand-negative) 82%, var(--surface-2));
+  --valence-n1:  color-mix(in oklab, var(--brand-negative) 52%, var(--surface-2));
+  --valence-0:   var(--ink-ghost);
+  --valence-p1:  color-mix(in oklab, var(--brand-positive) 52%, var(--surface-2));
+  --valence-p2:  color-mix(in oklab, var(--brand-positive) 82%, var(--surface-2));
+
+  /* markers */
+  --marker-critical:    var(--brand-attention);   /* momentOfTruth   */
+  --marker-fail:        var(--brand-negative);    /* failureMode     */
+  --marker-opportunity: var(--brand-positive);    /* opportunity     */
+  --marker-machine:     var(--brand-machine);     /* automation      */
+  --marker-pain:        color-mix(in oklab, var(--brand-negative) 62%, var(--brand-primary)); /* painPoint */
+
+  /* Two colours that pair with *data*, not with the page, so they must NOT flip
+     with the theme: text sitting on a saturated fill, and the colour a shadow is
+     cast in. Inverting either is the classic dark-mode bug. */
+  --ink-on-fill: oklch(22% 0.014 70);
+  --shadow-ink:  oklch(12% 0.010 60);
+
+  /* actor kinds (categorical — limit to 4, per the guide's 6–8 hue ceiling) */
+  --actor-primary:   var(--brand-primary);
+  --actor-system:    var(--brand-machine);
+  --actor-backstage: var(--brand-secondary);
+  --actor-none:      var(--ink-faint);
+
+  /* categorical — unordered groups: milestones, lanes, channels. Never use
+     these for anything ordered; lightness (the ramp below) encodes magnitude. */
+  --cat-1: var(--brand-cat-1);
+  --cat-2: var(--brand-cat-2);
+  --cat-3: var(--brand-cat-3);
+  --cat-4: var(--brand-cat-4);
+  --cat-5: var(--brand-cat-5);
+  --cat-1-soft: color-mix(in oklab, var(--brand-cat-1) 16%, var(--bg));
+  --cat-2-soft: color-mix(in oklab, var(--brand-cat-2) 16%, var(--bg));
+  --cat-3-soft: color-mix(in oklab, var(--brand-cat-3) 16%, var(--bg));
+  --cat-4-soft: color-mix(in oklab, var(--brand-cat-4) 16%, var(--bg));
+  --cat-5-soft: color-mix(in oklab, var(--brand-cat-5) 16%, var(--bg));
+
+  /* service layers */
+  --layer-customer-bg:  color-mix(in oklab, var(--brand-primary) 9%, var(--bg));
+  --layer-customer-ln:  var(--accent-line);
+  --layer-backstage-bg: var(--surface-2);
+  --layer-backstage-ln: var(--line);
+  --layer-support-bg:   var(--surface-1);
+  --layer-support-ln:   var(--line-soft);
+
+  /* sequential ramp — ordered magnitude (density, duration, count). Single hue,
+     stepped in oklab so equal numeric steps read as equal perceptual steps. */
+  --ramp-0: var(--surface-1);
+  --ramp-1: color-mix(in oklab, var(--brand-primary) 18%, var(--surface-1));
+  --ramp-2: color-mix(in oklab, var(--brand-primary) 36%, var(--surface-1));
+  --ramp-3: color-mix(in oklab, var(--brand-primary) 56%, var(--surface-1));
+  --ramp-4: color-mix(in oklab, var(--brand-primary) 78%, var(--surface-1));
+  --ramp-5: var(--brand-primary);
+
+  /* provenance — the skill's own metadata, so it gets first-class tokens */
+  --prov-model:  var(--ink-ghost);                /* model-authored (default)  */
+  --prov-user:   var(--brand-primary);            /* user-modified             */
+  --prov-source: var(--brand-secondary);          /* source-backed             */
+  --prov-auto:   var(--brand-machine);            /* auto-composite            */
+
+  /* priority */
+  --prio-must:   var(--brand-negative);
+  --prio-should: var(--brand-primary);
+  --prio-nice:   var(--ink-faint);
+
+  /* type — fluid modular scale, ratio 1.2 */
+  --font:      var(--brand-font);
+  --font-mono: var(--brand-font-mono);
+  --step--2: clamp(0.60rem, 0.58rem + 0.10vw, 0.66rem);
+  --step--1: clamp(0.72rem, 0.69rem + 0.14vw, 0.80rem);
+  --step-0:  clamp(0.86rem, 0.82rem + 0.18vw, 0.95rem);
+  --step-1:  clamp(1.03rem, 0.97rem + 0.28vw, 1.19rem);
+  --step-2:  clamp(1.24rem, 1.14rem + 0.48vw, 1.55rem);
+  --step-3:  clamp(1.60rem, 1.40rem + 1.00vw, 2.40rem);
+  --step-4:  clamp(2.10rem, 1.70rem + 2.00vw, 4.00rem);
+
+  /* space — deliberately uneven, so rhythm is possible */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 13px; --sp-4: 21px;
+  --sp-5: 34px; --sp-6: 55px; --sp-7: 89px;
+
+  --radius: var(--brand-radius);
+  --dur-fast: 140ms; --dur: 260ms; --dur-slow: 620ms;
+  --ease: cubic-bezier(.22,.61,.36,1);          /* ease-out-quart, no bounce */
+}
+
+@media (prefers-reduced-motion: reduce){
+  :root{ --dur-fast: 0ms; --dur: 0ms; --dur-slow: 0ms; }
+}
+/* tokens:end */
+
+/* ── Tier 3 ── */
+:root{
+  --seg-active:  var(--accent);
+  --seg-machine: var(--marker-machine);
+  --seg-void:    var(--line-strong);
+  --rule:        var(--line);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
+  font-size:var(--step-0);line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.sheet{max-width:1180px;margin:0 auto;padding:var(--sp-6) var(--sp-5) var(--sp-7)}
+
+/* ── masthead ── */
+.eyebrow{font-size:var(--step--2);letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);font-weight:600}
+h1{font-size:var(--step-3);font-weight:520;letter-spacing:-.024em;margin:var(--sp-3) 0 0;line-height:1.1;max-width:19ch}
+h1 em{font-style:normal;color:var(--accent)}
+.lede{margin:var(--sp-4) 0 0;max-width:60ch;color:var(--ink-muted)}
+.masthead{display:flex;flex-wrap:wrap;gap:var(--sp-5);align-items:flex-end;justify-content:space-between}
+
+.theming{display:flex;align-items:center;gap:var(--sp-2);font-size:var(--step--2);color:var(--ink-faint)}
+.theming button,.ctl button{
+  font:inherit;font-size:var(--step--2);letter-spacing:.06em;text-transform:uppercase;
+  background:none;border:1px solid var(--line);color:var(--ink-muted);
+  padding:5px 9px;border-radius:var(--radius);cursor:pointer;transition:var(--dur-fast) var(--ease);
+}
+.theming button:hover,.ctl button:hover{border-color:var(--line-strong);color:var(--ink)}
+.theming button[aria-pressed="true"],.ctl button[aria-pressed="true"]{
+  background:var(--accent-soft);border-color:var(--accent-line);color:var(--ink)}
+
+/* ── the number ── */
+.verdict{
+  display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--sp-5);
+  margin:var(--sp-6) 0 var(--sp-5);padding-bottom:var(--sp-4);border-bottom:1px solid var(--rule);
+}
+.big{font-size:var(--step-4);font-weight:500;letter-spacing:-.045em;line-height:.9;font-variant-numeric:tabular-nums}
+.verdict p{margin:0;max-width:44ch;color:var(--ink-muted);font-size:var(--step--1)}
+.verdict p b{color:var(--ink);font-weight:540}
+
+/* ── controls ── */
+.ctl{display:flex;flex-wrap:wrap;gap:var(--sp-4);align-items:center;margin-bottom:var(--sp-4);font-size:var(--step--1);color:var(--ink-faint)}
+.ctl .grp{display:flex;gap:var(--sp-1);align-items:center}
+.ctl label{letter-spacing:.06em;text-transform:uppercase;font-size:var(--step--2);margin-right:var(--sp-1)}
+
+/* ── the strip ── */
+.strip-wrap{position:relative;margin:var(--sp-7) 0 0}
+.strip{position:relative;height:76px;border-left:1px solid var(--line-strong);border-right:0}
+.seg{
+  position:absolute;top:0;height:100%;left:0;transform-origin:left center;
+  transition:transform var(--dur-slow) var(--ease);will-change:transform;
+}
+.seg i{position:absolute;inset:0;display:block}
+.seg[data-kind="active"]  i{background:var(--seg-active)}
+.seg[data-kind="machine"] i{background:repeating-linear-gradient(90deg,var(--seg-machine) 0 1px,transparent 1px 5px)}
+.seg[data-kind="void"]    i{background:repeating-linear-gradient(135deg,var(--seg-void) 0 1px,transparent 1px 6px)}
+.seg::after{
+  content:"";position:absolute;top:0;bottom:0;left:0;width:1px;background:var(--bg);opacity:.85;
+}
+.seg.open i{-webkit-mask-image:linear-gradient(90deg,black 40%,transparent);mask-image:linear-gradient(90deg,black 40%,transparent)}
+.seg:hover i,.seg:focus-visible i{outline:1px solid var(--ink);outline-offset:0}
+.seg:focus-visible{outline:none}
+
+/* valence ribbon, same x-axis — the low point and the long segment are the same place */
+.ribbon{position:relative;height:7px;margin-top:5px}
+.ribbon .v{position:absolute;top:0;height:100%;left:0;transform-origin:left center;
+  transition:transform var(--dur-slow) var(--ease)}
+
+/* ruler */
+.ribbon-key{font-family:var(--font-mono);font-size:var(--step--2);color:var(--ink-faint);margin:4px 0 var(--sp-3);letter-spacing:.03em}
+.ruler{position:relative;height:34px;margin-top:2px;border-top:1px solid var(--rule)}
+.tick{position:absolute;top:0;transform:translateX(-.5px);transition:left var(--dur-slow) var(--ease)}
+.tick span{
+  position:absolute;top:7px;left:4px;white-space:nowrap;
+  font-family:var(--font-mono);font-size:var(--step--2);color:var(--ink-faint);letter-spacing:.03em;
+}
+.tick::before{content:"";position:absolute;top:0;width:1px;height:6px;background:var(--line-strong)}
+
+/* the bracket over the collapsed part */
+.bracket{position:absolute;top:-34px;height:24px;border:1px solid var(--line-strong);border-bottom:none;
+  transition:left var(--dur-slow) var(--ease),width var(--dur-slow) var(--ease)}
+.bracket span{
+  position:absolute;bottom:calc(100% + 4px);left:0;white-space:nowrap;
+  font-size:var(--step--2);font-family:var(--font-mono);color:var(--ink-muted);letter-spacing:.03em;
+}
+
+/* labels under the strip, only where they fit */
+.labels{position:relative;height:52px;margin-top:var(--sp-2)}
+.lab{position:absolute;top:0;font-size:var(--step--2);color:var(--ink-muted);line-height:1.3;
+  transition:left var(--dur-slow) var(--ease),opacity var(--dur) var(--ease);max-width:190px}
+.lab b{display:block;color:var(--ink);font-weight:540;font-size:var(--step--1);hyphens:auto}
+.lab.hide{opacity:0;pointer-events:none}
+
+/* legend + audit */
+.legend{display:flex;flex-wrap:wrap;gap:var(--sp-4);margin-top:var(--sp-5);font-size:var(--step--1);color:var(--ink-muted)}
+.legend div{display:flex;align-items:center;gap:var(--sp-2)}
+.key{width:26px;height:11px;flex:0 0 auto;display:block}
+.key.active{background:var(--seg-active)}
+.key.machine{background:repeating-linear-gradient(90deg,var(--seg-machine) 0 1px,transparent 1px 5px)}
+.key.void{background:repeating-linear-gradient(135deg,var(--seg-void) 0 1px,transparent 1px 6px)}
+
+.audit{margin-top:var(--sp-6);border-top:1px solid var(--rule);padding-top:var(--sp-4)}
+.audit h2{font-size:var(--step--2);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);font-weight:650;margin:0 0 var(--sp-3)}
+table{border-collapse:collapse;width:100%;font-size:var(--step--1)}
+th,td{text-align:left;padding:6px 10px 6px 0;border-bottom:1px solid var(--line-soft);vertical-align:top}
+th{font-size:var(--step--2);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);font-weight:650}
+td.id{font-family:var(--font-mono);font-size:var(--step--2);color:var(--ink-faint);white-space:nowrap}
+td.src{color:var(--ink-muted)}
+td.num{font-family:var(--font-mono);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+tr.off{opacity:.34}
+.note{margin-top:var(--sp-4);font-size:var(--step--2);color:var(--ink-faint);max-width:76ch;font-family:var(--font-mono);line-height:1.7}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="masthead">
+    <div>
+      <div class="eyebrow">Rendering · time to scale</div>
+      <h1>An hour of work.<br>Then <em>weeks of nothing</em>.</h1>
+    </div>
+    <div class="theming" role="group" aria-label="Theme">
+      <span>Theme</span>
+      <button data-theme-set="light" aria-pressed="false">Light</button>
+      <button data-theme-set="dark" aria-pressed="false">Dark</button>
+      <button data-theme-set="system" aria-pressed="true">Auto</button>
+    </div>
+  </div>
+
+  <p class="lede">The timeline rendering spaces these steps evenly, which quietly throws the time away.
+     Here every segment is drawn from the map's own <code>duration</code> and <code>waitTime</code> strings —
+     so the "application black hole" stops being a figure of speech.</p>
+
+  <div class="verdict">
+    <div class="big" id="pct">—</div>
+    <p id="verdict-copy"></p>
+  </div>
+
+  <div class="ctl">
+    <div class="grp"><label>Path</label><span id="paths"></span></div>
+    <div class="grp"><label>Scale</label>
+      <button data-scale="true" aria-pressed="true">True</button>
+      <button data-scale="log" aria-pressed="false">Log</button>
+    </div>
+  </div>
+
+  <div class="strip-wrap">
+    <div class="bracket" id="bracket"><span id="bracket-label"></span></div>
+    <div class="strip" id="strip" role="img" aria-label="Journey duration drawn to scale"></div>
+    <div class="ribbon" id="ribbon" aria-hidden="true"></div>
+    <div class="ribbon-key">emotionValence, on the same axis</div>
+    <div class="ruler" id="ruler"></div>
+    <div class="labels" id="labels"></div>
+  </div>
+
+  <div class="legend">
+    <div><i class="key active"></i> Maya is doing something</div>
+    <div><i class="key machine"></i> a machine is processing · <code>automation</code></div>
+    <div><i class="key void"></i> nothing is happening · <code>waitTime</code></div>
+  </div>
+
+  <section class="audit">
+    <h2>Every number above, and the string it came from</h2>
+    <table>
+      <thead><tr><th>Step</th><th>Field &amp; value in the map</th><th class="num">Low</th><th class="num">High</th></tr></thead>
+      <tbody id="audit"></tbody>
+    </table>
+    <p class="note" id="note"></p>
+  </section>
+</div>
+
+<script>
+/* data:begin */
+const JOURNEY = {
+ "personas": [
+  {
+   "name": "Maya",
+   "role": "Mid-career applicant job-hunting while employed",
+   "type": "primary"
+  },
+  {
+   "name": "ATS",
+   "role": "Applicant Tracking System (resume parsing, status, automated mail)",
+   "type": "system"
+  },
+  {
+   "name": "AI Screener",
+   "role": "Automated resume-screening step that matches applicants against role criteria and auto-rejects non-matches within 24h",
+   "type": "system"
+  },
+  {
+   "name": "Recruiter",
+   "role": "In-house recruiter / talent team screening applications",
+   "type": "backstage"
+  },
+  {
+   "name": "Hiring Manager",
+   "role": "Owns the role, makes the final call",
+   "type": "backstage"
+  }
+ ],
+ "activeCategories": [
+  "emotional",
+  "channel",
+  "temporal",
+  "people",
+  "actions",
+  "systems",
+  "service-layers",
+  "failure",
+  "path",
+  "design",
+  "accessibility"
+ ],
+ "milestones": [
+  {
+   "id": "discovery",
+   "fields": {
+    "title": "Discovery",
+    "description": "Maya encounters the job posting and decides it's worth pursuing"
+   },
+   "steps": [
+    {
+     "id": "see-the-posting",
+     "fields": {
+      "persona": [
+       "Maya"
+      ],
+      "description": "Comes across the role on a job board, LinkedIn, or the company careers page",
+      "emotion": "Spark of interest, cautious optimism",
+      "emotionValence": "1",
+      "emotionIntensity": "low",
+      "thinking": "\"This could actually be a good fit — let me see what they want\"",
+      "channel": "LinkedIn / job board / careers page",
+      "device": "Phone, in a gap between other things",
+      "trigger": "Active search, alert email, or a link shared by a contact",
+      "duration": "~30 sec skim",
+      "pacing": "normal",
+      "entryPoint": "true",
+      "next": "→ read-and-assess-fit"
+     },
+     "meta": {},
+     "index": 0,
+     "milestone": "discovery",
+     "coverage": {
+      "A": {
+       "count": 4,
+       "fields": [
+        "emotion",
+        "emotionValence",
+        "emotionIntensity",
+        "thinking"
+       ]
+      },
+      "B": {
+       "count": 2,
+       "fields": [
+        "channel",
+        "device"
+       ]
+      },
+      "C": {
+       "count": 3,
+       "fields": [
+        "trigger",
+        "duration",
+        "pacing"
+       ]
+      },
+      "K": {
+       "count": 2,
+       "fields": [
+        "entryPoint",
+        "next"
+       ]
+      }
+     }
+    },
+    {
+     "id": "read-and-assess-fit",
+     "fields": {
+      "persona": [
+       "Maya"
+      ],
+      "description": "Reads the description and self-assesses whether to apply",
+      "emotion": "Mix of excitement and self-doubt",
+      "emotionValence": "0",
+      "emotionIntensity": "medium",
+      "thinking": "\"I hit most of these, but not all — is it worth my time?\"",
+      "cognitiveLoad": "medium",
+      "duration": "~5-10 min",
+      "painPoint": "Vague or inflated requirements make it hard to judge fit",
+      "decision": "Apply now, bookmark for later, or pass",
+      "failureMode": "Talks self out of applying (\"I only meet 7 of 10 bullets\")",
+      "failureProbability": "high",
+      "failureImpact": "medium",
+      "literacyRequirement": "Job descriptions are written in internal jargon and inflated requirement lists; reading them accurately is insider knowledge",
+      "inclusionConsideration": "Candidates without that insider context read every bullet as a hard requirement and self-eliminate before the funnel even starts",
+      "opportunity": "Mark which requirements are actually firm and which are wish-list",
+      "priority": "should-fix",
+      "next": "→ click-apply"
+     },
+     "meta": {},
+     "index": 1,
+     "milestone": "discovery",
+     "coverage": {
+      "A": {
+       "count": 5,
+       "fields": [
+        "emotion",
+        "emotionValence",
+        "emotionIntensity",
+        "thinking",
+        "cognitiveLoad"
+       ]
+      },
+      "C": {
+       "count": 1,
+       "fields": [
+        "duration"
+       ]
+      },
+      "I": {
+       "count": 3,
+       "fields": [
+        "painPoint",
+        "opportunity",
+        "priority"
+       ]
+      },
+      "E": {
+       "count": 1,
+       "fields": [
+        "decision"
+       ]
+      },
+      "J": {
+       "count": 3,
+       "fields": [
+        "failureMode",
+        "failureProbability",
+        "failureImpact"
+       ]
+      },
+      "M": {
+       "count": 2,
+       "fields": [
+        "literacyRequirement",
+        "inclusionConsideration"
+       ]
+      },
+      "K": {
+       "count": 1,
+       "fields": [
+        "next"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "application",
+   "fields": {
+    "title": "Application",
+    "description": "Maya creates an account and submits her materials"
+   },
+   "steps": [
+    {
+     "id": "click-apply",
+     "fields": {
+      "persona": [
+       "Maya",
+       "ATS"
+      ],
+      "description": "Clicks Apply and is routed into the company's application portal",
+      "emotion": "Readiness, slight bracing",
+      "emotionValence": "0",
+      "emotionIntensity": "low",
+      "channel": "Careers portal (ATS-hosted)",
+      "touchpoint": "\"Apply\" button, landing her on the portal",
+      "channelTransition": "Employer-branded careers page hands off to a third-party ATS portal with different branding and different UX conventions",
+      "duration": "~10 sec",
+      "systems": [
+       "ATS"
+      ],
+      "backstageAction": "Creates a candidate session and applies the employer's account-gate policy",
+      "automation": "Fully automated; no human involved",
+      "lineOfVisibility": "Maya sees a redirect; the session creation and the account-gate decision behind it are invisible",
+      "backstage": "The ATS opens a candidate session at the redirect and applies the employer's configured account-gate policy",
+      "painPoint": "Redirected to a clunky third-party portal that breaks the flow",
+      "next": "→ create-account"
+     },
+     "meta": {
+      "provenance": {
+       "backstage": "auto-composite"
+      }
+     },
+     "index": 2,
+     "milestone": "application",
+     "coverage": {
+      "A": {
+       "count": 3,
+       "fields": [
+        "emotion",
+        "emotionValence",
+        "emotionIntensity"
+       ]
+      },
+      "B": {
+       "count": 3,
+       "fields": [
+        "channel",
+        "touchpoint",
+        "channelTransition"
+       ]
+      },
+      "C": {
+       "count": 1,
+       "fields": [
+        "duration"
+       ]
+      },
+      "F": {
+       "count": 2,
+       "fields": [
+        "systems",
+        "automation"
+       ]
+      },
+      "E": {
+       "count": 1,
+       "fields": [
+        "backstageAction"
+       ]
+      },
+      "G": {
+       "count": 2,
+       "fields": [
+        "lineOfVisibility",
+        "backstage"
+       ]
+      },
+      "I": {
+       "count": 1,
+       "fields": [
+        "painPoint"
+       ]
+      },
+      "K": {
+       "count": 1,
+       "fields": [
+        "next"
+       ]
+      }
+     }
+    },
+    {
+     "id": "create-account",
+     "fields": {
+      "persona": [
+       "Maya",
+       "ATS"
+      ],
+      "description": "Forced to create an account before she can apply",
+      "emotion": "Mild irritation",
+      "emotionValence": "-1",
+      "emotionIntensity": "medium",
+      "effort": "Yet another login and password to manage",
+      "duration": "~3-5 min",
+      "systems": [
+       "ATS",
+       "Email service"
+      ],
+      "policy": "Employer's ATS configuration requires an account before the form is shown",
+      "painPoint": "Account gate before she's even seen the form",
+      "failureMode": "Abandons here rather than make an account",
+      "failureProbability": "high",
+      "failureImpact": "high",
+      "accessibilityBarrier": "Password rules, CAPTCHA, and an email round-trip stack up as a hard stop before any content is reached",
+      "opportunity": "Let people apply first and create the account at submit — or offer a guest apply",
+      "priority": "must-fix",
+      "exitPoint": "true",
+      "next": "→ fill-application-form"
+     },
+     "meta": {},
+     "index": 3,
+     "milestone": "application",
+     "coverage": {
+      "A": {
+       "count": 4,
+       "fields": [
+        "emotion",
+        "emotionValence",
+        "emotionIntensity",
+        "effort"
+       ]
+      },
+      "C": {
+       "count": 1,
+       "fields": [
+        "duration"
+       ]
+      },
+      "F": {
+       "count": 3,
+       "fields": [
+        "systems",
+        "policy"
+       ]
+      },
+      "I": {
+       "count": 3,
+       "fields": [
+        "painPoint",
+        "opportunity",
+        "priority"
+       ]
+      },
+      "J": {
+       "count": 3,
+       "fields": [
+        "failureMode",
+        "failureProbability",
+        "failureImpact"
+       ]
+      },
+      "M": {
+       "count": 1,
+       "fields": [
+        "accessibilityBarrier"
+       ]
+      },
+      "K": {
+       "count": 2,
+       "fields": [
+        "exitPoint",
+        "next"
+       ]
+      }
+     }
+    },
+    {
+     "id": "fill-application-form",
+     "fields": {
+      "persona": [
+       "Maya",
+       "ATS"
+      ],
+      "description": "Fills out the application form, often re-typing what's on her resume",
+      "emotion": "Tedium, growing frustration",
+      "emotionValence": "-2",
+      "emotionIntensity": "high",
+      "duration": "~20-40 min",
+      "pacing": "stalled",
+      "cognitiveLoad": "high",
+      "doing": "Re-entering work history field by field after uploading a resume",
+      "inputRequired": "Full work history, education, work-authorization answers, EEO/demographic questions",
+      "systems": [
+       "ATS",
+       "Resume parser"
+      ],
+      "dataFlow": "Resume PDF into the parser, parser output into pre-filled form fields, form contents into the candidate record; parse errors propagate into the record Maya never gets to see",
+      "automation": "Parsing is automated; correcting what it got wrong is entirely manual",
+      "painPoint": [
+       "\"I just uploaded my resume — why am I typing it all again?\"",
+       "Parser mangles formatting, she fixes it by hand"
+      ],
+      "failureMode": "Session times out or form errors wipe entries",
+      "failureProbability": "medium",
+      "failureImpact": "high",
+      "recoveryPath": "Start over, often from scratch",
+      "accessibilityBarrier": "Timed session expiry punishes anyone who needs longer — assistive-tech users, people on slow connections, people filling this in between shifts",
+      "momentOfTruth": "Whether the form respects her time or wastes it",
+      "opportunity": "Parse once, show it back for confirmation, never ask for the same fact twice",
+      "priority": "must-fix",
+      "next": "→ submit-application"
+     },
+     "meta": {},
+     "index": 4,
+     "milestone": "application",
+     "coverage": {
+      "A": {
+       "count": 4,
+       "fields": [
+        "emotion",
+        "emotionValence",
+        "emotionIntensity",
+        "cognitiveLoad"
+       ]
+      },
+      "C": {
+       "count": 2,
+       "fields": [
+        "duration",
+        "pacing"
+       ]
+      },
+      "E": {
+       "count": 2,
+       "fields": [
+        "doing",
+        "inputRequired"
+       ]
+      },
+      "F": {
+       "count": 4,
+       "fields": [
+        "systems",
+        "dataFlow",
+        "automation"
+       ]
+      },
+      "I": {
+       "count": 5,
+       "fields": [
+        "painPoint",
+        "momentOfTruth",
+        "opportunity",
+        "priority"
+       ]
+      },
+      "J": {
+       "count": 4,
+       "fields": [
+        "failureMode",
+        "failureProbability",
+        "failureImpact",
+        "recoveryPath"
+       ]
+      },
+      "M": {
+       "count": 1,
+       "fields": [
+        "accessibilityBarrier"
+       ]
+      },
+      "K": {
+       "count": 1,
+       "fields": [
+        "next"
+       ]
+      }
+     }
+    },
+    {
+     "id": "submit-application",
+     "fields": {
+      "persona": [
+       "Maya",
+       "ATS"
+      ],
+      "description": "Reviews and submits the completed application",
+      "emotion": "Relief, hope, a small sense of accomplishment",
+      "emotionValence": "1",
+      "emotionIntensity": "medium",
+      "doing": "Hits Submit",
+      "channel": "Careers portal",
+      "duration": "~1 min",
+      "systems": [
+       "ATS",
+       "Email service",
+       "AI Screener"
+      ],
+      "backstageAction": "Records the submission, fires the automated confirmation email, and enqueues the application for the AI screen",
+      "automation": "Fully automated; the three downstream processes fan out from one tap",
+      "parallelPath": "→ receive-confirmation, → ai-resume-screen (both kick off from the same Submit)",
+      "lineOfVisibility": "Everything past Submit is invisible — record creation, mail send, screening queue",
+      "backstage": "One Submit fans out into three automated processes — the ATS writes the candidate record, the mail service sends a templated acknowledgment, and the application enters the AI screening queue",
+      "valueExchange": "Maya gives 40 minutes of unpaid labour and a complete personal data record; she gets a confirmation screen",
+      "momentOfTruth": "The instant after Submit — did it go through, and what now?",
+      "next": "→ receive-confirmation"
+     },
+     "meta": {
+      "provenance": {
+       "backstage": "auto-composite"
+      }
+     },
+     "index": 5,
+     "milestone": "application",
+     "coverage": {
+      "A": {
+       "count": 3,
+       "fields": [
+        "emotion",
+        "emotionValence",
+        "emotionIntensity"
+       ]
+      },
+      "E": {
+       "count": 2,
+       "fields": [
+        "doing",
+        "backstageAction"
+       ]
+      },
+      "B": {
+       "count": 1,
+       "fields": [
+        "channel"
+       ]
+      },
+      "C": {
+       "count": 1,
+       "fields": [
+        "duration"
+       ]
+      },
+      "F": {
+       "count": 4,
+       "fields": [
+        "systems",
+        "automation"
+       ]
+      },
+      "K": {
+       "count": 2,
+       "fields": [
+        "parallelPath",
+        "next"
+       ]
+      },
+      "G": {
+       "count": 3,
+       "fields": [
+        "lineOfVisibility",
+        "backstage",
+        "valueExchange"
+       ]
+      },
+      "I": {
+       "count": 1,
+       "fields": [
+        "momentOfTruth"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "the-wait",
+   "fields": {
+    "title": "The Wait",
+    "description": "The period after submission where the experience most often breaks down. An AI screen now forks it early — non-matches get a fast 'no' within 24h, but everyone who passes still falls into the same old \"application black hole\""
+   },
+   "steps": [
+    {
+     "id": "receive-confirmation",
+     "fields": {
+      "persona": [
+       "Maya",
+       "ATS"
+      ],
+      "description": "Gets (or doesn't get) an automated \"we received your application\" email",
+      "emotion": "Reassured if it arrives, uneasy if it doesn't",
+      "emotionValence": "0",
+      "emotionIntensity": "low",
+      "channel": "Email",
+      "duration": "Seconds to minutes after submit",
+      "notification": "Automated \"application received\" acknowledgment",
+      "systems": [
+       "ATS",
+       "Email service"
+      ],
+      "backstageAction": "Sends templated confirmation",
+      "message": "\"We've received your application\" — no timeline, no next step, no name",
+      "tone": "Templated, impersonal",
+      "failureMode": "No confirmation configured, or it lands in spam",
+      "failureProbability": "medium",
+      "failureImpact": "medium",
+      "painPoint": "A generic auto-reply with no sense of timeline or next steps",
+      "opportunity": "Say what happens next and by when — the cheapest fix in the whole journey",
+      "priority": "should-fix",
+      "next": "→ ai-resume-screen"
+     },
+     "meta": {},
+     "index": 6,
+     "milestone": "the-wait",
+     "coverage": {
+      "A": {
+       "count": 3,
+       "fields": [
+        "emotion",
+        "emotionValence",
+        "emotionIntensity"
+       ]
+      },
+      "B": {
+       "count": 1,
+       "fields": [
+        "channel"
+       ]
+      },
+      "C": {
+       "count": 1,
+       "fields": [
+        "duration"
+       ]
+      },
+      "F": {
+       "count": 3,
+       "fields": [
+        "notification",
+        "systems"
+       ]
+      },
+      "E": {
+       "count": 1,
+       "fields": [
+        "backstageAction"
+       ]
+      },
+      "L": {
+       "count": 2,
+       "fields": [
+        "message",
+        "tone"
+       ]
+      },
+      "J": {
+       "count": 3,
+       "fields": [
+        "failureMode",
+        "failureProbability",
+        "failureImpact"
+       ]
+      },
+      "I": {
+       "count": 3,
+       "fields": [
+        "painPoint",
+        "opportunity",
+        "priority"
+       ]
+      },
+      "K": {
+       "count": 1,
+       "fields": [
+        "next"
+       ]
+      }
+     }
+    },
+    {
+     "id": "ai-resume-screen",
+     "fields": {
+      "persona": [
+       "ATS",
+       "AI Screener"
+      ],
+      "description": "An AI screening step automatically matches Maya's resume against the role criteria within 24 hours of submission",
+      "channel": "Automated (no visible touchpoint for Maya)",
+      "duration": "Within 24 hours of submission",
+      "systems": [
+       "AI Screener",
+       "ATS"
+      ],
+      "backstageAction": "Scores the application against role criteria; non-matches are auto-rejected, matches pass through to the recruiter queue",
+      "automation": "Fully automated — there is no human review anywhere on the reject path",
+      "dataFlow": "Parsed resume fields and role criteria feed a match score, which decides the routing written back to the candidate record",
+      "policy": "An employer-configured match threshold decides who a human ever sees",
+      "lineOfVisibility": "Maya is never told this step exists",
+      "branchCondition": "AI match vs. no match",
+      "momentOfTruth": "An algorithm now decides — invisibly — whether Maya is fast-rejected or advances into the queue",
+      "failureMode": "A qualified applicant is auto-rejected on a criteria mismatch (keyword/parsing miss) with no human review",
+      "failureProbability": "medium",
+      "failureImpact": "high",
+      "risk": "Criteria proxies (school, keywords, employment gaps) encode bias at scale, invisibly and unappealably",
+      "inclusionConsideration": "Non-linear careers, career breaks, and non-standard resume formats score worst — the people the format serves least are filtered out first",
+      "opportunity": "Disclose that an automated screen made the call, and give one correction loop before it's final",
+      "priority": "must-fix",
+      "next": [
+       "no match → outcome-fast-rejection",
+       "match → wait-in-silence"
+      ]
+     },
+     "meta": {},
+     "index": 7,
+     "milestone": "the-wait",
+     "coverage": {
+      "B": {
+       "count": 1,
+       "fields": [
+        "channel"
+       ]
+      },
+      "C": {
+       "count": 1,
+       "fields": [
+        "duration"
+       ]
+      },
+      "F": {
+       "count": 5,
+       "fields": [
+        "systems",
+        "automation",
+        "dataFlow",
+        "policy"
+       ]
+      },
+      "E": {
+       "count": 1,
+       "fields": [
+        "backstageAction"
+       ]
+      },
+      "G": {
+       "count": 1,
+       "fields": [
+        "lineOfVisibility"
+       ]
+      },
+      "K": {
+       "count": 3,
+       "fields": [
+        "branchCondition",
+        "next"
+       ]
+      },
+      "I": {
+       "count": 3,
+       "fields": [
+        "momentOfTruth",
+        "opportunity",
+        "priority"
+       ]
+      },
+      "J": {
+       "count": 4,
+       "fields": [
+        "failureMode",
+        "failureProbability",
+        "failureImpact",
+        "risk"
+       ]
+      },
+      "M": {
+       "count": 1,
+       "fields": [
+        "inclusionConsideration"
+       ]
+      }
+     }
+    },
+    {
+     "id": "outcome-fast-rejection",
+     "fields": {
+      "persona": [
+       "Maya",
+       "ATS",
+       "AI Screener"
+      ],
+      "description": "Maya gets an automated rejection within ~24 hours because the AI screen flagged her as not matching the criteria",
+      "emotion": "Sting of a fast 'no', but the speed gives real closure — better than weeks of silence",
+      "emotionValence": "-1",
+      "emotionIntensity": "medium",
+      "channel": "Email",
+      "duration": "Within 24 hours of applying",
+      "notification": "Automated rejection, often without saying an AI made the call",
+      "message": "\"We've decided to move forward with other candidates\"",
+      "tone": "Templated, final, no route to reply",
+      "thinking": "\"At least I know now — but did a person ever actually look at this?\"",
+      "painPoint": [
+       "No feedback on why she didn't match; no way to tell if it was a genuine misfit or a parsing miss",
+       "No disclosure that an algorithm made the decision"
+      ],
+      "opportunity": "Fast, honest rejections (with a hint of why) turn the black hole into prompt closure and preserve goodwill",
+      "priority": "should-fix",
+      "exitPoint": "true"
+     },
+     "meta": {},
+     "index": 8,
+     "milestone": "the-wait",
+     "coverage": {
+      "A": {
+       "count": 4,
+       "fields": [
+        "emotion",
+        "emotionValence",
+        "emotionIntensity",
+        "thinking"
+       ]
+      },
+      "B": {
+       "count": 1,
+       "fields": [
+        "channel"
+       ]
+      },
+      "C": {
+       "count": 1,
+       "fields": [
+        "duration"
+       ]
+      },
+      "F": {
+       "count": 1,
+       "fields": [
+        "notification"
+       ]
+      },
+      "L": {
+       "count": 2,
+       "fields": [
+        "message",
+        "tone"
+       ]
+      },
+      "I": {
+       "count": 4,
+       "fields": [
+        "painPoint",
+        "opportunity",
+        "priority"
+       ]
+      },
+      "K": {
+       "count": 1,
+       "fields": [
+        "exitPoint"
+       ]
+      }
+     }
+    },
+    {
+     "id": "wait-in-silence",
+     "fields": {
+      "persona": [
+       "Maya",
+       "Recruiter",
+       "Hiring Manager",
+       "ATS"
+      ],
+      "description": "Having passed the AI screen, Maya's application reaches the recruiter queue — and days then weeks pass with no update. The black hole is unchanged for everyone who clears the AI gate",
+      "emotion": "Hope curdling into anxiety, then resignation",
+      "emotionValence": "-2",
+      "emotionIntensity": "high",
+      "waitTime": "Days to several weeks, often indefinite",
+      "duration": "The longest step in the journey by two orders of magnitude",
+      "pacing": "stalled",
+      "thinking": "\"Did anyone even look at it? Did I do something wrong? Should I follow up or will that annoy them?\"",
+      "systems": [
+       "ATS"
+      ],
+      "backstageAction": "Application sits in a queue; internal status changes are recorded but never surfaced to Maya",
+      "backstageStaff": "Recruiter screens or filters; many applications never get human eyes",
+      "handoff": "Recruiter → Hiring Manager for shortlist review — the transfer where the queue actually stalls",
+      "bottleneck": "Hiring Manager review capacity; a shortlist can sit for weeks behind higher-priority work",
+      "lineOfVisibility": "Status changes exist inside the ATS and are deliberately not exposed to the candidate",
+      "orchestration": "None — nothing connects internal ATS status to candidate communication",
+      "painPoint": [
+       "No acknowledgment that a human ever reviewed it",
+       "No status, no timeline, no closure"
+      ],
+      "momentOfTruth": "This silence is the make-or-break of the whole experience",
+      "failureMode": "Company never sends any further communication at all",
+      "failureProbability": "high",
+      "failureImpact": "high",
+      "opportunity": "Surface the real internal state, even coarsely — \"in recruiter review, typically ~2 weeks\"",
+      "priority": "must-fix",
+      "next": "→ check-status-or-follow-up"
+     },
+     "meta": {},
+     "index": 9,
+     "milestone": "the-wait",
+     "coverage": {
+      "A": {
+       "count": 4,
+       "fields": [
+        "emotion",
+        "emotionValence",
+        "emotionIntensity",
+        "thinking"
+       ]
+      },
+      "C": {
+       "count": 3,
+       "fields": [
+        "waitTime",
+        "duration",
+        "pacing"
+       ]
+      },
+      "F": {
+       "count": 1,
+       "fields": [
+        "systems"
+       ]
+      },
+      "E": {
+       "count": 1,
+       "fields": [
+        "backstageAction"
+       ]
+      },
+      "D": {
+       "count": 2,
+       "fields": [
+        "backstageStaff",
+        "handoff"
+       ]
+      },
+      "J": {
+       "count": 4,
+       "fields": [
+        "bottleneck",
+        "failureMode",
+        "failureProbability",
+        "failureImpact"
+       ]
+      },
+      "G": {
+       "count": 2,
+       "fields": [
+        "lineOfVisibility",
+        "orchestration"
+       ]
+      },
+      "I": {
+       "count": 5,
+       "fields": [
+        "painPoint",
+        "momentOfTruth",
+        "opportunity",
+        "priority"
+       ]
+      },
+      "K": {
+       "count": 1,
+       "fields": [
+        "next"
+       ]
+      }
+     }
+    },
+    {
+     "id": "check-status-or-follow-up",
+     "fields": {
+      "persona": [
+       "Maya"
+      ],
+      "description": "Logs back into the portal or musters the nerve to follow up",
+      "emotion": "Powerlessness, frustration",
+      "emotionValence": "-2",
+      "emotionIntensity": "medium",
+      "channel": "Portal, then email, then LinkedIn",
+      "duration": "~10 min per attempt",
+      "frequency": "Every few days at first, tapering off as hope fades",
+      "effort": "High emotional cost for near-zero information gain",
+      "doing": "Checks portal status (often just \"Submitted\" or \"Under review\" indefinitely)",
+      "workaround": "Emails a recruiter or messages an employee on LinkedIn to get a signal",
+      "painPoint": "Portal status is stale or meaningless; no way to get a real answer",
+      "failureMode": "Follow-ups go unanswered too",
+      "failureProbability": "high",
+      "failureImpact": "medium",
+      "opportunity": "A status that actually means something removes the need for the workaround entirely",
+      "priority": "should-fix",
+      "next": "→ hear-back"
+     },
+     "meta": {},
+     "index": 10,
+     "milestone": "the-wait",
+     "coverage": {
+      "A": {
+       "count": 4,
+       "fields": [
+        "emotion",
+        "emotionValence",
+        "emotionIntensity",
+        "effort"
+       ]
+      },
+      "B": {
+       "count": 1,
+       "fields": [
+        "channel"
+       ]
+      },
+      "C": {
+       "count": 2,
+       "fields": [
+        "duration",
+        "frequency"
+       ]
+      },
+      "E": {
+       "count": 2,
+       "fields": [
+        "doing",
+        "workaround"
+       ]
+      },
+      "I": {
+       "count": 3,
+       "fields": [
+        "painPoint",
+        "opportunity",
+        "priority"
+       ]
+      },
+      "J": {
+       "count": 3,
+       "fields": [
+        "failureMode",
+        "failureProbability",
+        "failureImpact"
+       ]
+      },
+      "K": {
+       "count": 1,
+       "fields": [
+        "next"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "resolution",
+   "fields": {
+    "title": "Resolution",
+    "description": "How (and whether) the journey actually ends"
+   },
+   "steps": [
+    {
+     "id": "hear-back",
+     "fields": {
+      "persona": [
+       "Maya",
+       "Recruiter",
+       "ATS"
+      ],
+      "description": "Eventually receives an outcome — or never does",
+      "emotion": "Depends entirely on what arrives, if anything",
+      "emotionValence": "0",
+      "emotionIntensity": "high",
+      "channel": "Email (rejection or advance), or silence",
+      "waitTime": "Weeks; for many applicants the branch never resolves at all",
+      "branchCondition": "Rejection vs. advance to interview vs. permanent silence (ghosting)",
+      "next": [
+       "rejection → outcome-rejection",
+       "advance → outcome-advance",
+       "no response ever → outcome-ghosted"
+      ]
+     },
+     "meta": {},
+     "index": 11,
+     "milestone": "resolution",
+     "coverage": {
+      "A": {
+       "count": 3,
+       "fields": [
+        "emotion",
+        "emotionValence",
+        "emotionIntensity"
+       ]
+      },
+      "B": {
+       "count": 1,
+       "fields": [
+        "channel"
+       ]
+      },
+      "C": {
+       "count": 1,
+       "fields": [
+        "waitTime"
+       ]
+      },
+      "K": {
+       "count": 4,
+       "fields": [
+        "branchCondition",
+        "next"
+       ]
+      }
+     }
+    },
+    {
+     "id": "outcome-rejection",
+     "fields": {
+      "persona": [
+       "Maya",
+       "ATS"
+      ],
+      "description": "Receives a rejection — best case a clear one, worst case a cold template",
+      "emotion": "Disappointment, but closure is its own relief",
+      "emotionValence": "-1",
+      "emotionIntensity": "medium",
+      "channel": "Email",
+      "notification": "Automated rejection (\"we've decided to move forward with other candidates\")",
+      "duration": "Weeks after applying, sometimes months",
+      "tone": "Form letter, weeks after the fact",
+      "painPoint": "Form-letter rejection with no feedback after weeks of waiting",
+      "opportunity": "A timely, human, even slightly personalized rejection preserves goodwill",
+      "priority": "should-fix",
+      "exitPoint": "true"
+     },
+     "meta": {},
+     "index": 12,
+     "milestone": "resolution",
+     "coverage": {
+      "A": {
+       "count": 3,
+       "fields": [
+        "emotion",
+        "emotionValence",
+        "emotionIntensity"
+       ]
+      },
+      "B": {
+       "count": 1,
+       "fields": [
+        "channel"
+       ]
+      },
+      "F": {
+       "count": 1,
+       "fields": [
+        "notification"
+       ]
+      },
+      "C": {
+       "count": 1,
+       "fields": [
+        "duration"
+       ]
+      },
+      "L": {
+       "count": 1,
+       "fields": [
+        "tone"
+       ]
+      },
+      "I": {
+       "count": 3,
+       "fields": [
+        "painPoint",
+        "opportunity",
+        "priority"
+       ]
+      },
+      "K": {
+       "count": 1,
+       "fields": [
+        "exitPoint"
+       ]
+      }
+     }
+    },
+    {
+     "id": "outcome-ghosted",
+     "fields": {
+      "persona": [
+       "Maya"
+      ],
+      "description": "Never hears anything — the application simply dissolves into silence",
+      "emotion": "Resentment, lasting damage to how she sees the company brand",
+      "emotionValence": "-2",
+      "emotionIntensity": "high",
+      "waitTime": "Indefinite — the journey has no terminating event",
+      "painPoint": "No closure ever; she's left to assume rejection",
+      "momentOfTruth": "Ghosting is the single most corrosive outcome for employer brand",
+      "failureMode": "The journey ends by exhaustion rather than by any decision being communicated",
+      "failureProbability": "high",
+      "failureImpact": "high",
+      "opportunity": "An automatic \"the role is closed\" sweep costs nothing and eliminates this ending entirely",
+      "priority": "must-fix",
+      "exitPoint": "true"
+     },
+     "meta": {},
+     "index": 13,
+     "milestone": "resolution",
+     "coverage": {
+      "A": {
+       "count": 3,
+       "fields": [
+        "emotion",
+        "emotionValence",
+        "emotionIntensity"
+       ]
+      },
+      "C": {
+       "count": 1,
+       "fields": [
+        "waitTime"
+       ]
+      },
+      "I": {
+       "count": 4,
+       "fields": [
+        "painPoint",
+        "momentOfTruth",
+        "opportunity",
+        "priority"
+       ]
+      },
+      "J": {
+       "count": 3,
+       "fields": [
+        "failureMode",
+        "failureProbability",
+        "failureImpact"
+       ]
+      },
+      "K": {
+       "count": 1,
+       "fields": [
+        "exitPoint"
+       ]
+      }
+     }
+    },
+    {
+     "id": "outcome-advance",
+     "fields": {
+      "persona": [
+       "Maya",
+       "Recruiter"
+      ],
+      "description": "Gets invited to a screen or interview — the journey continues into the hiring process",
+      "emotion": "Elation, validation",
+      "emotionValence": "2",
+      "emotionIntensity": "high",
+      "channel": "Email / recruiter call",
+      "duration": "Days to weeks after submission",
+      "next": "→ (interview journey — separate map)",
+      "exitPoint": "true"
+     },
+     "meta": {},
+     "index": 14,
+     "milestone": "resolution",
+     "coverage": {
+      "A": {
+       "count": 3,
+       "fields": [
+        "emotion",
+        "emotionValence",
+        "emotionIntensity"
+       ]
+      },
+      "B": {
+       "count": 1,
+       "fields": [
+        "channel"
+       ]
+      },
+      "C": {
+       "count": 1,
+       "fields": [
+        "duration"
+       ]
+      },
+      "K": {
+       "count": 2,
+       "fields": [
+        "next",
+        "exitPoint"
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "journey": "Applying for a job through an online application portal",
+ "created": "2026-06-02",
+ "lastModified": "2026-08-18",
+ "structure": "Journey > Milestone > Step",
+ "stepCount": 15,
+ "categories": [
+  {
+   "letter": "A",
+   "name": "Emotional / Cognitive"
+  },
+  {
+   "letter": "B",
+   "name": "Physical / Spatial / Channel"
+  },
+  {
+   "letter": "C",
+   "name": "Temporal"
+  },
+  {
+   "letter": "D",
+   "name": "People / Actors"
+  },
+  {
+   "letter": "E",
+   "name": "Actions / Behaviors"
+  },
+  {
+   "letter": "F",
+   "name": "Systems / Technology"
+  },
+  {
+   "letter": "G",
+   "name": "Service Design Layers"
+  },
+  {
+   "letter": "H",
+   "name": "Business / Metrics"
+  },
+  {
+   "letter": "I",
+   "name": "Design / Opportunities"
+  },
+  {
+   "letter": "J",
+   "name": "Failure / Risk"
+  },
+  {
+   "letter": "K",
+   "name": "Path / Flow"
+  },
+  {
+   "letter": "L",
+   "name": "Communication / Content"
+  },
+  {
+   "letter": "M",
+   "name": "Accessibility / Inclusion"
+  }
+ ],
+ "fieldCategory": {
+  "emotion": "A",
+  "emotionValence": "A",
+  "emotionIntensity": "A",
+  "thinking": "A",
+  "cognitiveLoad": "A",
+  "motivation": "A",
+  "anxiety": "A",
+  "expectation": "A",
+  "trust": "A",
+  "effort": "A",
+  "confidence": "A",
+  "informationNeed": "A",
+  "channel": "B",
+  "touchpoint": "B",
+  "device": "B",
+  "place": "B",
+  "environment": "B",
+  "physicalEvidence": "B",
+  "channelTransition": "B",
+  "duration": "C",
+  "waitTime": "C",
+  "frequency": "C",
+  "trigger": "C",
+  "deadline": "C",
+  "pacing": "C",
+  "coActors": "D",
+  "frontlineStaff": "D",
+  "backstageStaff": "D",
+  "responsibleTeam": "D",
+  "thirdParty": "D",
+  "handoff": "D",
+  "doing": "E",
+  "frontstageAction": "E",
+  "backstageAction": "E",
+  "supportProcess": "E",
+  "inputRequired": "E",
+  "outputProduced": "E",
+  "workaround": "E",
+  "decision": "E",
+  "systems": "F",
+  "tools": "F",
+  "technology": "F",
+  "dataFlow": "F",
+  "automation": "F",
+  "dependencies": "F",
+  "notification": "F",
+  "policy": "F",
+  "frontstage": "G",
+  "backstage": "G",
+  "supportProcesses": "G",
+  "lineOfVisibility": "G",
+  "valueExchange": "G",
+  "serviceRecovery": "G",
+  "orchestration": "G",
+  "kpi": "H",
+  "metric": "H",
+  "conversionRate": "H",
+  "cost": "H",
+  "revenueImpact": "H",
+  "dropoffRate": "H",
+  "volumePerPeriod": "H",
+  "owner": "H",
+  "painPoint": "I",
+  "opportunity": "I",
+  "momentOfTruth": "I",
+  "insight": "I",
+  "desiredOutcome": "I",
+  "recommendation": "I",
+  "priority": "I",
+  "failureMode": "J",
+  "failureProbability": "J",
+  "failureImpact": "J",
+  "recoveryPath": "J",
+  "escalation": "J",
+  "fallback": "J",
+  "bottleneck": "J",
+  "risk": "J",
+  "next": "K",
+  "previous": "K",
+  "branchCondition": "K",
+  "parallelPath": "K",
+  "entryPoint": "K",
+  "exitPoint": "K",
+  "optionality": "K",
+  "message": "L",
+  "tone": "L",
+  "contentType": "L",
+  "cta": "L",
+  "accessibilityBarrier": "M",
+  "inclusionConsideration": "M",
+  "literacyRequirement": "M",
+  "economicBarrier": "M",
+  "culturalConsideration": "M"
+ },
+ "source": "remote/demos/gallery/job-application-portal.md"
+};
+/* data:end */
+
+/* Prose to seconds. The only judgement call in this rendering, so it is kept in
+   one visible table and printed back in full under the chart — nothing here is
+   a number the map did not already state in words. */
+const SEC = {min:60, hour:3600, day:86400, week:604800};
+const READ = {
+  "see-the-posting":           {lo:30,             hi:30,              kind:"active"},
+  "read-and-assess-fit":       {lo:5*SEC.min,      hi:10*SEC.min,      kind:"active"},
+  "click-apply":               {lo:10,             hi:10,              kind:"active"},
+  "create-account":            {lo:3*SEC.min,      hi:5*SEC.min,       kind:"active"},
+  "fill-application-form":     {lo:20*SEC.min,     hi:40*SEC.min,      kind:"active"},
+  "submit-application":        {lo:1*SEC.min,      hi:1*SEC.min,       kind:"active"},
+  "receive-confirmation":      {lo:5,              hi:5*SEC.min,       kind:"machine"},
+  "ai-resume-screen":          {lo:1*SEC.hour,     hi:24*SEC.hour,     kind:"machine"},
+  "outcome-fast-rejection":    {lo:1*SEC.hour,     hi:24*SEC.hour,     kind:"machine"},
+  "wait-in-silence":           {lo:3*SEC.day,      hi:3*SEC.week,      kind:"void"},
+  "check-status-or-follow-up": {lo:10*SEC.min,     hi:30*SEC.min,      kind:"active"},
+  "hear-back":                 {lo:2*SEC.week,     hi:6*SEC.week,      kind:"void", open:true},
+  "outcome-rejection":         {lo:0,              hi:0,               kind:"void"},
+  "outcome-ghosted":           {lo:6*SEC.week,     hi:6*SEC.week,      kind:"void", open:true, infinite:true},
+  "outcome-advance":           {lo:0,              hi:0,               kind:"void"}
+};
+const PATHS = {
+  cleared: {label:"Cleared the AI screen", ids:["see-the-posting","read-and-assess-fit","click-apply","create-account",
+            "fill-application-form","submit-application","receive-confirmation","ai-resume-screen",
+            "wait-in-silence","check-status-or-follow-up","hear-back"]},
+  fast:    {label:"Auto-rejected in 24h", ids:["see-the-posting","read-and-assess-fit","click-apply","create-account",
+            "fill-application-form","submit-application","receive-confirmation","ai-resume-screen","outcome-fast-rejection"]},
+  ghosted: {label:"Ghosted", ids:["see-the-posting","read-and-assess-fit","click-apply","create-account",
+            "fill-application-form","submit-application","receive-confirmation","ai-resume-screen",
+            "wait-in-silence","check-status-or-follow-up","hear-back","outcome-ghosted"]}
+};
+
+const steps = Object.fromEntries(JOURNEY.milestones.flatMap(m=>m.steps).map(s=>[s.id,s]));
+const humanize = id => id.replace(/-/g," ").replace(/^./,c=>c.toUpperCase());
+const mid = id => (READ[id].lo + READ[id].hi)/2;
+const fmt = s => s>=SEC.week ? (s/SEC.week).toFixed(s<2*SEC.week?1:0)+" wk"
+               : s>=SEC.day  ? (s/SEC.day).toFixed(s<2*SEC.day?1:0)+" d"
+               : s>=SEC.hour ? (s/SEC.hour).toFixed(s<2*SEC.hour?1:0)+" h"
+               : s>=SEC.min  ? Math.round(s/SEC.min)+" min" : Math.round(s)+" sec";
+
+let path = "cleared", scale = "true";
+
+function segments(){
+  const ids = PATHS[path].ids.filter(id=>mid(id)>0);
+  const raw = ids.map(id=>({id, d:mid(id), ...READ[id]}));
+  const total = raw.reduce((a,b)=>a+b.d,0);
+  let acc = 0;
+  return raw.map(r=>{
+    const share = scale==="true" ? r.d/total : null;
+    const o = {...r, x0: acc/total, w: r.d/total};
+    acc += r.d; return o;
+  }).map((o,i,arr)=>{
+    if (scale==="true") return o;
+    const logs = arr.map(a=>Math.log10(1+a.d));
+    const sum  = logs.reduce((a,b)=>a+b,0);
+    let x = 0; for (let k=0;k<i;k++) x += logs[k]/sum;
+    return {...o, x0:x, w:logs[i]/sum};
+  });
+}
+
+const VAL = {"-2":"--valence-n2","-1":"--valence-n1","0":"--valence-0","1":"--valence-p1","2":"--valence-p2"};
+const $ = id => document.getElementById(id);
+
+function draw(){
+  const segs = segments();
+  // strip
+  $("strip").innerHTML = segs.map(s=>`
+    <div class="seg${s.open?" open":""}" data-kind="${s.kind}" tabindex="0"
+         style="width:100%;transform:translateX(${(s.x0*100).toFixed(4)}%) scaleX(${Math.max(s.w,0.00002).toFixed(6)})"
+         aria-label="${humanize(s.id)}, ${fmt(s.d)}"><i></i></div>`).join("");
+  // valence ribbon
+  $("ribbon").innerHTML = segs.map(s=>{
+    const v = steps[s.id]?.fields.emotionValence;
+    if (v===undefined) return "";
+    return `<div class="v" style="background:var(${VAL[String(v)]});width:100%;
+      transform:translateX(${(s.x0*100).toFixed(4)}%) scaleX(${Math.max(s.w,0.00002).toFixed(6)})"></div>`;
+  }).join("");
+  // labels — each one is capped to the width of its own segment, so they can
+  // never collide; anything narrower than a readable word simply drops out
+  const px = $("strip").clientWidth || 900;
+  $("labels").innerHTML = segs.map(s=>{
+    const w = s.w * px;
+    return `<div class="lab${w>58?"":" hide"}" style="left:${(s.x0*100).toFixed(3)}%;max-width:${Math.max(w-8,0).toFixed(0)}px">
+      <b>${humanize(s.id)}</b>${fmt(s.d)}${s.infinite?" · and counting":""}</div>`;
+  }).join("");
+  // ruler
+  const total = segs.reduce((a,b)=>a+b.d,0);
+  const marks = [SEC.min, SEC.hour, SEC.day, SEC.week, 4*SEC.week].filter(m=>m<=total*1.02);
+  $("ruler").innerHTML = marks.map(m=>{
+    let pos;
+    if (scale==="true") pos = m/total;
+    else {
+      let acc=0, x=0; const logs=segs.map(s=>Math.log10(1+s.d)); const sum=logs.reduce((a,b)=>a+b,0);
+      for (let i=0;i<segs.length;i++){
+        if (acc+segs[i].d >= m){ const f=(m-acc)/segs[i].d; pos = x + (logs[i]/sum)*f; break; }
+        acc+=segs[i].d; x+=logs[i]/sum;
+      }
+      if (pos===undefined) pos = 1;
+    }
+    return {pos, label:fmt(m)};
+  }).reduce((keep,t)=>{ if(!keep.length || t.pos - keep[keep.length-1].pos > 0.05) keep.push(t); return keep; },[])
+    .map(t=>`<div class="tick" style="left:${(t.pos*100).toFixed(3)}%"><span>${t.label}</span></div>`)
+    .join("");
+  // bracket the application itself — the first unbroken run of doing, not every
+  // active segment (check-status happens *after* the wait; spanning to it would
+  // draw a bracket around the very silence this chart is about)
+  const run = [];
+  for (const s of segs){ if (s.kind==="active") run.push(s); else if (run.length) break; }
+  const hs = run[0], he = run[run.length-1];
+  const runTotal = run.reduce((a,b)=>a+b.d,0);
+  const hTotal = segs.filter(s=>s.kind==="active").reduce((a,b)=>a+b.d,0);
+  $("bracket").style.left = (hs.x0*100)+"%";
+  $("bracket").style.width = Math.max(((he.x0+he.w)-hs.x0)*100,0.15)+"%";
+  $("bracket-label").textContent = `the entire application · ${fmt(runTotal)}`;
+  // verdict
+  const share = hTotal/total;
+  const infinite = segs.some(s=>s.infinite);
+  $("pct").textContent = infinite ? "→ 0"
+    : share < 0.001 ? (share*100).toFixed(3)+"%" : (share*100).toFixed(share<0.01?2:1)+"%";
+  $("verdict-copy").innerHTML = infinite
+    ? `There is no percentage to give: <code>outcome-ghosted</code> carries <b>no terminating event</b>,
+       so the denominator never closes and the designed share trends to nothing. The strip runs off the page instead.`
+    : `of this journey is the part anyone designed — <b>${fmt(hTotal)}</b> of doing, inside <b>${fmt(total)}</b> of elapsed time.
+       Every pixel to the right of the bracket is Maya waiting.`;
+  document.querySelectorAll("[data-scale]").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.scale===scale)));
+  document.querySelectorAll("[data-path]").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.path===path)));
+  // audit table
+  $("audit").innerHTML = Object.keys(READ).map(id=>{
+    const on = PATHS[path].ids.includes(id) && mid(id)>0;
+    const st = steps[id]; if(!st) return "";
+    const src = st.fields.waitTime ? ["waitTime", st.fields.waitTime] :
+                st.fields.duration ? ["duration", st.fields.duration] : ["—","—"];
+    return `<tr class="${on?"":"off"}"><td class="id">${id}</td>
+      <td class="src"><code>${src[0]}</code> ${src[1]}</td>
+      <td class="num">${READ[id].lo?fmt(READ[id].lo):"–"}</td>
+      <td class="num">${READ[id].hi?fmt(READ[id].hi):"–"}</td></tr>`;
+  }).join("");
+}
+
+$("paths").innerHTML = Object.entries(PATHS).map(([k,v])=>
+  `<button data-path="${k}" aria-pressed="${k===path}">${v.label}</button>`).join("");
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-path],[data-scale]");
+  if (!b) return;
+  if (b.dataset.path) path = b.dataset.path; else scale = b.dataset.scale;
+  draw();
+});
+const btns = document.querySelectorAll("[data-theme-set]");
+btns.forEach(b=>b.addEventListener("click",()=>{
+  const v=b.dataset.themeSet;
+  if(v==="system") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme",v);
+  btns.forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+}));
+$("note").textContent =
+  `Ranges are the midpoint of what the map states in words; branch steps that are not on the selected path are greyed out. `
+  + `Nothing here is measured — the source journey carries no metrics fields, so no drop-off or conversion number is claimed. `
+  + `source · ${JOURNEY.source}`;
+draw();
+</script>
+</body>
+</html>

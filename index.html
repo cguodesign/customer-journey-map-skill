@@ -120,7 +120,12 @@ section{padding:68px 0}
 
 /* renderings gallery */
 .gallery{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-@media(max-width:740px){.gallery{grid-template-columns:1fr}}
+.gallery.trio{grid-template-columns:repeat(3,1fr);margin-top:26px}
+@media(max-width:960px){.gallery.trio{grid-template-columns:1fr 1fr}}
+@media(max-width:740px){.gallery{grid-template-columns:1fr}.gallery.trio{grid-template-columns:1fr}}
+.sub-head{margin:56px 0 0;padding-top:34px;border-top:1px solid var(--line)}
+.sub-head h3{font-size:22px;font-weight:500;letter-spacing:-.02em;margin:8px 0 8px}
+.sub-head p{margin:0;color:var(--muted);font-size:14.5px;max-width:62ch}
 .shot{background:var(--bg-elev);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .15s}
 .shot:hover{border-color:var(--muted-2)}
 .shot img{width:100%;height:210px;object-fit:cover;object-position:top center;display:block;border-bottom:1px solid var(--line)}
@@ -251,6 +256,18 @@ footer .fbottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12
     <div class="shot"><img src="img/swimlane-themed.png" alt="Brand-themed swimlane"><div class="body"><p class="say">Render it as a swimlane, themed to our brand colors.</p><a class="view" href="renderings/food-delivery--swimlane-themed.html">Explore live →</a></div></div>
     <div class="shot"><img src="img/timeline-dark.png" alt="Dark-mode timeline"><div class="body"><p class="say">Give me a dark timeline where the weeks-long wait dwarfs every step.</p><a class="view" href="renderings/job-application--timeline-dark.html">Explore live →</a></div></div>
     <div class="shot"><img src="img/storyboard.png" alt="Film storyboard"><div class="body"><p class="say">Turn it into a storyboard — frame by frame, like a film.</p><a class="view" href="renderings/job-application--storyboard.html">Explore live →</a></div></div>
+    <div class="shot"><img src="img/swimlane-zoompan.png" alt="Swimlane on a zoom-pan canvas"><div class="body"><p class="say">Put the whole blueprint on one canvas I can pan around.</p><a class="view" href="renderings/job-application--swimlane-zoompan.html">Explore live →</a></div></div>
+  </div>
+
+  <div class="sub-head"><div class="kicker">One file, three arguments</div>
+    <h3>The rendering is a <em>choice</em>, not an output.</h3>
+    <p>These three are the same 15 steps as the map above — one source file, asked three different questions.
+       Nothing is redrawn by hand: nodes, durations and coverage are read out of the journey at build time,
+       and every colour comes from one shared token file, so a theme is a five-value swap.</p></div>
+  <div class="gallery trio">
+    <div class="shot"><img src="img/flow-graph.png" alt="Flow graph of the journey"><div class="body"><p class="say">Show me where this journey actually forks — I don't buy that it's a straight line.</p><a class="view" href="renderings/job-application--flow-graph.html">Explore live →</a></div></div>
+    <div class="shot"><img src="img/time-to-scale.png" alt="Journey drawn to true time scale"><div class="body"><p class="say">Draw the time to scale. I want to see how much of this is just waiting.</p><a class="view" href="renderings/job-application--time-to-scale.html">Explore live →</a></div></div>
+    <div class="shot"><img src="img/coverage-xray.png" alt="Coverage and provenance matrix"><div class="body"><p class="say">Where is this map thin — and which parts of it are guesses?</p><a class="view" href="renderings/job-application--coverage-xray.html">Explore live →</a></div></div>
   </div>
 </div></section>
 

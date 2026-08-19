@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <!-- Job Application Portal journey — Swimlane × Zoom-pan.
      Rendering: Swimlane (service blueprint). Interaction: Zoom + Pan (user override).
      Self-contained, zero dependencies. Built for big-wall workshop display. -->
@@ -8,32 +8,242 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Job Application Journey — Zoom &amp; Pan Canvas</title>
 <style>
+/* tokens:begin */
+/* ============================================================================
+   journey-tokens.css — the single source of truth for every journey rendering.
+
+   Tier 1  brand seed      ~10 values. The only thing a user/brand ever changes.
+   Tier 2  semantic        derived from Tier 1. Renderings consume THESE.
+   Tier 3  component       declared locally inside each rendering, from Tier 2.
+
+   Rule for renderings: zero literal colors. If you type a hex, it belongs here.
+   Themes: base = light. Dark re-derives (never inverts) via prefers-color-scheme
+   and [data-theme], so a manual toggle wins in both directions.
+
+   OVERRIDING TIER 1 (brand themes, paper artifacts): the dark blocks below are
+   selected by :root:not([data-theme="light"]) and :root[data-theme="dark"],
+   both of which out-specify a bare :root. So an artifact that reseeds Tier 1
+   must also pin its theme on the element:
+
+       <html data-theme="light">   ← now the dark blocks cannot match, and a
+                                     later :root{...} override wins on order
+
+   Reseeding at :root without pinning a theme silently does nothing for readers
+   whose system is set to dark. See renderings/food-delivery--swimlane-themed
+   (a brand reseed) and renderings/job-application--storyboard (a paper reseed).
+   ========================================================================= */
+
+/* ── Tier 1 · brand seed ───────────────────────────────────────────────── */
 :root{
-  /* Tier 1: brand seed */
+  --brand-primary:    oklch(70% 0.148 52);      /* chrome, accent, selection   */
+  --brand-secondary:  oklch(63% 0.115 248);     /* second categorical hue      */
+  --brand-surface:    oklch(98.6% 0.006 80);    /* page ground                 */
+  --brand-text:       oklch(21% 0.014 62);      /* body ink                    */
+  --brand-positive:   oklch(64% 0.118 158);     /* semantic good               */
+  --brand-negative:   oklch(58% 0.168 25);      /* semantic bad                */
+  --brand-machine:    oklch(60% 0.096 285);     /* automated / no-human paths  */
+  --brand-on-primary: oklch(22% 0.014 70);      /* text that sits ON the primary */
+  --brand-attention:  oklch(72% 0.152 62);      /* momentOfTruth — NOT the brand:
+                                                   a marker that repaints itself
+                                                   when the logo changes is not a
+                                                   marker (guide § colour) */
+  /* categorical seed — Okabe-Ito, distinguishable under all three common
+     colour-vision deficiencies. Independent of brand on purpose (see
+     html-rendering-guide § accessibility); override only if the brand's own
+     categorical palette has been checked for the same. */
+  --brand-cat-1:      oklch(56% 0.108 248);     /* blue            */
+  --brand-cat-2:      oklch(62% 0.155 42);      /* vermillion      */
+  --brand-cat-3:      oklch(60% 0.098 168);     /* bluish green    */
+  --brand-cat-4:      oklch(72% 0.145 78);      /* orange          */
+  --brand-cat-5:      oklch(56% 0.112 340);     /* reddish purple  */
+  --brand-font:       "Söhne","Inter var",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,sans-serif;
+  --brand-font-mono:  ui-monospace,"SF Mono","Berkeley Mono",Menlo,Consolas,monospace;
+  --brand-radius:     3px;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --brand-primary:   oklch(76% 0.138 55);
+    --brand-secondary: oklch(70% 0.105 248);
+    --brand-surface:   oklch(17.5% 0.008 66);
+    --brand-text:      oklch(94% 0.008 80);
+    --brand-positive:  oklch(72% 0.108 158);
+    --brand-negative:  oklch(67% 0.150 26);
+    --brand-machine:   oklch(70% 0.088 285);
+    --brand-attention: oklch(78% 0.140 64);
+    --brand-cat-1:     oklch(70% 0.098 248);
+    --brand-cat-2:     oklch(72% 0.140 42);
+    --brand-cat-3:     oklch(70% 0.090 168);
+    --brand-cat-4:     oklch(78% 0.130 78);
+    --brand-cat-5:     oklch(68% 0.102 340);
+  }
+}
+:root[data-theme="dark"]{
+  --brand-primary:   oklch(76% 0.138 55);
+  --brand-secondary: oklch(70% 0.105 248);
+  --brand-surface:   oklch(17.5% 0.008 66);
+  --brand-text:      oklch(94% 0.008 80);
+  --brand-positive:  oklch(72% 0.108 158);
+  --brand-negative:  oklch(67% 0.150 26);
+  --brand-machine:   oklch(70% 0.088 285);
+  --brand-attention: oklch(78% 0.140 64);
+  --brand-cat-1:     oklch(70% 0.098 248);
+  --brand-cat-2:     oklch(72% 0.140 42);
+  --brand-cat-3:     oklch(70% 0.090 168);
+  --brand-cat-4:     oklch(78% 0.130 78);
+  --brand-cat-5:     oklch(68% 0.102 340);
+}
+
+/* ── Tier 2 · semantic ─────────────────────────────────────────────────── */
+:root{
+  /* ground & elevation — dark re-derives by mixing toward ink, not by inverting */
+  --bg:          var(--brand-surface);
+  --surface-1:   color-mix(in oklab, var(--brand-surface) 97%, var(--brand-text));
+  --surface-2:   color-mix(in oklab, var(--brand-surface) 93%, var(--brand-text));
+  --surface-3:   color-mix(in oklab, var(--brand-surface) 88%, var(--brand-text));
+
+  /* ink */
+  --ink:         var(--brand-text);
+  --ink-muted:   color-mix(in oklab, var(--brand-text) 58%, var(--brand-surface));
+  --ink-faint:   color-mix(in oklab, var(--brand-text) 36%, var(--brand-surface));
+  --ink-ghost:   color-mix(in oklab, var(--brand-text) 20%, var(--brand-surface));
+
+  /* rules */
+  --line:        color-mix(in oklab, var(--brand-text) 16%, var(--brand-surface));
+  --line-soft:   color-mix(in oklab, var(--brand-text) 9%,  var(--brand-surface));
+  --line-strong: color-mix(in oklab, var(--brand-text) 34%, var(--brand-surface));
+
+  /* accent */
+  --accent:       var(--brand-primary);
+  --accent-soft:  color-mix(in oklab, var(--brand-primary) 16%, var(--brand-surface));
+  --accent-line:  color-mix(in oklab, var(--brand-primary) 55%, var(--brand-surface));
+  --accent-ink:   color-mix(in oklab, var(--brand-primary) 18%, var(--brand-text));
+  --ink-on-accent: var(--brand-on-primary);
+
+  /* emotion valence — diverging, 5 stops. Deliberately held one step back from
+     full strength: valence is the *field*, markers are annotations laid on top of
+     it, and a marker that reads as just another data point has failed. NEVER the
+     sole encoding either — always pair with position, a numeral, or a glyph
+     (see html-rendering-guide § accessibility). */
+  --valence-n2:  color-mix(in oklab, var(--brand-negative) 82%, var(--surface-2));
+  --valence-n1:  color-mix(in oklab, var(--brand-negative) 52%, var(--surface-2));
+  --valence-0:   var(--ink-ghost);
+  --valence-p1:  color-mix(in oklab, var(--brand-positive) 52%, var(--surface-2));
+  --valence-p2:  color-mix(in oklab, var(--brand-positive) 82%, var(--surface-2));
+
+  /* markers */
+  --marker-critical:    var(--brand-attention);   /* momentOfTruth   */
+  --marker-fail:        var(--brand-negative);    /* failureMode     */
+  --marker-opportunity: var(--brand-positive);    /* opportunity     */
+  --marker-machine:     var(--brand-machine);     /* automation      */
+  --marker-pain:        color-mix(in oklab, var(--brand-negative) 62%, var(--brand-primary)); /* painPoint */
+
+  /* Two colours that pair with *data*, not with the page, so they must NOT flip
+     with the theme: text sitting on a saturated fill, and the colour a shadow is
+     cast in. Inverting either is the classic dark-mode bug. */
+  --ink-on-fill: oklch(22% 0.014 70);
+  --shadow-ink:  oklch(12% 0.010 60);
+
+  /* actor kinds (categorical — limit to 4, per the guide's 6–8 hue ceiling) */
+  --actor-primary:   var(--brand-primary);
+  --actor-system:    var(--brand-machine);
+  --actor-backstage: var(--brand-secondary);
+  --actor-none:      var(--ink-faint);
+
+  /* categorical — unordered groups: milestones, lanes, channels. Never use
+     these for anything ordered; lightness (the ramp below) encodes magnitude. */
+  --cat-1: var(--brand-cat-1);
+  --cat-2: var(--brand-cat-2);
+  --cat-3: var(--brand-cat-3);
+  --cat-4: var(--brand-cat-4);
+  --cat-5: var(--brand-cat-5);
+  --cat-1-soft: color-mix(in oklab, var(--brand-cat-1) 16%, var(--bg));
+  --cat-2-soft: color-mix(in oklab, var(--brand-cat-2) 16%, var(--bg));
+  --cat-3-soft: color-mix(in oklab, var(--brand-cat-3) 16%, var(--bg));
+  --cat-4-soft: color-mix(in oklab, var(--brand-cat-4) 16%, var(--bg));
+  --cat-5-soft: color-mix(in oklab, var(--brand-cat-5) 16%, var(--bg));
+
+  /* service layers */
+  --layer-customer-bg:  color-mix(in oklab, var(--brand-primary) 9%, var(--bg));
+  --layer-customer-ln:  var(--accent-line);
+  --layer-backstage-bg: var(--surface-2);
+  --layer-backstage-ln: var(--line);
+  --layer-support-bg:   var(--surface-1);
+  --layer-support-ln:   var(--line-soft);
+
+  /* sequential ramp — ordered magnitude (density, duration, count). Single hue,
+     stepped in oklab so equal numeric steps read as equal perceptual steps. */
+  --ramp-0: var(--surface-1);
+  --ramp-1: color-mix(in oklab, var(--brand-primary) 18%, var(--surface-1));
+  --ramp-2: color-mix(in oklab, var(--brand-primary) 36%, var(--surface-1));
+  --ramp-3: color-mix(in oklab, var(--brand-primary) 56%, var(--surface-1));
+  --ramp-4: color-mix(in oklab, var(--brand-primary) 78%, var(--surface-1));
+  --ramp-5: var(--brand-primary);
+
+  /* provenance — the skill's own metadata, so it gets first-class tokens */
+  --prov-model:  var(--ink-ghost);                /* model-authored (default)  */
+  --prov-user:   var(--brand-primary);            /* user-modified             */
+  --prov-source: var(--brand-secondary);          /* source-backed             */
+  --prov-auto:   var(--brand-machine);            /* auto-composite            */
+
+  /* priority */
+  --prio-must:   var(--brand-negative);
+  --prio-should: var(--brand-primary);
+  --prio-nice:   var(--ink-faint);
+
+  /* type — fluid modular scale, ratio 1.2 */
+  --font:      var(--brand-font);
+  --font-mono: var(--brand-font-mono);
+  --step--2: clamp(0.60rem, 0.58rem + 0.10vw, 0.66rem);
+  --step--1: clamp(0.72rem, 0.69rem + 0.14vw, 0.80rem);
+  --step-0:  clamp(0.86rem, 0.82rem + 0.18vw, 0.95rem);
+  --step-1:  clamp(1.03rem, 0.97rem + 0.28vw, 1.19rem);
+  --step-2:  clamp(1.24rem, 1.14rem + 0.48vw, 1.55rem);
+  --step-3:  clamp(1.60rem, 1.40rem + 1.00vw, 2.40rem);
+  --step-4:  clamp(2.10rem, 1.70rem + 2.00vw, 4.00rem);
+
+  /* space — deliberately uneven, so rhythm is possible */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 13px; --sp-4: 21px;
+  --sp-5: 34px; --sp-6: 55px; --sp-7: 89px;
+
+  --radius: var(--brand-radius);
+  --dur-fast: 140ms; --dur: 260ms; --dur-slow: 620ms;
+  --ease: cubic-bezier(.22,.61,.36,1);          /* ease-out-quart, no bounce */
+}
+
+@media (prefers-reduced-motion: reduce){
+  :root{ --dur-fast: 0ms; --dur: 0ms; --dur-slow: 0ms; }
+}
+/* tokens:end */
+
+/* Tier 1 — this rendering ships light; reseeding needs the theme pinned
+   (see journey-tokens.css § OVERRIDING TIER 1) */
+:root{
   --brand-primary:#2563eb;
   --brand-surface:#f5f6f8;
   --brand-text:#1a1f2b;
+}
+/* Tier 3 — local names, every one derived */
+:root{
+  --lane-actions-bg:var(--layer-customer-bg);  --lane-actions-accent:var(--layer-customer-ln);
+  --lane-emotion-bg:var(--surface-1);          --lane-emotion-accent:var(--line-strong);
+  --lane-front-bg:var(--layer-customer-bg);    --lane-front-accent:var(--layer-customer-ln);
+  --lane-back-bg:var(--layer-backstage-bg);    --lane-back-accent:var(--layer-backstage-ln);
+  --lane-support-bg:var(--layer-support-bg);   --lane-support-accent:var(--layer-support-ln);
 
-  /* Tier 2: service-layer palette (categorical) */
-  --lane-actions-bg:#fff9e6; --lane-actions-accent:#c9a227;
-  --lane-emotion-bg:#ffffff;  --lane-emotion-accent:#9aa0aa;
-  --lane-front-bg:#fff9e6;    --lane-front-accent:#c9a227;
-  --lane-back-bg:#ffffff;     --lane-back-accent:#aaaaaa;
-  --lane-support-bg:#f3f3f3;  --lane-support-accent:#999999;
+  --v-neg2:var(--valence-n2); --v-neg1:var(--valence-n1); --v-zero:var(--valence-0);
+  --v-pos1:var(--valence-p1); --v-pos2:var(--valence-p2);
 
-  /* Emotion valence (diverging) */
-  --v-neg2:#fecaca; --v-neg1:#fed7aa; --v-zero:#e5e7eb; --v-pos1:#bbf7d0; --v-pos2:#86efac;
+  --mot:var(--marker-critical); --fail:var(--marker-fail);
+  --pain:var(--marker-pain);    --opp:var(--marker-opportunity);
 
-  /* Markers (semantic, fixed) */
-  --mot:#ef4444; --fail:#8b6914; --pain:#ea580c; --opp:#16a34a;
-
-  --border:#d9dce1; --text:var(--brand-text); --muted:#6b7280; --card:#ffffff;
+  --border:var(--line); --text:var(--ink); --muted:var(--ink-muted); --card:var(--bg);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--brand-surface);color:var(--text);overflow:hidden;height:100vh}
 
 /* ---- Top bar ---- */
-.topbar{position:fixed;top:0;left:0;right:0;height:48px;z-index:30;display:flex;align-items:center;gap:14px;padding:0 16px;background:rgba(255,255,255,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--border)}
+.topbar{position:fixed;top:0;left:0;right:0;height:48px;z-index:30;display:flex;align-items:center;gap:14px;padding:0 16px;background:color-mix(in oklab,var(--bg) 92%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--border)}
 .topbar h1{font-size:14px;font-weight:700;letter-spacing:.2px}
 .topbar .sub{font-size:11px;color:var(--muted)}
 .topbar .spacer{flex:1}
@@ -41,13 +251,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 .legend span{display:inline-flex;align-items:center;gap:4px}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 .dot.mot{background:var(--mot)} .dot.fail{background:var(--fail)}
-.swatch{width:10px;height:10px;border-radius:2px;display:inline-block;border:1px solid rgba(0,0,0,.12)}
+.swatch{width:10px;height:10px;border-radius:2px;display:inline-block;border:1px solid color-mix(in oklab,var(--shadow-ink) 15%,transparent)}
 
 /* ---- Canvas viewport ---- */
 .viewport{position:absolute;top:48px;left:0;right:0;bottom:0;overflow:hidden;cursor:grab;
   background:
-    linear-gradient(rgba(0,0,0,.025) 1px,transparent 1px) 0 0/28px 28px,
-    linear-gradient(90deg,rgba(0,0,0,.025) 1px,transparent 1px) 0 0/28px 28px,
+    linear-gradient(color-mix(in oklab,var(--shadow-ink) 4%,transparent) 1px,transparent 1px) 0 0/28px 28px,
+    linear-gradient(90deg,color-mix(in oklab,var(--shadow-ink) 4%,transparent) 1px,transparent 1px) 0 0/28px 28px,
     var(--brand-surface);}
 .viewport.grabbing{cursor:grabbing}
 .canvas-content{position:absolute;top:0;left:0;transform-origin:0 0}
@@ -57,9 +267,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 .blueprint{display:grid;
   grid-template-columns:160px 360px 540px 760px 540px;
   background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;
-  box-shadow:0 6px 30px rgba(0,0,0,.08)}
-.corner{background:#eef1f5;padding:12px 10px;font-size:11px;font-weight:600;color:var(--muted);border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
-.phase-header{background:#eef1f5;padding:12px;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+  box-shadow:0 6px 30px color-mix(in oklab,var(--shadow-ink) 10%,transparent)}
+.corner{background:var(--surface-2);padding:12px 10px;font-size:11px;font-weight:600;color:var(--muted);border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+.phase-header{background:var(--surface-2);padding:12px;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
 .phase-header:last-child{border-right:none}
 .phase-header .pname{font-size:13px;font-weight:700;letter-spacing:.3px}
 .phase-header .pdesc{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.4}
@@ -81,92 +291,92 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 .lane-emotion .lane-label{border-left:4px solid var(--lane-emotion-accent)}
 
 /* divider rows */
-.divider{grid-column:1/-1;border-bottom:2px dashed var(--lane-back-accent);background:#fbfbfc;
+.divider{grid-column:1/-1;border-bottom:2px dashed var(--lane-back-accent);background:var(--surface-1);
   padding:3px 14px;font-size:9.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 
 /* ---- Step cards ---- */
 .card{position:relative;background:var(--card);border:1px solid var(--border);border-left:4px solid var(--v-zero);
   border-radius:7px;padding:8px 10px;font-size:11.5px;line-height:1.4;min-width:150px;max-width:230px;flex:1 1 150px;
   cursor:pointer;transition:box-shadow .15s,transform .15s}
-.card:hover{box-shadow:0 3px 14px rgba(0,0,0,.13);transform:translateY(-1px)}
+.card:hover{box-shadow:0 3px 14px color-mix(in oklab,var(--shadow-ink) 16%,transparent);transform:translateY(-1px)}
 .card .ctitle{font-weight:700;font-size:11.5px;margin-bottom:3px;padding-right:14px}
 .card .cdesc{color:var(--muted);font-size:10.5px}
 .card .meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
-.pill{font-size:9px;padding:1.5px 6px;border-radius:999px;background:#eef1f5;color:#4b5563;white-space:nowrap}
-.pill.dur{background:#e0e7ff;color:#3730a3}
-.pill.chan{background:#f1f5f9;color:#475569}
-.pill.persona{background:#ede9fe;color:#5b21b6}
+.pill{font-size:9px;padding:1.5px 6px;border-radius:999px;background:var(--surface-2);color:var(--ink-muted);white-space:nowrap}
+.pill.dur{background:color-mix(in oklab,var(--marker-machine) 16%,var(--bg));color:color-mix(in oklab,var(--marker-machine) 62%,var(--ink))}
+.pill.chan{background:var(--surface-2);color:var(--ink-muted)}
+.pill.persona{background:color-mix(in oklab,var(--marker-machine) 14%,var(--bg));color:color-mix(in oklab,var(--marker-machine) 70%,var(--ink))}
 
 /* valence left bar */
 .v--2{border-left-color:var(--v-neg2)} .v--1{border-left-color:var(--v-neg1)}
 .v-0{border-left-color:var(--v-zero)} .v-1{border-left-color:var(--v-pos1)} .v-2{border-left-color:var(--v-pos2)}
 
 /* emotion swatch cell */
-.emo{font-size:10.5px;border-radius:6px;padding:7px 9px;flex:1 1 150px;min-width:150px;line-height:1.35;color:#3a3f4a;border:1px solid rgba(0,0,0,.06)}
+.emo{font-size:10.5px;border-radius:6px;padding:7px 9px;flex:1 1 150px;min-width:150px;line-height:1.35;color:var(--ink);border:1px solid color-mix(in oklab,var(--shadow-ink) 8%,transparent)}
 .emo.e--2{background:var(--v-neg2)} .emo.e--1{background:var(--v-neg1)}
 .emo.e-0{background:var(--v-zero)} .emo.e-1{background:var(--v-pos1)} .emo.e-2{background:var(--v-pos2)}
 
 /* markers */
-.marker{position:absolute;width:9px;height:9px;border-radius:50%;border:1.5px solid #fff}
+.marker{position:absolute;width:9px;height:9px;border-radius:50%;border:1.5px solid var(--bg)}
 .marker.mot{background:var(--mot);top:-4px;right:-4px}
 .marker.fail{background:var(--fail);top:-4px;left:-4px}
 
 /* support-cell system boxes */
-.sysbox{background:#fff;border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:10.5px;flex:1 1 150px;min-width:150px}
+.sysbox{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:10.5px;flex:1 1 150px;min-width:150px}
 .sysbox .sname{font-weight:700;font-size:10.5px}
 .sysbox .saction{color:var(--muted);margin-top:2px;line-height:1.35}
 
 /* branch fork badge */
-.fork{grid-column:1/-1;background:#fef3c7;border-top:1px solid #fcd34d;border-bottom:1px solid #fcd34d;
-  padding:5px 14px;font-size:10.5px;color:#92400e;font-weight:600}
-.fork b{color:#b45309}
+.fork{grid-column:1/-1;background:color-mix(in oklab,var(--marker-critical) 22%,var(--bg));border-top:1px solid var(--marker-critical);border-bottom:1px solid var(--marker-critical);
+  padding:5px 14px;font-size:10.5px;color:var(--accent-ink);font-weight:600}
+.fork b{color:var(--marker-critical)}
 
 .empty{flex:1;min-height:40px}
 
 /* ---- Zoom controls ---- */
 .zoom-controls{position:fixed;top:60px;right:14px;z-index:25;display:flex;flex-direction:column;gap:5px}
-.zoom-controls button{width:34px;height:34px;border:1px solid var(--border);border-radius:7px;background:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.zoom-controls button:hover{background:#eef1f5}
-.zoom-level{position:fixed;top:60px;right:54px;z-index:25;padding:5px 9px;background:#fff;border:1px solid var(--border);border-radius:7px;font-size:11px;color:var(--muted);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.zoom-controls button{width:34px;height:34px;border:1px solid var(--border);border-radius:7px;background:var(--bg);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px color-mix(in oklab,var(--shadow-ink) 10%,transparent)}
+.zoom-controls button:hover{background:var(--surface-2)}
+.zoom-level{position:fixed;top:60px;right:54px;z-index:25;padding:5px 9px;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-size:11px;color:var(--muted);box-shadow:0 1px 4px color-mix(in oklab,var(--shadow-ink) 10%,transparent)}
 
 /* ---- Minimap ---- */
-.minimap{position:fixed;bottom:14px;right:14px;z-index:25;width:200px;height:150px;background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden;cursor:crosshair;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.minimap{position:fixed;bottom:14px;right:14px;z-index:25;width:200px;height:150px;background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;cursor:crosshair;box-shadow:0 2px 10px color-mix(in oklab,var(--shadow-ink) 15%,transparent)}
 .minimap-content{position:absolute;top:0;left:0;width:100%;height:100%}
 .minimap .mini-node{position:absolute;border-radius:1px}
-.minimap-viewport{position:absolute;border:2px solid var(--brand-primary);border-radius:2px;pointer-events:none;background:rgba(37,99,235,.08)}
+.minimap-viewport{position:absolute;border:2px solid var(--brand-primary);border-radius:2px;pointer-events:none;background:color-mix(in oklab,var(--accent) 10%,transparent)}
 .minimap-cap{position:absolute;top:3px;left:5px;font-size:8.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
 
 /* ---- Detail drawer ---- */
-.scrim{position:fixed;inset:0;background:rgba(15,20,30,.34);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim{position:fixed;inset:0;background:color-mix(in oklab,var(--shadow-ink) 42%,transparent);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
 .scrim.open{opacity:1;pointer-events:auto}
-.drawer{position:fixed;top:0;right:0;height:100vh;width:420px;max-width:92vw;background:#fff;z-index:50;
-  transform:translateX(100%);transition:transform .25s ease-out;box-shadow:-8px 0 40px rgba(0,0,0,.18);overflow-y:auto}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:420px;max-width:92vw;background:var(--bg);z-index:50;
+  transform:translateX(100%);transition:transform .25s ease-out;box-shadow:-8px 0 40px color-mix(in oklab,var(--shadow-ink) 22%,transparent);overflow-y:auto}
 .drawer.open{transform:translateX(0)}
-.drawer .dhead{position:sticky;top:0;background:#fff;padding:18px 20px 12px;border-bottom:1px solid var(--border)}
+.drawer .dhead{position:sticky;top:0;background:var(--bg);padding:18px 20px 12px;border-bottom:1px solid var(--border)}
 .drawer .dphase{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--brand-primary)}
 .drawer h2{font-size:18px;margin:5px 0 6px}
 .drawer .dpersonas{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
 .drawer .dbody{padding:16px 20px 60px}
-.drawer .ddesc{font-size:13px;line-height:1.55;color:#374151;margin-bottom:16px}
-.dclose{position:absolute;top:14px;right:14px;width:30px;height:30px;border:none;background:#eef1f5;border-radius:7px;font-size:16px;cursor:pointer;line-height:1}
-.dclose:hover{background:#e2e6ec}
+.drawer .ddesc{font-size:13px;line-height:1.55;color:var(--ink-muted);margin-bottom:16px}
+.dclose{position:absolute;top:14px;right:14px;width:30px;height:30px;border:none;background:var(--surface-2);border-radius:7px;font-size:16px;cursor:pointer;line-height:1}
+.dclose:hover{background:var(--surface-3)}
 .field{margin-bottom:13px}
 .field .flabel{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;gap:5px}
-.field .fval{font-size:12.5px;line-height:1.5;color:#1f2937}
+.field .fval{font-size:12.5px;line-height:1.5;color:var(--ink)}
 .field ul{margin:2px 0 0 16px}.field li{font-size:12.5px;line-height:1.5;margin-bottom:2px}
 .field.pain{border-left:3px solid var(--pain);padding-left:10px}
 .field.pain .flabel{color:var(--pain)}
 .field.opp{border-left:3px solid var(--opp);padding-left:10px}
 .field.opp .flabel{color:var(--opp)}
 .field.fail{border-left:3px solid var(--fail);padding-left:10px}
-.field.fail .flabel{color:#6b5210}
+.field.fail .flabel{color:var(--accent-ink)}
 .field.mot{border-left:3px solid var(--mot);padding-left:10px}
 .field.mot .flabel{color:var(--mot)}
-.badge-hi{font-size:9px;background:#fee2e2;color:#b91c1c;padding:1px 6px;border-radius:999px;font-weight:700}
+.badge-hi{font-size:9px;background:color-mix(in oklab,var(--marker-fail) 18%,var(--bg));color:var(--marker-fail);padding:1px 6px;border-radius:999px;font-weight:700}
 .prov{font-size:10.5px;color:var(--muted);font-style:italic;margin-top:2px}
-.exit-tag{display:inline-block;font-size:9.5px;font-weight:700;background:#1f2937;color:#fff;padding:2px 8px;border-radius:999px}
+.exit-tag{display:inline-block;font-size:9.5px;font-weight:700;background:var(--ink);color:var(--bg);padding:2px 8px;border-radius:999px}
 
-.hint{position:fixed;bottom:14px;left:14px;z-index:25;font-size:10.5px;color:var(--muted);background:rgba(255,255,255,.85);padding:6px 10px;border-radius:7px;border:1px solid var(--border)}
+.hint{position:fixed;bottom:14px;left:14px;z-index:25;font-size:10.5px;color:var(--muted);background:color-mix(in oklab,var(--bg) 85%,transparent);padding:6px 10px;border-radius:7px;border:1px solid var(--border)}
 @media (max-width:640px){.legend{display:none}}
 </style>
 </head>

@@ -11,48 +11,253 @@
   Rendering guide: references/html-rendering-guide.md. Self-contained, zero dependencies.
 -->
 <style>
-  :root {
-    /* Tier 1: brand seed (override to re-theme) */
-    --brand-primary: #3b4cca;
-    --brand-surface: #ffffff;
-    --brand-text: #1a1a1a;
+/* tokens:begin */
+/* ============================================================================
+   journey-tokens.css — the single source of truth for every journey rendering.
 
-    /* Tier 2: semantic */
-    --bg: #f4f5f7;
-    --surface: var(--brand-surface);
-    --text: var(--brand-text);
-    --text-muted: #6b7280;
-    --border: #e3e5e9;
+   Tier 1  brand seed      ~10 values. The only thing a user/brand ever changes.
+   Tier 2  semantic        derived from Tier 1. Renderings consume THESE.
+   Tier 3  component       declared locally inside each rendering, from Tier 2.
 
-    --valence-neg2: #fecaca;
-    --valence-neg1: #fed7aa;
-    --valence-neutral: #e5e7eb;
-    --valence-pos1: #bbf7d0;
-    --valence-pos2: #86efac;
-    --valence-neg2-line: #dc2626;
-    --valence-neg1-line: #ea580c;
-    --valence-neutral-line: #9ca3af;
-    --valence-pos1-line: #16a34a;
-    --valence-pos2-line: #15803d;
+   Rule for renderings: zero literal colors. If you type a hex, it belongs here.
+   Themes: base = light. Dark re-derives (never inverts) via prefers-color-scheme
+   and [data-theme], so a manual toggle wins in both directions.
 
-    --mot-color: #ef4444;
-    --fail-color: #8b6914;
-    --pain-color: #ea580c;
-    --opp-color: #16a34a;
+   OVERRIDING TIER 1 (brand themes, paper artifacts): the dark blocks below are
+   selected by :root:not([data-theme="light"]) and :root[data-theme="dark"],
+   both of which out-specify a bare :root. So an artifact that reseeds Tier 1
+   must also pin its theme on the element:
 
-    --frontstage-bg: #fff9e6;
-    --backstage-bg: #f9f9f9;
-    --void-bg: #0f1115;
-    --void-text: #c7ccd6;
+       <html data-theme="light">   ← now the dark blocks cannot match, and a
+                                     later :root{...} override wins on order
+
+   Reseeding at :root without pinning a theme silently does nothing for readers
+   whose system is set to dark. See renderings/food-delivery--swimlane-themed
+   (a brand reseed) and renderings/job-application--storyboard (a paper reseed).
+   ========================================================================= */
+
+/* ── Tier 1 · brand seed ───────────────────────────────────────────────── */
+:root{
+  --brand-primary:    oklch(70% 0.148 52);      /* chrome, accent, selection   */
+  --brand-secondary:  oklch(63% 0.115 248);     /* second categorical hue      */
+  --brand-surface:    oklch(98.6% 0.006 80);    /* page ground                 */
+  --brand-text:       oklch(21% 0.014 62);      /* body ink                    */
+  --brand-positive:   oklch(64% 0.118 158);     /* semantic good               */
+  --brand-negative:   oklch(58% 0.168 25);      /* semantic bad                */
+  --brand-machine:    oklch(60% 0.096 285);     /* automated / no-human paths  */
+  --brand-on-primary: oklch(22% 0.014 70);      /* text that sits ON the primary */
+  --brand-attention:  oklch(72% 0.152 62);      /* momentOfTruth — NOT the brand:
+                                                   a marker that repaints itself
+                                                   when the logo changes is not a
+                                                   marker (guide § colour) */
+  /* categorical seed — Okabe-Ito, distinguishable under all three common
+     colour-vision deficiencies. Independent of brand on purpose (see
+     html-rendering-guide § accessibility); override only if the brand's own
+     categorical palette has been checked for the same. */
+  --brand-cat-1:      oklch(56% 0.108 248);     /* blue            */
+  --brand-cat-2:      oklch(62% 0.155 42);      /* vermillion      */
+  --brand-cat-3:      oklch(60% 0.098 168);     /* bluish green    */
+  --brand-cat-4:      oklch(72% 0.145 78);      /* orange          */
+  --brand-cat-5:      oklch(56% 0.112 340);     /* reddish purple  */
+  --brand-font:       "Söhne","Inter var",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,sans-serif;
+  --brand-font-mono:  ui-monospace,"SF Mono","Berkeley Mono",Menlo,Consolas,monospace;
+  --brand-radius:     3px;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --brand-primary:   oklch(76% 0.138 55);
+    --brand-secondary: oklch(70% 0.105 248);
+    --brand-surface:   oklch(17.5% 0.008 66);
+    --brand-text:      oklch(94% 0.008 80);
+    --brand-positive:  oklch(72% 0.108 158);
+    --brand-negative:  oklch(67% 0.150 26);
+    --brand-machine:   oklch(70% 0.088 285);
+    --brand-attention: oklch(78% 0.140 64);
+    --brand-cat-1:     oklch(70% 0.098 248);
+    --brand-cat-2:     oklch(72% 0.140 42);
+    --brand-cat-3:     oklch(70% 0.090 168);
+    --brand-cat-4:     oklch(78% 0.130 78);
+    --brand-cat-5:     oklch(68% 0.102 340);
   }
+}
+:root[data-theme="dark"]{
+  --brand-primary:   oklch(76% 0.138 55);
+  --brand-secondary: oklch(70% 0.105 248);
+  --brand-surface:   oklch(17.5% 0.008 66);
+  --brand-text:      oklch(94% 0.008 80);
+  --brand-positive:  oklch(72% 0.108 158);
+  --brand-negative:  oklch(67% 0.150 26);
+  --brand-machine:   oklch(70% 0.088 285);
+  --brand-attention: oklch(78% 0.140 64);
+  --brand-cat-1:     oklch(70% 0.098 248);
+  --brand-cat-2:     oklch(72% 0.140 42);
+  --brand-cat-3:     oklch(70% 0.090 168);
+  --brand-cat-4:     oklch(78% 0.130 78);
+  --brand-cat-5:     oklch(68% 0.102 340);
+}
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #121212; --surface: #1e1e1e; --text: #ffffff; --text-muted: #9aa0aa; --border: #333;
-      --valence-neg2: #991b1b; --valence-neg1: #9a3412; --valence-neutral: #4b5563;
-      --valence-pos1: #166534; --valence-pos2: #15803d;
-      --frontstage-bg: #2a2518; --backstage-bg: #242424;
-    }
+/* ── Tier 2 · semantic ─────────────────────────────────────────────────── */
+:root{
+  /* ground & elevation — dark re-derives by mixing toward ink, not by inverting */
+  --bg:          var(--brand-surface);
+  --surface-1:   color-mix(in oklab, var(--brand-surface) 97%, var(--brand-text));
+  --surface-2:   color-mix(in oklab, var(--brand-surface) 93%, var(--brand-text));
+  --surface-3:   color-mix(in oklab, var(--brand-surface) 88%, var(--brand-text));
+
+  /* ink */
+  --ink:         var(--brand-text);
+  --ink-muted:   color-mix(in oklab, var(--brand-text) 58%, var(--brand-surface));
+  --ink-faint:   color-mix(in oklab, var(--brand-text) 36%, var(--brand-surface));
+  --ink-ghost:   color-mix(in oklab, var(--brand-text) 20%, var(--brand-surface));
+
+  /* rules */
+  --line:        color-mix(in oklab, var(--brand-text) 16%, var(--brand-surface));
+  --line-soft:   color-mix(in oklab, var(--brand-text) 9%,  var(--brand-surface));
+  --line-strong: color-mix(in oklab, var(--brand-text) 34%, var(--brand-surface));
+
+  /* accent */
+  --accent:       var(--brand-primary);
+  --accent-soft:  color-mix(in oklab, var(--brand-primary) 16%, var(--brand-surface));
+  --accent-line:  color-mix(in oklab, var(--brand-primary) 55%, var(--brand-surface));
+  --accent-ink:   color-mix(in oklab, var(--brand-primary) 18%, var(--brand-text));
+  --ink-on-accent: var(--brand-on-primary);
+
+  /* emotion valence — diverging, 5 stops. Deliberately held one step back from
+     full strength: valence is the *field*, markers are annotations laid on top of
+     it, and a marker that reads as just another data point has failed. NEVER the
+     sole encoding either — always pair with position, a numeral, or a glyph
+     (see html-rendering-guide § accessibility). */
+  --valence-n2:  color-mix(in oklab, var(--brand-negative) 82%, var(--surface-2));
+  --valence-n1:  color-mix(in oklab, var(--brand-negative) 52%, var(--surface-2));
+  --valence-0:   var(--ink-ghost);
+  --valence-p1:  color-mix(in oklab, var(--brand-positive) 52%, var(--surface-2));
+  --valence-p2:  color-mix(in oklab, var(--brand-positive) 82%, var(--surface-2));
+
+  /* markers */
+  --marker-critical:    var(--brand-attention);   /* momentOfTruth   */
+  --marker-fail:        var(--brand-negative);    /* failureMode     */
+  --marker-opportunity: var(--brand-positive);    /* opportunity     */
+  --marker-machine:     var(--brand-machine);     /* automation      */
+  --marker-pain:        color-mix(in oklab, var(--brand-negative) 62%, var(--brand-primary)); /* painPoint */
+
+  /* Two colours that pair with *data*, not with the page, so they must NOT flip
+     with the theme: text sitting on a saturated fill, and the colour a shadow is
+     cast in. Inverting either is the classic dark-mode bug. */
+  --ink-on-fill: oklch(22% 0.014 70);
+  --shadow-ink:  oklch(12% 0.010 60);
+
+  /* actor kinds (categorical — limit to 4, per the guide's 6–8 hue ceiling) */
+  --actor-primary:   var(--brand-primary);
+  --actor-system:    var(--brand-machine);
+  --actor-backstage: var(--brand-secondary);
+  --actor-none:      var(--ink-faint);
+
+  /* categorical — unordered groups: milestones, lanes, channels. Never use
+     these for anything ordered; lightness (the ramp below) encodes magnitude. */
+  --cat-1: var(--brand-cat-1);
+  --cat-2: var(--brand-cat-2);
+  --cat-3: var(--brand-cat-3);
+  --cat-4: var(--brand-cat-4);
+  --cat-5: var(--brand-cat-5);
+  --cat-1-soft: color-mix(in oklab, var(--brand-cat-1) 16%, var(--bg));
+  --cat-2-soft: color-mix(in oklab, var(--brand-cat-2) 16%, var(--bg));
+  --cat-3-soft: color-mix(in oklab, var(--brand-cat-3) 16%, var(--bg));
+  --cat-4-soft: color-mix(in oklab, var(--brand-cat-4) 16%, var(--bg));
+  --cat-5-soft: color-mix(in oklab, var(--brand-cat-5) 16%, var(--bg));
+
+  /* service layers */
+  --layer-customer-bg:  color-mix(in oklab, var(--brand-primary) 9%, var(--bg));
+  --layer-customer-ln:  var(--accent-line);
+  --layer-backstage-bg: var(--surface-2);
+  --layer-backstage-ln: var(--line);
+  --layer-support-bg:   var(--surface-1);
+  --layer-support-ln:   var(--line-soft);
+
+  /* sequential ramp — ordered magnitude (density, duration, count). Single hue,
+     stepped in oklab so equal numeric steps read as equal perceptual steps. */
+  --ramp-0: var(--surface-1);
+  --ramp-1: color-mix(in oklab, var(--brand-primary) 18%, var(--surface-1));
+  --ramp-2: color-mix(in oklab, var(--brand-primary) 36%, var(--surface-1));
+  --ramp-3: color-mix(in oklab, var(--brand-primary) 56%, var(--surface-1));
+  --ramp-4: color-mix(in oklab, var(--brand-primary) 78%, var(--surface-1));
+  --ramp-5: var(--brand-primary);
+
+  /* provenance — the skill's own metadata, so it gets first-class tokens */
+  --prov-model:  var(--ink-ghost);                /* model-authored (default)  */
+  --prov-user:   var(--brand-primary);            /* user-modified             */
+  --prov-source: var(--brand-secondary);          /* source-backed             */
+  --prov-auto:   var(--brand-machine);            /* auto-composite            */
+
+  /* priority */
+  --prio-must:   var(--brand-negative);
+  --prio-should: var(--brand-primary);
+  --prio-nice:   var(--ink-faint);
+
+  /* type — fluid modular scale, ratio 1.2 */
+  --font:      var(--brand-font);
+  --font-mono: var(--brand-font-mono);
+  --step--2: clamp(0.60rem, 0.58rem + 0.10vw, 0.66rem);
+  --step--1: clamp(0.72rem, 0.69rem + 0.14vw, 0.80rem);
+  --step-0:  clamp(0.86rem, 0.82rem + 0.18vw, 0.95rem);
+  --step-1:  clamp(1.03rem, 0.97rem + 0.28vw, 1.19rem);
+  --step-2:  clamp(1.24rem, 1.14rem + 0.48vw, 1.55rem);
+  --step-3:  clamp(1.60rem, 1.40rem + 1.00vw, 2.40rem);
+  --step-4:  clamp(2.10rem, 1.70rem + 2.00vw, 4.00rem);
+
+  /* space — deliberately uneven, so rhythm is possible */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 13px; --sp-4: 21px;
+  --sp-5: 34px; --sp-6: 55px; --sp-7: 89px;
+
+  --radius: var(--brand-radius);
+  --dur-fast: 140ms; --dur: 260ms; --dur-slow: 620ms;
+  --ease: cubic-bezier(.22,.61,.36,1);          /* ease-out-quart, no bounce */
+}
+
+@media (prefers-reduced-motion: reduce){
+  :root{ --dur-fast: 0ms; --dur: 0ms; --dur-slow: 0ms; }
+}
+/* tokens:end */
+
+  /* No Tier 1 override: this one is the default-palette example, and it follows
+     the reader's own light/dark preference. The hand-written light/dark pair it
+     used to carry is journey-tokens.css's job now — and that file re-derives
+     the dark palette rather than inverting the light one. */
+
+  /* Tier 3 — local names, every one derived */
+  :root {
+    --surface:     var(--surface-1);
+    --text:        var(--ink);
+    --text-muted:  var(--ink-muted);
+    --border:      var(--line);
+
+    --valence-neg2: var(--valence-n2);
+    --valence-neg1: var(--valence-n1);
+    --valence-neutral: var(--valence-0);
+    --valence-pos1: var(--valence-p1);
+    --valence-pos2: var(--valence-p2);
+
+    /* outlines: the same hue pulled toward the ink of whatever theme is live,
+       so a stroke stays a stroke in both */
+    --valence-neg2-line: color-mix(in oklab, var(--valence-n2) 58%, var(--ink));
+    --valence-neg1-line: color-mix(in oklab, var(--valence-n1) 58%, var(--ink));
+    --valence-neutral-line: var(--line-strong);
+    --valence-pos1-line: color-mix(in oklab, var(--valence-p1) 58%, var(--ink));
+    --valence-pos2-line: color-mix(in oklab, var(--valence-p2) 58%, var(--ink));
+
+    --mot-color:  var(--marker-critical);
+    --fail-color: var(--marker-fail);
+    --pain-color: var(--marker-pain);
+    --opp-color:  var(--marker-opportunity);
+
+    --frontstage-bg: var(--layer-customer-bg);
+    --backstage-bg:  var(--layer-backstage-bg);
+
+    /* the void section is meant to stay dark in either theme — that's the point
+       of it, so it is pinned, not themed */
+    --void-bg:   var(--shadow-ink);
+    --void-text: color-mix(in oklab, var(--shadow-ink) 22%, white);
+  }
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -67,8 +272,8 @@
   .persona-pill { font-size: 0.7rem; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border); color: var(--text-muted); display: inline-flex; align-items: center; gap: 6px; }
   .persona-pill .dot { width: 7px; height: 7px; border-radius: 50%; }
   .pp-primary .dot { background: var(--brand-primary); }
-  .pp-system .dot { background: #9ca3af; }
-  .pp-backstage .dot { background: #b08900; }
+  .pp-system .dot { background: var(--line-strong); }
+  .pp-backstage .dot { background: var(--layer-customer-ln); }
 
   .tab-bar { display: flex; gap: 0; max-width: 860px; margin: 16px auto 0; padding: 0; }
   .tab { padding: 10px 18px; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); cursor: pointer; border: none; background: none; border-bottom: 3px solid transparent; user-select: none; }
@@ -98,31 +303,31 @@
   .tl-seg { font-size: 0.68rem; font-weight: 600; color: var(--text-muted); text-align: center; padding: 5px 4px; border-radius: 4px; background: var(--valence-neutral); white-space: nowrap; }
   .tl-row { position: relative; }
   .tl-step { display: flex; align-items: stretch; gap: 12px; margin-bottom: 3px; }
-  .tl-bar { border-radius: 5px; min-width: 40px; display: flex; align-items: center; padding: 8px 12px; font-size: 0.78rem; font-weight: 600; color: #1a1a1a; position: relative; }
+  .tl-bar { border-radius: 5px; min-width: 40px; display: flex; align-items: center; padding: 8px 12px; font-size: 0.78rem; font-weight: 600; color: var(--text); position: relative; }
   .tl-meta { font-size: 0.7rem; color: var(--text-muted); align-self: center; white-space: nowrap; }
   .tl-wait { flex: 1; }
   .tl-wait .tl-bar { background: var(--void-bg); color: var(--void-text); width: 100%; flex-direction: column; align-items: flex-start; padding: 16px; gap: 6px; }
   .tl-wait .big { font-size: 1.05rem; font-weight: 700; }
-  .tl-wait .small { font-size: 0.72rem; color: #8b93a3; font-weight: 400; }
+  .tl-wait .small { font-size: 0.72rem; color: var(--ink-faint); font-weight: 400; }
 
   /* ---------- The Void (signature feel-it block) ---------- */
   .void { background: var(--void-bg); border-radius: 12px; margin: 22px 0; padding: 0; overflow: hidden; }
   .void-head { padding: 22px 24px 10px; }
-  .void-head h2 { color: #fff; font-size: 1.05rem; font-weight: 700; }
-  .void-head p { color: #8b93a3; font-size: 0.8rem; margin-top: 4px; }
+  .void-head h2 { color: var(--bg); font-size: 1.05rem; font-weight: 700; }
+  .void-head p { color: var(--ink-faint); font-size: 0.8rem; margin-top: 4px; }
   .void-body { padding: 30px 24px 50px; min-height: 360px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-  .void-counter { font-variant-numeric: tabular-nums; font-size: 2.6rem; font-weight: 700; color: #e7e9ee; letter-spacing: 0.02em; }
-  .void-counter .unit { font-size: 1rem; color: #6b7280; font-weight: 500; margin-left: 6px; }
-  .void-status { margin-top: 18px; font-size: 0.92rem; color: #c7ccd6; min-height: 1.4em; transition: opacity .4s; }
-  .void-sub { margin-top: 6px; font-size: 0.78rem; color: #6b7280; }
+  .void-counter { font-variant-numeric: tabular-nums; font-size: 2.6rem; font-weight: 700; color: color-mix(in oklab,var(--void-bg) 8%,white); letter-spacing: 0.02em; }
+  .void-counter .unit { font-size: 1rem; color: var(--text-muted); font-weight: 500; margin-left: 6px; }
+  .void-status { margin-top: 18px; font-size: 0.92rem; color: var(--void-text); min-height: 1.4em; transition: opacity .4s; }
+  .void-sub { margin-top: 6px; font-size: 0.78rem; color: var(--text-muted); }
   .void-dots { margin-top: 26px; display: flex; gap: 7px; }
-  .void-dots i { width: 6px; height: 6px; border-radius: 50%; background: #2a2f38; }
-  .void-dots i.on { background: #4b5563; }
+  .void-dots i { width: 6px; height: 6px; border-radius: 50%; background: color-mix(in oklab,var(--void-bg) 80%,white); }
+  .void-dots i.on { background: var(--ink-muted); }
   .void-controls { padding: 0 24px 22px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-  .void-btn { background: #232830; color: #c7ccd6; border: 1px solid #353c47; border-radius: 6px; padding: 7px 13px; font-size: 0.76rem; cursor: pointer; font-weight: 600; }
-  .void-btn:hover { background: #2c323c; }
-  .void-btn.live { background: var(--mot-color); color: #fff; border-color: var(--mot-color); }
-  .void-hint { font-size: 0.72rem; color: #6b7280; }
+  .void-btn { background: color-mix(in oklab,var(--void-bg) 92%,white); color: var(--void-text); border: 1px solid color-mix(in oklab,var(--void-bg) 74%,white); border-radius: 6px; padding: 7px 13px; font-size: 0.76rem; cursor: pointer; font-weight: 600; }
+  .void-btn:hover { background: color-mix(in oklab,var(--void-bg) 84%,white); }
+  .void-btn.live { background: var(--mot-color); color: var(--bg); border-color: var(--mot-color); }
+  .void-hint { font-size: 0.72rem; color: var(--text-muted); }
 
   /* ---------- Cards view ---------- */
   .milestone { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); padding: 8px 0 4px; margin: 22px 0 10px; border-bottom: 1px solid var(--border); }
@@ -137,7 +342,7 @@
   .card h3 { font-size: 0.95rem; font-weight: 600; padding-right: 18px; }
   .card .desc { font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 8px; }
   .card .meta { display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.72rem; color: var(--text-muted); align-items: center; }
-  .card .badge { padding: 2px 9px; border-radius: 10px; font-size: 0.68rem; font-weight: 600; color: #1a1a1a; }
+  .card .badge { padding: 2px 9px; border-radius: 10px; font-size: 0.68rem; font-weight: 600; color: var(--text); }
   .card .chip { padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); }
   .marker { position: absolute; width: 9px; height: 9px; border-radius: 50%; }
   .marker.mot { background: var(--mot-color); top: 10px; right: 10px; }
@@ -202,64 +407,64 @@
     <svg viewBox="0 0 820 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Emotional valence across the journey">
       <defs>
         <linearGradient id="vg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#86efac" stop-opacity="0.40"/>
-          <stop offset="45%" stop-color="#e5e7eb" stop-opacity="0.14"/>
-          <stop offset="100%" stop-color="#fecaca" stop-opacity="0.45"/>
+          <stop offset="0%" stop-color="var(--valence-pos2)" stop-opacity="0.40"/>
+          <stop offset="45%" stop-color="var(--valence-neutral)" stop-opacity="0.14"/>
+          <stop offset="100%" stop-color="var(--valence-neg2)" stop-opacity="0.45"/>
         </linearGradient>
       </defs>
 
       <!-- y labels -->
-      <text x="58" y="48" text-anchor="end" font-size="10" fill="#888">+2</text>
-      <text x="58" y="106" text-anchor="end" font-size="10" fill="#888">+1</text>
-      <text x="58" y="164" text-anchor="end" font-size="10" fill="#888">0</text>
-      <text x="58" y="222" text-anchor="end" font-size="10" fill="#888">&minus;1</text>
-      <text x="58" y="280" text-anchor="end" font-size="10" fill="#888">&minus;2</text>
+      <text x="58" y="48" text-anchor="end" font-size="10" fill="var(--ink-faint)">+2</text>
+      <text x="58" y="106" text-anchor="end" font-size="10" fill="var(--ink-faint)">+1</text>
+      <text x="58" y="164" text-anchor="end" font-size="10" fill="var(--ink-faint)">0</text>
+      <text x="58" y="222" text-anchor="end" font-size="10" fill="var(--ink-faint)">&minus;1</text>
+      <text x="58" y="280" text-anchor="end" font-size="10" fill="var(--ink-faint)">&minus;2</text>
 
       <!-- gridlines -->
-      <line x1="68" y1="44" x2="800" y2="44" stroke="#eee"/>
-      <line x1="68" y1="102" x2="800" y2="102" stroke="#eee"/>
-      <line x1="68" y1="160" x2="800" y2="160" stroke="#ccc"/>
-      <line x1="68" y1="218" x2="800" y2="218" stroke="#eee"/>
-      <line x1="68" y1="276" x2="800" y2="276" stroke="#eee"/>
-      <line x1="68" y1="40" x2="68" y2="282" stroke="#ccc"/>
+      <line x1="68" y1="44" x2="800" y2="44" stroke="var(--line-soft)"/>
+      <line x1="68" y1="102" x2="800" y2="102" stroke="var(--line-soft)"/>
+      <line x1="68" y1="160" x2="800" y2="160" stroke="var(--line)"/>
+      <line x1="68" y1="218" x2="800" y2="218" stroke="var(--line-soft)"/>
+      <line x1="68" y1="276" x2="800" y2="276" stroke="var(--line-soft)"/>
+      <line x1="68" y1="40" x2="68" y2="282" stroke="var(--line)"/>
 
       <!-- milestone bands: Discovery | Application | The Wait | Resolution -->
-      <line x1="200" y1="36" x2="200" y2="282" stroke="#ddd" stroke-dasharray="4,4"/>
-      <line x1="430" y1="36" x2="430" y2="282" stroke="#ddd" stroke-dasharray="4,4"/>
-      <line x1="690" y1="36" x2="690" y2="282" stroke="#ddd" stroke-dasharray="4,4"/>
-      <text x="134" y="34" text-anchor="middle" font-size="10" fill="#999" font-weight="600">Discovery</text>
-      <text x="315" y="34" text-anchor="middle" font-size="10" fill="#999" font-weight="600">Application</text>
-      <text x="560" y="34" text-anchor="middle" font-size="10" fill="#999" font-weight="600">The Wait</text>
-      <text x="745" y="34" text-anchor="middle" font-size="10" fill="#999" font-weight="600">Resolution</text>
+      <line x1="200" y1="36" x2="200" y2="282" stroke="var(--line)" stroke-dasharray="4,4"/>
+      <line x1="430" y1="36" x2="430" y2="282" stroke="var(--line)" stroke-dasharray="4,4"/>
+      <line x1="690" y1="36" x2="690" y2="282" stroke="var(--line)" stroke-dasharray="4,4"/>
+      <text x="134" y="34" text-anchor="middle" font-size="10" fill="var(--line-strong)" font-weight="600">Discovery</text>
+      <text x="315" y="34" text-anchor="middle" font-size="10" fill="var(--line-strong)" font-weight="600">Application</text>
+      <text x="560" y="34" text-anchor="middle" font-size="10" fill="var(--line-strong)" font-weight="600">The Wait</text>
+      <text x="745" y="34" text-anchor="middle" font-size="10" fill="var(--line-strong)" font-weight="600">Resolution</text>
 
       <!-- area fill. points: see circles below -->
       <path d="M 100,102 L 168,118 L 250,135 L 330,170 L 410,102 L 500,135 L 600,247 L 660,265 L 760,222 L 760,160 L 100,160 Z" fill="url(#vg)" stroke="none"/>
       <!-- curve -->
       <polyline points="100,102 168,118 250,135 330,170 410,102 500,135 600,247 660,265 760,222"
-        fill="none" stroke="#555" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+        fill="none" stroke="var(--ink-muted)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
 
       <!-- data points (cy: +2=44,+1=102,0=160,-1=218,-2=276) -->
-      <circle class="curve-point" cx="100" cy="102" r="6.5" fill="#bbf7d0" stroke="#444" stroke-width="1.5" data-id="see-the-posting"/>
-      <circle class="curve-point" cx="168" cy="118" r="6.5" fill="#bbf7d0" stroke="#444" stroke-width="1.5" data-id="read-and-assess-fit"/>
-      <circle class="curve-point" cx="250" cy="135" r="6.5" fill="#e5e7eb" stroke="#444" stroke-width="1.5" data-id="create-account"/>
-      <circle class="curve-point" cx="330" cy="170" r="6.5" fill="#fed7aa" stroke="#444" stroke-width="1.5" data-id="fill-application-form"/>
-      <circle class="curve-point" cx="410" cy="102" r="6.5" fill="#86efac" stroke="#444" stroke-width="1.5" data-id="submit-application"/>
-      <circle class="curve-point" cx="500" cy="135" r="6.5" fill="#bbf7d0" stroke="#444" stroke-width="1.5" data-id="receive-confirmation"/>
+      <circle class="curve-point" cx="100" cy="102" r="6.5" fill="var(--valence-pos1)" stroke="var(--ink-muted)" stroke-width="1.5" data-id="see-the-posting"/>
+      <circle class="curve-point" cx="168" cy="118" r="6.5" fill="var(--valence-pos1)" stroke="var(--ink-muted)" stroke-width="1.5" data-id="read-and-assess-fit"/>
+      <circle class="curve-point" cx="250" cy="135" r="6.5" fill="var(--valence-neutral)" stroke="var(--ink-muted)" stroke-width="1.5" data-id="create-account"/>
+      <circle class="curve-point" cx="330" cy="170" r="6.5" fill="var(--valence-neg1)" stroke="var(--ink-muted)" stroke-width="1.5" data-id="fill-application-form"/>
+      <circle class="curve-point" cx="410" cy="102" r="6.5" fill="var(--valence-pos2)" stroke="var(--ink-muted)" stroke-width="1.5" data-id="submit-application"/>
+      <circle class="curve-point" cx="500" cy="135" r="6.5" fill="var(--valence-pos1)" stroke="var(--ink-muted)" stroke-width="1.5" data-id="receive-confirmation"/>
       <!-- The Wait: deepest collapse + moment of truth -->
-      <circle class="curve-point" cx="600" cy="247" r="8" fill="#fecaca" stroke="#ef4444" stroke-width="2.5" data-id="wait-in-silence"/>
-      <circle class="curve-point" cx="660" cy="265" r="6.5" fill="#fecaca" stroke="#444" stroke-width="1.5" data-id="check-status-or-follow-up"/>
-      <circle class="curve-point" cx="760" cy="222" r="6.5" fill="#fed7aa" stroke="#444" stroke-width="1.5" data-id="hear-back"/>
+      <circle class="curve-point" cx="600" cy="247" r="8" fill="var(--valence-neg2)" stroke="var(--mot-color)" stroke-width="2.5" data-id="wait-in-silence"/>
+      <circle class="curve-point" cx="660" cy="265" r="6.5" fill="var(--valence-neg2)" stroke="var(--ink-muted)" stroke-width="1.5" data-id="check-status-or-follow-up"/>
+      <circle class="curve-point" cx="760" cy="222" r="6.5" fill="var(--valence-neg1)" stroke="var(--ink-muted)" stroke-width="1.5" data-id="hear-back"/>
 
       <!-- x labels -->
-      <text x="100" y="300" text-anchor="middle" font-size="9" fill="#888">Posting</text>
-      <text x="168" y="300" text-anchor="middle" font-size="9" fill="#888">Assess fit</text>
-      <text x="250" y="300" text-anchor="middle" font-size="9" fill="#888">Account</text>
-      <text x="330" y="300" text-anchor="middle" font-size="9" fill="#888">Form</text>
-      <text x="410" y="300" text-anchor="middle" font-size="9" fill="#888">Submit</text>
-      <text x="500" y="300" text-anchor="middle" font-size="9" fill="#888">Confirm</text>
-      <text x="600" y="300" text-anchor="middle" font-size="9" fill="#ef4444" font-weight="600">Silence</text>
-      <text x="660" y="300" text-anchor="middle" font-size="9" fill="#888">Follow-up</text>
-      <text x="760" y="300" text-anchor="middle" font-size="9" fill="#888">Outcome</text>
+      <text x="100" y="300" text-anchor="middle" font-size="9" fill="var(--ink-faint)">Posting</text>
+      <text x="168" y="300" text-anchor="middle" font-size="9" fill="var(--ink-faint)">Assess fit</text>
+      <text x="250" y="300" text-anchor="middle" font-size="9" fill="var(--ink-faint)">Account</text>
+      <text x="330" y="300" text-anchor="middle" font-size="9" fill="var(--ink-faint)">Form</text>
+      <text x="410" y="300" text-anchor="middle" font-size="9" fill="var(--ink-faint)">Submit</text>
+      <text x="500" y="300" text-anchor="middle" font-size="9" fill="var(--ink-faint)">Confirm</text>
+      <text x="600" y="300" text-anchor="middle" font-size="9" fill="var(--mot-color)" font-weight="600">Silence</text>
+      <text x="660" y="300" text-anchor="middle" font-size="9" fill="var(--ink-faint)">Follow-up</text>
+      <text x="760" y="300" text-anchor="middle" font-size="9" fill="var(--ink-faint)">Outcome</text>
     </svg>
     <div class="chart-caption">Hope peaks the instant Maya hits <strong>Submit</strong>, holds while the confirmation email lands &mdash; then collapses through <strong>The Wait</strong>. The lowest point isn't a rejection. It's the silence. <em>Click any point to jump to its card.</em></div>
   </div>
@@ -380,7 +585,7 @@ const OUTCOMES = [
 ];
 
 const VCLASS = {'-2':'v-neg2','-1':'v-neg1','0':'v-neutral','1':'v-pos1','2':'v-pos2'};
-const VBADGE = {'-2':'#fecaca','-1':'#fed7aa','0':'#e5e7eb','1':'#bbf7d0','2':'#86efac'};
+const VBADGE = {'-2':'var(--valence-neg2)','-1':'var(--valence-neg1)','0':'var(--valence-neutral)','1':'var(--valence-pos1)','2':'var(--valence-pos2)'};
 const VLABEL = {'-2':'Very negative','-1':'Negative','0':'Neutral','1':'Positive','2':'Very positive'};
 
 // ---------- Shared state ----------

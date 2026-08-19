@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,57 +11,258 @@
   Customer-visible lane on top; line of visibility separates the hidden backstage machinery below.
 -->
 <style>
+/* tokens:begin */
+/* ============================================================================
+   journey-tokens.css — the single source of truth for every journey rendering.
+
+   Tier 1  brand seed      ~10 values. The only thing a user/brand ever changes.
+   Tier 2  semantic        derived from Tier 1. Renderings consume THESE.
+   Tier 3  component       declared locally inside each rendering, from Tier 2.
+
+   Rule for renderings: zero literal colors. If you type a hex, it belongs here.
+   Themes: base = light. Dark re-derives (never inverts) via prefers-color-scheme
+   and [data-theme], so a manual toggle wins in both directions.
+
+   OVERRIDING TIER 1 (brand themes, paper artifacts): the dark blocks below are
+   selected by :root:not([data-theme="light"]) and :root[data-theme="dark"],
+   both of which out-specify a bare :root. So an artifact that reseeds Tier 1
+   must also pin its theme on the element:
+
+       <html data-theme="light">   ← now the dark blocks cannot match, and a
+                                     later :root{...} override wins on order
+
+   Reseeding at :root without pinning a theme silently does nothing for readers
+   whose system is set to dark. See renderings/food-delivery--swimlane-themed
+   (a brand reseed) and renderings/job-application--storyboard (a paper reseed).
+   ========================================================================= */
+
+/* ── Tier 1 · brand seed ───────────────────────────────────────────────── */
+:root{
+  --brand-primary:    oklch(70% 0.148 52);      /* chrome, accent, selection   */
+  --brand-secondary:  oklch(63% 0.115 248);     /* second categorical hue      */
+  --brand-surface:    oklch(98.6% 0.006 80);    /* page ground                 */
+  --brand-text:       oklch(21% 0.014 62);      /* body ink                    */
+  --brand-positive:   oklch(64% 0.118 158);     /* semantic good               */
+  --brand-negative:   oklch(58% 0.168 25);      /* semantic bad                */
+  --brand-machine:    oklch(60% 0.096 285);     /* automated / no-human paths  */
+  --brand-on-primary: oklch(22% 0.014 70);      /* text that sits ON the primary */
+  --brand-attention:  oklch(72% 0.152 62);      /* momentOfTruth — NOT the brand:
+                                                   a marker that repaints itself
+                                                   when the logo changes is not a
+                                                   marker (guide § colour) */
+  /* categorical seed — Okabe-Ito, distinguishable under all three common
+     colour-vision deficiencies. Independent of brand on purpose (see
+     html-rendering-guide § accessibility); override only if the brand's own
+     categorical palette has been checked for the same. */
+  --brand-cat-1:      oklch(56% 0.108 248);     /* blue            */
+  --brand-cat-2:      oklch(62% 0.155 42);      /* vermillion      */
+  --brand-cat-3:      oklch(60% 0.098 168);     /* bluish green    */
+  --brand-cat-4:      oklch(72% 0.145 78);      /* orange          */
+  --brand-cat-5:      oklch(56% 0.112 340);     /* reddish purple  */
+  --brand-font:       "Söhne","Inter var",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,sans-serif;
+  --brand-font-mono:  ui-monospace,"SF Mono","Berkeley Mono",Menlo,Consolas,monospace;
+  --brand-radius:     3px;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --brand-primary:   oklch(76% 0.138 55);
+    --brand-secondary: oklch(70% 0.105 248);
+    --brand-surface:   oklch(17.5% 0.008 66);
+    --brand-text:      oklch(94% 0.008 80);
+    --brand-positive:  oklch(72% 0.108 158);
+    --brand-negative:  oklch(67% 0.150 26);
+    --brand-machine:   oklch(70% 0.088 285);
+    --brand-attention: oklch(78% 0.140 64);
+    --brand-cat-1:     oklch(70% 0.098 248);
+    --brand-cat-2:     oklch(72% 0.140 42);
+    --brand-cat-3:     oklch(70% 0.090 168);
+    --brand-cat-4:     oklch(78% 0.130 78);
+    --brand-cat-5:     oklch(68% 0.102 340);
+  }
+}
+:root[data-theme="dark"]{
+  --brand-primary:   oklch(76% 0.138 55);
+  --brand-secondary: oklch(70% 0.105 248);
+  --brand-surface:   oklch(17.5% 0.008 66);
+  --brand-text:      oklch(94% 0.008 80);
+  --brand-positive:  oklch(72% 0.108 158);
+  --brand-negative:  oklch(67% 0.150 26);
+  --brand-machine:   oklch(70% 0.088 285);
+  --brand-attention: oklch(78% 0.140 64);
+  --brand-cat-1:     oklch(70% 0.098 248);
+  --brand-cat-2:     oklch(72% 0.140 42);
+  --brand-cat-3:     oklch(70% 0.090 168);
+  --brand-cat-4:     oklch(78% 0.130 78);
+  --brand-cat-5:     oklch(68% 0.102 340);
+}
+
+/* ── Tier 2 · semantic ─────────────────────────────────────────────────── */
+:root{
+  /* ground & elevation — dark re-derives by mixing toward ink, not by inverting */
+  --bg:          var(--brand-surface);
+  --surface-1:   color-mix(in oklab, var(--brand-surface) 97%, var(--brand-text));
+  --surface-2:   color-mix(in oklab, var(--brand-surface) 93%, var(--brand-text));
+  --surface-3:   color-mix(in oklab, var(--brand-surface) 88%, var(--brand-text));
+
+  /* ink */
+  --ink:         var(--brand-text);
+  --ink-muted:   color-mix(in oklab, var(--brand-text) 58%, var(--brand-surface));
+  --ink-faint:   color-mix(in oklab, var(--brand-text) 36%, var(--brand-surface));
+  --ink-ghost:   color-mix(in oklab, var(--brand-text) 20%, var(--brand-surface));
+
+  /* rules */
+  --line:        color-mix(in oklab, var(--brand-text) 16%, var(--brand-surface));
+  --line-soft:   color-mix(in oklab, var(--brand-text) 9%,  var(--brand-surface));
+  --line-strong: color-mix(in oklab, var(--brand-text) 34%, var(--brand-surface));
+
+  /* accent */
+  --accent:       var(--brand-primary);
+  --accent-soft:  color-mix(in oklab, var(--brand-primary) 16%, var(--brand-surface));
+  --accent-line:  color-mix(in oklab, var(--brand-primary) 55%, var(--brand-surface));
+  --accent-ink:   color-mix(in oklab, var(--brand-primary) 18%, var(--brand-text));
+  --ink-on-accent: var(--brand-on-primary);
+
+  /* emotion valence — diverging, 5 stops. Deliberately held one step back from
+     full strength: valence is the *field*, markers are annotations laid on top of
+     it, and a marker that reads as just another data point has failed. NEVER the
+     sole encoding either — always pair with position, a numeral, or a glyph
+     (see html-rendering-guide § accessibility). */
+  --valence-n2:  color-mix(in oklab, var(--brand-negative) 82%, var(--surface-2));
+  --valence-n1:  color-mix(in oklab, var(--brand-negative) 52%, var(--surface-2));
+  --valence-0:   var(--ink-ghost);
+  --valence-p1:  color-mix(in oklab, var(--brand-positive) 52%, var(--surface-2));
+  --valence-p2:  color-mix(in oklab, var(--brand-positive) 82%, var(--surface-2));
+
+  /* markers */
+  --marker-critical:    var(--brand-attention);   /* momentOfTruth   */
+  --marker-fail:        var(--brand-negative);    /* failureMode     */
+  --marker-opportunity: var(--brand-positive);    /* opportunity     */
+  --marker-machine:     var(--brand-machine);     /* automation      */
+  --marker-pain:        color-mix(in oklab, var(--brand-negative) 62%, var(--brand-primary)); /* painPoint */
+
+  /* Two colours that pair with *data*, not with the page, so they must NOT flip
+     with the theme: text sitting on a saturated fill, and the colour a shadow is
+     cast in. Inverting either is the classic dark-mode bug. */
+  --ink-on-fill: oklch(22% 0.014 70);
+  --shadow-ink:  oklch(12% 0.010 60);
+
+  /* actor kinds (categorical — limit to 4, per the guide's 6–8 hue ceiling) */
+  --actor-primary:   var(--brand-primary);
+  --actor-system:    var(--brand-machine);
+  --actor-backstage: var(--brand-secondary);
+  --actor-none:      var(--ink-faint);
+
+  /* categorical — unordered groups: milestones, lanes, channels. Never use
+     these for anything ordered; lightness (the ramp below) encodes magnitude. */
+  --cat-1: var(--brand-cat-1);
+  --cat-2: var(--brand-cat-2);
+  --cat-3: var(--brand-cat-3);
+  --cat-4: var(--brand-cat-4);
+  --cat-5: var(--brand-cat-5);
+  --cat-1-soft: color-mix(in oklab, var(--brand-cat-1) 16%, var(--bg));
+  --cat-2-soft: color-mix(in oklab, var(--brand-cat-2) 16%, var(--bg));
+  --cat-3-soft: color-mix(in oklab, var(--brand-cat-3) 16%, var(--bg));
+  --cat-4-soft: color-mix(in oklab, var(--brand-cat-4) 16%, var(--bg));
+  --cat-5-soft: color-mix(in oklab, var(--brand-cat-5) 16%, var(--bg));
+
+  /* service layers */
+  --layer-customer-bg:  color-mix(in oklab, var(--brand-primary) 9%, var(--bg));
+  --layer-customer-ln:  var(--accent-line);
+  --layer-backstage-bg: var(--surface-2);
+  --layer-backstage-ln: var(--line);
+  --layer-support-bg:   var(--surface-1);
+  --layer-support-ln:   var(--line-soft);
+
+  /* sequential ramp — ordered magnitude (density, duration, count). Single hue,
+     stepped in oklab so equal numeric steps read as equal perceptual steps. */
+  --ramp-0: var(--surface-1);
+  --ramp-1: color-mix(in oklab, var(--brand-primary) 18%, var(--surface-1));
+  --ramp-2: color-mix(in oklab, var(--brand-primary) 36%, var(--surface-1));
+  --ramp-3: color-mix(in oklab, var(--brand-primary) 56%, var(--surface-1));
+  --ramp-4: color-mix(in oklab, var(--brand-primary) 78%, var(--surface-1));
+  --ramp-5: var(--brand-primary);
+
+  /* provenance — the skill's own metadata, so it gets first-class tokens */
+  --prov-model:  var(--ink-ghost);                /* model-authored (default)  */
+  --prov-user:   var(--brand-primary);            /* user-modified             */
+  --prov-source: var(--brand-secondary);          /* source-backed             */
+  --prov-auto:   var(--brand-machine);            /* auto-composite            */
+
+  /* priority */
+  --prio-must:   var(--brand-negative);
+  --prio-should: var(--brand-primary);
+  --prio-nice:   var(--ink-faint);
+
+  /* type — fluid modular scale, ratio 1.2 */
+  --font:      var(--brand-font);
+  --font-mono: var(--brand-font-mono);
+  --step--2: clamp(0.60rem, 0.58rem + 0.10vw, 0.66rem);
+  --step--1: clamp(0.72rem, 0.69rem + 0.14vw, 0.80rem);
+  --step-0:  clamp(0.86rem, 0.82rem + 0.18vw, 0.95rem);
+  --step-1:  clamp(1.03rem, 0.97rem + 0.28vw, 1.19rem);
+  --step-2:  clamp(1.24rem, 1.14rem + 0.48vw, 1.55rem);
+  --step-3:  clamp(1.60rem, 1.40rem + 1.00vw, 2.40rem);
+  --step-4:  clamp(2.10rem, 1.70rem + 2.00vw, 4.00rem);
+
+  /* space — deliberately uneven, so rhythm is possible */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 13px; --sp-4: 21px;
+  --sp-5: 34px; --sp-6: 55px; --sp-7: 89px;
+
+  --radius: var(--brand-radius);
+  --dur-fast: 140ms; --dur: 260ms; --dur-slow: 620ms;
+  --ease: cubic-bezier(.22,.61,.36,1);          /* ease-out-quart, no bounce */
+}
+
+@media (prefers-reduced-motion: reduce){
+  :root{ --dur-fast: 0ms; --dur: 0ms; --dur-slow: 0ms; }
+}
+/* tokens:end */
+
+  /* ── Tier 1 · the entire theme. Four seed values and a text pairing; every
+     lane tint, ramp, shadow and divider below is derived from them by
+     journey-tokens.css. This is what white-labelling costs. ── */
   :root {
-    /* ── Tier 1: Brand seed ── */
-    --brand-primary: #6C2BD9;
-    --brand-surface: #ffffff;
-    --brand-text: #1a1320;
+    --brand-primary:    #6C2BD9;
+    --brand-surface:    #ffffff;
+    --brand-text:       #1a1320;
+    --brand-on-primary: #ffffff;   /* the primary is dark, so its text is light */
+  }
 
-    /* ── Tier 1 derived: sequential purple ramp (lightness-stepped from primary) ── */
-    --purple-95: #f6f2fe;
-    --purple-90: #ede4fc;
-    --purple-80: #d9c6f7;
-    --purple-60: #a778ec;
-    --purple-45: #7d39e0;
+  /* ── Tier 3 · local names, all derived ── */
+  :root {
+    --page:              color-mix(in oklab, var(--bg) 94%, var(--accent));
+    --surface:           var(--bg);
+    --text:              var(--ink);
+    --text-muted:        var(--ink-muted);
+    --border:            var(--line);
 
-    /* ── Tier 2: chrome & layers ── */
-    --bg: #f4f1f8;
-    --surface: var(--brand-surface);
-    --text: var(--brand-text);
-    --text-muted: #6b6477;
-    --border: #e3dcef;
+    --customer-bg:       var(--layer-customer-bg);
+    --customer-accent:   var(--accent);
+    --backstage-bg:      var(--layer-backstage-bg);
+    --backstage-accent:  var(--layer-backstage-ln);
+    --systems-bg:        var(--layer-support-bg);
+    --systems-accent:    var(--layer-support-ln);
 
-    /* Lane colors: background / accent.
-       Customer (frontstage) carries the brand. Backstage lanes stay quiet/neutral. */
-    --customer-bg: var(--purple-95);
-    --customer-accent: var(--brand-primary);
-    --backstage-bg: #ffffff;
-    --backstage-accent: #9b93a8;
-    --systems-bg: #f6f5f8;
-    --systems-accent: #b4adc0;
+    --phase-bg:          var(--accent);
+    --phase-text:        var(--ink-on-accent);
 
-    /* Phase header */
-    --phase-bg: var(--brand-primary);
-    --phase-text: #ffffff;
+    --divider-color:     var(--accent);
+    --divider-muted:     var(--accent-line);
 
-    /* Divider lines (lines of interaction / visibility / internal interaction) */
-    --divider-color: var(--brand-primary);
-    --divider-muted: #b9add6;
+    --mot-color:         var(--marker-critical);
+    --fail-color:        var(--marker-fail);
+    --parallel-color:    var(--marker-machine);
 
-    /* Markers — semantic, fixed across themes (independent of brand) */
-    --mot-color: #ef4444;     /* moment of truth */
-    --fail-color: #8b6914;    /* failure point */
-    --parallel-color: var(--purple-45);
-
-    --arrow-color: #c9bce6;
-    --label-width: 168px;
-    --phase-col: minmax(190px, 1fr);
+    --arrow-color:       var(--line-strong);
+    --label-width:       168px;
+    --phase-col:         minmax(190px, 1fr);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background: var(--bg); color: var(--text); padding: 24px; -webkit-font-smoothing: antialiased;
+    background: var(--page); color: var(--text); padding: 24px; -webkit-font-smoothing: antialiased;
   }
 
   /* ── Header ── */
@@ -86,11 +287,11 @@
   .toolbar .hint { font-size: 0.72rem; color: var(--text-muted); margin-left: auto; }
 
   /* ── Blueprint grid ── */
-  .blueprint-wrap { max-width: 1180px; margin: 0 auto; overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); box-shadow: 0 1px 3px rgba(108,43,217,0.06); }
+  .blueprint-wrap { max-width: 1180px; margin: 0 auto; overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); box-shadow: 0 1px 3px color-mix(in oklab, var(--accent) 10%, transparent); }
   .blueprint { display: grid; grid-template-columns: var(--label-width) repeat(4, var(--phase-col)); min-width: 940px; }
 
-  .corner { background: var(--phase-bg); color: var(--phase-text); border-right: 1px solid rgba(255,255,255,0.18); padding: 12px 10px; font-size: 0.68rem; font-weight: 600; display: flex; align-items: flex-end; letter-spacing: 0.03em; }
-  .phase-header { background: var(--phase-bg); color: var(--phase-text); border-right: 1px solid rgba(255,255,255,0.18); padding: 11px 12px; font-size: 0.78rem; font-weight: 600; text-align: center; }
+  .corner { background: var(--phase-bg); color: var(--phase-text); border-right: 1px solid color-mix(in oklab, var(--ink-on-accent) 22%, transparent); padding: 12px 10px; font-size: 0.68rem; font-weight: 600; display: flex; align-items: flex-end; letter-spacing: 0.03em; }
+  .phase-header { background: var(--phase-bg); color: var(--phase-text); border-right: 1px solid color-mix(in oklab, var(--ink-on-accent) 22%, transparent); padding: 11px 12px; font-size: 0.78rem; font-weight: 600; text-align: center; }
   .phase-header:last-child { border-right: none; }
   .phase-header small { display: block; font-weight: 400; font-size: 0.66rem; opacity: 0.82; margin-top: 2px; }
 
@@ -118,14 +319,14 @@
 
   /* Action box */
   .box { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 0.74rem; position: relative; flex: 1; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s, transform 0.1s; }
-  .box:hover { border-color: var(--brand-primary); box-shadow: 0 2px 8px rgba(108,43,217,0.14); }
+  .box:hover { border-color: var(--brand-primary); box-shadow: 0 2px 8px color-mix(in oklab, var(--accent) 20%, transparent); }
   .box:focus { outline: none; border-color: var(--brand-primary); box-shadow: 0 0 0 3px var(--purple-90); }
   .box .box-title { font-weight: 600; line-height: 1.25; color: var(--text); }
   .box .box-sub { color: var(--text-muted); font-size: 0.68rem; margin-top: 3px; line-height: 1.3; }
   .box .meta { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
   .tag { font-size: 0.62rem; padding: 1px 6px; border-radius: 999px; background: var(--purple-95); color: var(--brand-primary); border: 1px solid var(--purple-80); }
   .tag.clock::before { content: '⏱ '; }
-  .tag.par { background: #fff; color: var(--parallel-color); border-color: var(--parallel-color); }
+  .tag.par { background: var(--surface); color: var(--parallel-color); border-color: var(--parallel-color); }
   .tag.par::before { content: '⇉ '; }
 
   /* Empty cell placeholder */
@@ -155,9 +356,9 @@
   .legend .swatch { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 5px; vertical-align: middle; border: 1px solid var(--border); }
 
   /* ── Detail drawer ── */
-  .scrim { position: fixed; inset: 0; background: rgba(26,19,32,0.42); opacity: 0; pointer-events: none; transition: opacity 0.18s; z-index: 40; }
+  .scrim { position: fixed; inset: 0; background: color-mix(in oklab, var(--shadow-ink) 55%, transparent); opacity: 0; pointer-events: none; transition: opacity 0.18s; z-index: 40; }
   .scrim.open { opacity: 1; pointer-events: auto; }
-  .drawer { position: fixed; top: 0; right: 0; height: 100%; width: min(440px, 92vw); background: var(--surface); box-shadow: -8px 0 28px rgba(26,19,32,0.18); transform: translateX(100%); transition: transform 0.22s ease; z-index: 50; display: flex; flex-direction: column; }
+  .drawer { position: fixed; top: 0; right: 0; height: 100%; width: min(440px, 92vw); background: var(--surface); box-shadow: -8px 0 28px color-mix(in oklab, var(--shadow-ink) 26%, transparent); transform: translateX(100%); transition: transform 0.22s ease; z-index: 50; display: flex; flex-direction: column; }
   .drawer.open { transform: translateX(0); }
   .drawer-head { padding: 20px 22px 14px; border-bottom: 1px solid var(--border); position: relative; }
   .drawer-head .lane-chip { font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--brand-primary); }
@@ -169,12 +370,12 @@
   .field { margin-bottom: 14px; }
   .field .k { font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 3px; }
   .field .v { font-size: 0.84rem; line-height: 1.5; color: var(--text); }
-  .field.risk .v { padding: 9px 11px; background: #fbf6ea; border-left: 3px solid var(--fail-color); border-radius: 0 5px 5px 0; }
-  .field.mot .v { padding: 9px 11px; background: #fef2f2; border-left: 3px solid var(--mot-color); border-radius: 0 5px 5px 0; }
+  .field.risk .v { padding: 9px 11px; background: color-mix(in oklab, var(--marker-fail) 12%, var(--bg)); border-left: 3px solid var(--fail-color); border-radius: 0 5px 5px 0; }
+  .field.mot .v { padding: 9px 11px; background: color-mix(in oklab, var(--marker-critical) 12%, var(--bg)); border-left: 3px solid var(--mot-color); border-radius: 0 5px 5px 0; }
   .field.par .v { padding: 9px 11px; background: var(--purple-95); border-left: 3px solid var(--parallel-color); border-radius: 0 5px 5px 0; color: var(--brand-primary); font-weight: 500; }
   .impact { display: inline-block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; margin-left: 6px; }
-  .impact.high { background: #fee2e2; color: #b91c1c; }
-  .impact.medium { background: #fef3c7; color: #92600a; }
+  .impact.high { background: color-mix(in oklab, var(--marker-fail) 18%, var(--bg)); color: var(--marker-fail); }
+  .impact.medium { background: color-mix(in oklab, var(--marker-critical) 20%, var(--bg)); color: var(--accent-ink); }
 
   @media (max-width: 640px) {
     body { padding: 14px; }
