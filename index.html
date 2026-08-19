@@ -238,7 +238,7 @@ footer .fbottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12
     <div class="cap"><h3>A living document</h3><p>It's a file that persists across sessions and grows by diff. Come back in three weeks and it's still your collaborator, not a blank slate.</p></div>
     <div class="cap"><h3>Provenance, automatically</h3><p>Every field tracks what you asserted, what's evidence-backed, and what the model guessed — so it won't dress a guess up as a statistic.</p></div>
   </div>
-  <div class="snippet"><span class="c">### Step: wait-for-bank-verification</span><br>- persona: [Maya]<br>- <span class="k">emotion</span>: Anxiety → suspicion → abandonment<br>- <span class="k">duration</span>: 3 business days<br>- <span class="k">painPoint</span>: "No feedback during the wait — most people think it's broken"<br>- <span class="k">failureMode</span>: Assumes verification failed and abandons setup<br>- <span class="k">momentOfTruth</span>: The single biggest drop-off point in the journey</div>
+  <div class="snippet"><span class="c">### Step: wait-in-silence</span><br>- persona: [Maya, Recruiter, Hiring Manager, ATS]<br>- <span class="k">emotion</span>: Hope curdling into anxiety, then resignation<br>- <span class="k">emotionValence</span>: -2<br>- <span class="k">waitTime</span>: Days to several weeks, often indefinite<br>- <span class="k">handoff</span>: Recruiter → Hiring Manager for shortlist review<br>- <span class="k">bottleneck</span>: Hiring Manager review capacity<br>- <span class="k">lineOfVisibility</span>: Status changes exist inside the ATS and are never exposed<br>- <span class="k">momentOfTruth</span>: This silence is the make-or-break of the whole experience</div>
 </div></section>
 
 <section id="schema"><div class="wrap">
@@ -263,12 +263,20 @@ footer .fbottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12
     <h3>The rendering is a <em>choice</em>, not an output.</h3>
     <p>These three are the same 15 steps as the map above — one source file, asked three different questions.
        Nothing is redrawn by hand: nodes, durations and coverage are read out of the journey at build time,
-       and every colour comes from one shared token file, so a theme is a five-value swap.</p></div>
+       and every colour comes from one shared token file.</p></div>
   <div class="gallery trio">
     <div class="shot"><img src="img/flow-graph.png" alt="Flow graph of the journey"><div class="body"><p class="say">Show me where this journey actually forks — I don't buy that it's a straight line.</p><a class="view" href="renderings/job-application--flow-graph.html">Explore live →</a></div></div>
     <div class="shot"><img src="img/time-to-scale.png" alt="Journey drawn to true time scale"><div class="body"><p class="say">Draw the time to scale. I want to see how much of this is just waiting.</p><a class="view" href="renderings/job-application--time-to-scale.html">Explore live →</a></div></div>
     <div class="shot"><img src="img/coverage-xray.png" alt="Coverage and provenance matrix"><div class="body"><p class="say">Where is this map thin — and which parts of it are guesses?</p><a class="view" href="renderings/job-application--coverage-xray.html">Explore live →</a></div></div>
   </div>
+
+  <div class="sub-head"><div class="kicker">Theming</div>
+    <h3>Your colours are <em>four values</em>, not a rewrite.</h3>
+    <p>Renderings hold no literal colours — only token names. Re-seed the top tier and the whole
+       palette re-derives: lane tints, the valence scale, rules, shadows, dark mode. Semantic
+       colours deliberately stay put, because a <em>moment of truth</em> marker that repaints itself
+       when your logo changes isn't a marker.</p></div>
+  <div class="snippet"><span class="c"># your brand</span><br>journey.sh theme map.html --primary <span class="k">'#6C2BD9'</span> --surface <span class="k">'#fff'</span> --text <span class="k">'#1a1320'</span><br><br><span class="c"># or one of the presets</span><br>journey.sh theme map.html --preset <span class="k">paper</span>&nbsp;&nbsp;<span class="c"># paper · midnight · blueprint · contrast</span></div>
 </div></section>
 
 <section><div class="narrow">

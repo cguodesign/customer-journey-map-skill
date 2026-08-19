@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html data-theme="light" lang="en">
 <!-- Job Application Portal journey — Swimlane × Zoom-pan.
      Rendering: Swimlane (service blueprint). Interaction: Zoom + Pan (user override).
      Self-contained, zero dependencies. Built for big-wall workshop display. -->
@@ -215,14 +215,17 @@
   :root{ --dur-fast: 0ms; --dur: 0ms; --dur-slow: 0ms; }
 }
 /* tokens:end */
-
-/* Tier 1 — this rendering ships light; reseeding needs the theme pinned
-   (see journey-tokens.css § OVERRIDING TIER 1) */
+/* theme:begin */
+/* Tier 1 override — the whole theme. Every colour in this file derives
+   from these; nothing below Tier 1 may hold a literal. Written by
+   `journey.sh theme`; edit here or re-run the command. */
 :root{
-  --brand-primary:#2563eb;
-  --brand-surface:#f5f6f8;
-  --brand-text:#1a1f2b;
+  --brand-primary: #2563eb;
+  --brand-surface: #f5f6f8;
+  --brand-text: #1a1f2b;
 }
+/* theme:end */
+
 /* Tier 3 — local names, every one derived */
 :root{
   --lane-actions-bg:var(--layer-customer-bg);  --lane-actions-accent:var(--layer-customer-ln);

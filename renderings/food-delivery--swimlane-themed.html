@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html data-theme="light" lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -218,19 +218,25 @@
   :root{ --dur-fast: 0ms; --dur: 0ms; --dur-slow: 0ms; }
 }
 /* tokens:end */
-
-  /* ── Tier 1 · the entire theme. Four seed values and a text pairing; every
-     lane tint, ramp, shadow and divider below is derived from them by
-     journey-tokens.css. This is what white-labelling costs. ── */
-  :root {
-    --brand-primary:    #6C2BD9;
-    --brand-surface:    #ffffff;
-    --brand-text:       #1a1320;
-    --brand-on-primary: #ffffff;   /* the primary is dark, so its text is light */
-  }
+/* theme:begin */
+/* Tier 1 override — the whole theme. Every colour in this file derives
+   from these; nothing below Tier 1 may hold a literal. Written by
+   `journey.sh theme`; edit here or re-run the command. */
+:root{
+  --brand-primary: #6C2BD9;
+  --brand-surface: #ffffff;
+  --brand-text: #1a1320;
+  --brand-on-primary: #ffffff;
+}
+/* theme:end */
 
   /* ── Tier 3 · local names, all derived ── */
   :root {
+    /* tints the file's own rules still ask for by name — derived, not hand-mixed */
+    --purple-95:         var(--accent-soft);
+    --purple-90:         color-mix(in oklab, var(--accent) 24%, var(--bg));
+    --purple-80:         color-mix(in oklab, var(--accent) 34%, var(--bg));
+
     --page:              color-mix(in oklab, var(--bg) 94%, var(--accent));
     --surface:           var(--bg);
     --text:              var(--ink);
