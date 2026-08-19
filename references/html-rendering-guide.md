@@ -17,6 +17,9 @@ The Interactive HTML output combines one **rendering mode** (layout structure) w
 | **Swimlane** | Horizontal lanes per service layer | Active categories include frontstage/backstage/support |
 | **Emotion curve** | Valence line chart over steps | Emotional arc is the focus. Also works as overlay on other modes |
 | **Storyboard** | Film-storyboard table: one frame per step (Cut / Frame / Action / Dialogue / Time) | Narrative journey where the audience should move through it frame by frame — the visual cousin of the Storyline. Kickoffs, empathy, presentations |
+| **Flow graph** | Node-link graph of `next` / `branchCondition` / `parallelPath`, laid out by document order | The journey is **not** a line: it forks, loops, or has several endings. The only mode that shows a step with no way out of it |
+| **Time to scale** | One horizontal strip, segments drawn in proportion to real `duration` / `waitTime` (log or true scale) | Waiting dominates the experience and the evenly-spaced Timeline is hiding it. Turns "the black hole" from a phrase into a measurement |
+| **Coverage x-ray** | Matrix of steps × schema categories, cells shaded by field count, provenance overlaid | The audience is the map's *authors*. Shows where the map is thick, where it is thin, and what is asserted without evidence |
 
 ### Interaction Modes
 
@@ -29,13 +32,20 @@ The Interactive HTML output combines one **rendering mode** (layout structure) w
 
 ### Valid Combination Matrix
 
-|                  | Scroll | Focus+Context | Zoom-pan | Multi-view |
-|------------------|:---:|:---:|:---:|:---:|
-| **Card grid**    | ✓ | ✓ | — | ✓ |
-| **Timeline**     | ✓ | ✓ | ✓ | — |
-| **Swimlane**     | ✓ | ✓ | ✓ | — |
-| **Emotion curve**| ✓ | — | — | ✓ |
-| **Storyboard**   | ✓ | ✓ | — | — |
+|                    | Scroll | Focus+Context | Zoom-pan | Multi-view |
+|--------------------|:---:|:---:|:---:|:---:|
+| **Card grid**      | ✓ | ✓ | — | ✓ |
+| **Timeline**       | ✓ | ✓ | ✓ | — |
+| **Swimlane**       | ✓ | ✓ | ✓ | — |
+| **Emotion curve**  | ✓ | — | — | ✓ |
+| **Storyboard**     | ✓ | ✓ | — | — |
+| **Flow graph**     | ✓ | ✓ | ✓ | — |
+| **Time to scale**  | ✓ | — | — | — |
+| **Coverage x-ray** | ✓ | — | — | — |
+
+The last three are **analytical** rather than sequential: they answer a question about the
+map instead of walking through it. Offer them alongside a sequential mode, not instead of
+one — a room that has never seen the journey needs the walk first.
 
 ### Selection Logic
 
@@ -57,6 +67,19 @@ if primary_analysis_dimension == temporal/duration:
 if audience should move through the journey frame-by-frame (narrative/empathy,
    the journey has a strong emotional arc and per-step "scenes"):
     rendering = storyboard   # the visual cousin of the Storyline express format
+
+# Analytical modes — these answer a question ABOUT the map. Offer, don't substitute.
+if the map branches (>1 branchCondition, or any exitPoint besides the last step,
+   or a parallelPath) AND the question is "where does this actually go?":
+    offer flow-graph        # the only mode that can show a step with no way out
+
+if duration/waitTime are populated AND the waits dwarf the actions
+   (or the user says "how much of this is waiting?"):
+    offer time-to-scale     # an evenly-spaced timeline is throwing the time away
+
+if the audience is the map's own authors — "where is this thin?", "what are we
+   asserting without evidence?", a review/health pass:
+    offer coverage-xray     # steps × categories, with provenance overlaid
 
 # Step 3: Overlays and multi-view
 if active_categories include emotional AND rendering != emotion-curve:

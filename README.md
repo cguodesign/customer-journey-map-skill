@@ -32,13 +32,17 @@ words; the skill maintains a canonical journey file: milestones, steps, and the 
 that actually matter on each one. No diagramming, no template.
 
 ```markdown
-### Step: wait-for-bank-verification
-- persona: [Maya]
-- emotion: Anxiety → suspicion → abandonment
-- duration: 3 business days
-- painPoint: "No feedback during the wait — most people think it's broken"
-- failureMode: Assumes verification failed and abandons setup entirely
-- momentOfTruth: The single biggest drop-off point in the journey
+### Step: wait-in-silence
+- persona: [Maya, Recruiter, Hiring Manager, ATS]
+- emotion: Hope curdling into anxiety, then resignation
+- emotionValence: -2
+- waitTime: Days to several weeks, often indefinite
+- handoff: Recruiter → Hiring Manager for shortlist review
+- bottleneck: Hiring Manager review capacity
+- lineOfVisibility: Status changes exist inside the ATS and are deliberately not exposed
+- painPoint: No status, no timeline, no closure
+- momentOfTruth: This silence is the make-or-break of the whole experience
+- priority: must-fix
 ```
 
 **A ~100-field vocabulary you never have to learn.** Underneath sits the language of
@@ -61,44 +65,69 @@ to go measure it.
 
 ## Express it for any audience
 
-Once the map exists, the same understanding renders for whoever needs it. (Full versions
-in [`demos/gallery/`](demos/gallery/).)
+Once the map exists, the same understanding renders for whoever needs it. Everything below
+comes from **one** journey file — fifteen steps, read for different rooms. (Full versions in
+[`demos/gallery/`](demos/gallery/).)
 
 **Storyline** — makes a team *feel* the experience. For kickoffs, empathy-building.
-> *Maya runs a small online store. She is not a developer… A customer fills a cart, gets
-> to the payment screen, asks "Wait, you don't take card?" — and disappears.*
-> *…She hits submit. And then the story stops. No progress bar. No estimate. Just a screen,
-> and silence. So Maya does what anyone does in a silence that long: she assumes it's
-> broken.*[^1]
+> *Maya has a job. That is the first thing to understand about her, because it changes
+> everything that follows… every single thing she does about our role happens in the margins
+> of a day that already belongs to someone else.*
+> *…At 10:20 she hits Submit. And here is the thing worth noticing: **she feels good.**
+> That is the emotional high point of this entire journey, and it happens forty-three
+> minutes in, with everything still ahead of her.*[^1]
 
 **One-page brief** — for a VP with 90 seconds and a decision to make.
-> **Ask:** Approve 2 sprints to add status feedback to bank verification.
-> **The problem in one line:** New merchants finish signup, hit a 3-business-day wait with
-> *zero feedback*, conclude the product is broken, and quit — one step before going live.
+> **Ask:** Approve three changes — surface real status, disclose the AI screen, auto-close
+> dead applications.
+> **The problem in one line:** Candidates who pass our screen enter a queue with no status,
+> no timeline, and no guaranteed ending — and the most common way our process concludes is
+> that it doesn't.
 
 **Engineering handoff** — spec-shaped, for the team that has to build it.
 > **Acceptance criteria**
-> - [ ] After KYC submission, the owner sees a status page with current state + estimated completion date.
-> - [ ] Status reflects **real** backend state, not a fake progress bar.
+> - [ ] The portal shows the application's real internal state, not a static "Submitted".
+> - [ ] When a role closes, every open application receives an outcome within 24h.
+> - [ ] An automated rejection states that it was automated, and offers one correction path.
 
-**Interactive HTML** — a self-contained, explorable map. The same journey renders however
-the room needs; you just ask:
+**Interactive HTML** — self-contained, explorable maps. Rendering is a *choice*, not a fixed
+output; you just ask. All eight are live on the
+[showcase site](https://cguodesign.github.io/customer-journey-map-skill/#demos).
 
 | Effect | What you say |
 |---|---|
 | ![Multi-view — emotion curve / timeline / cards](https://raw.githubusercontent.com/cguodesign/customer-journey-map-skill/gh-pages/img/hero-multiview.png) | *"Make an interactive map our team can pull up in the review."* |
+| ![Flow graph showing the journey's forks, loop and dead end](https://raw.githubusercontent.com/cguodesign/customer-journey-map-skill/gh-pages/img/flow-graph.png) | *"Show me where this journey actually forks — and where it dead-ends."* |
+| ![The journey drawn to true time scale](https://raw.githubusercontent.com/cguodesign/customer-journey-map-skill/gh-pages/img/time-to-scale.png) | *"Draw the time to scale. I want to see how much of this is waiting."* |
+| ![Coverage and provenance matrix](https://raw.githubusercontent.com/cguodesign/customer-journey-map-skill/gh-pages/img/coverage-xray.png) | *"Where is this map thin? What are we asserting without evidence?"* |
 | ![Brand-themed swimlane service blueprint](https://raw.githubusercontent.com/cguodesign/customer-journey-map-skill/gh-pages/img/swimlane-themed.png) | *"Render it as a swimlane, themed to our brand colors."* |
-| ![Dark-mode timeline](https://raw.githubusercontent.com/cguodesign/customer-journey-map-skill/gh-pages/img/timeline-dark.png) | *"Give me a dark timeline where the weeks-long wait dwarfs every step."* |
 | ![Film storyboard](https://raw.githubusercontent.com/cguodesign/customer-journey-map-skill/gh-pages/img/storyboard.png) | *"Turn it into a storyboard — frame by frame, like a film."* |
 
-> Across all of them: nobody quotes a hard drop-off percentage. The map carries no cited
-> evidence, so the skill frames the abandonment as a *hypothesis* — it won't invent a
-> statistic to make a slide look better. Give it real analytics and the number lands with
-> its source attached.
+Plus a dark timeline where the weeks-long wait dwarfs every step, and the whole service
+blueprint on a pannable canvas.
+
+**Your colours, in one line.** Renderings contain no literal colours — only token names — so
+re-theming isn't a rewrite:
+
+```bash
+journey.sh theme map.html --primary '#6C2BD9' --surface '#fff' --text '#1a1320'
+journey.sh theme map.html --preset paper     # or: midnight, blueprint, contrast
+```
+
+Four seed values re-derive the whole palette: lane tints, valence scale, rules, shadows,
+dark mode. Semantic colours stay put on purpose — a *moment of truth* marker that repaints
+itself when your logo changes isn't a marker.
+
+> Across all of them: nobody quotes a hard drop-off percentage. The map carries no measured
+> metrics, so the brief says so out loud and recommends instrumenting instead. The one number
+> it does use — 43 minutes of doing inside ~6 weeks of waiting — is computed from the map's
+> own time fields, and it says that too. Give it real analytics and the number lands with its
+> source attached.
 
 [^1]: Every beat traces back to a step in the journey file via footnotes — readable with or without them.
 
 ---
+
 
 ## See it across a project
 
@@ -154,12 +183,13 @@ the 10-minute guided tour in [`demos/walkthrough.md`](demos/walkthrough.md).
 ```
 SKILL.md                          # Behavior contract (the entry point)
 scripts/
-  journey.sh                      # Deterministic backbone: validated writes + an audit log of every change
+  journey.sh                      # Deterministic backbone: validated writes, an audit log of every change, and theming
 references/
   journey.schema.md               # 13 categories, ~100 fields, provenance + composite rules
   journey.format.md               # Canonical markdown format
   modes/                          # Per-mode playbooks (plan, modify, express, review), loaded on demand
   html-rendering-guide.md         # Interactive HTML: rendering matrix, color, data mapping
+assets/theme/                     # journey-tokens.css (3-tier colour system) + presets; installed by `journey.sh theme`
 assets/templates/                 # 5 rendering modes (card, timeline, swimlane, emotion, storyboard) + interaction + wireframe templates
 examples/                         # Golden examples
 demos/                            # Journey sources + expression examples (markdown), runnable scripts, guided walkthrough
@@ -171,7 +201,8 @@ edit against the schema, places nodes by stable id, and appends a per-journey ch
 are cheap (the model emits one changed block, not the whole file), a malformed write is rejected
 before it lands, and the map carries a real **who-changed-what-when history** — the foundation for
 many people sharing one set of journeys. The model still does the generative work (building from
-conversation, prose, rendering); the script does the mechanical work (place, validate, log, query).
+conversation, prose, rendering); the script does the mechanical work (place, validate, log, query,
+theme).
 
 The interactive HTML renderings and screenshots live on the
 [showcase site](https://cguodesign.github.io/customer-journey-map-skill/) (the `gh-pages`

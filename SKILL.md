@@ -125,6 +125,11 @@ hand-editing or hand-maintaining a log:
   write path** — never hand-maintain a changelog. Emit only the one changed block, not the file.
 - **`scripts/journey.sh query …` / `search …` / `audit …`** — structured search across the
   dataset and changelog (used heavily in Review).
+- **`scripts/journey.sh theme <file>.html`** — install the colour token layer into a rendering,
+  or re-seed it to the user's brand (`--preset paper|midnight|blueprint|contrast`, or
+  `--primary/--surface/--text …`). Renderings are written with `var(--…)` only; this command
+  owns the palette, including the light/dark specificity rules a hand-edit gets wrong. See
+  `references/html-rendering-guide.md`.
 
 **Authorship.** `commit` attributes each change to an author (saved name → git → OS user). If
 `scripts/journey.sh whoami` reports `source: fallback`, ask the user **once** what name or team
