@@ -124,10 +124,16 @@ survive being emailed, so it cannot link a stylesheet). Two marked regions carry
 /* theme:begin */    this artifact's own Tier-1 seeds, usually empty        /* theme:end */
 ```
 
+A third region, `<!-- switcher:begin -->`, carries the in-page theme control that ships with
+the tokens: **Dark · Light · Paper · Brand**. A rendering opens dark and the reader re-seeds
+it live — the control writes Tier-1 values as inline properties on `<html>`, which beats every
+stylesheet rule and so sidesteps the specificity trap below entirely. Pass `--no-switcher`
+only for artifacts that must carry no chrome.
+
 Never write these regions by hand. `journey.sh theme <file>` owns them:
 
 ```
-journey.sh theme map.html --init                 # default palette, follows the reader
+journey.sh theme map.html --init                 # tokens + switcher; opens dark
 journey.sh theme map.html --preset paper         # paper | midnight | blueprint | contrast
 journey.sh theme map.html --primary '#6C2BD9' --surface '#fff' --text '#1a1320'
 journey.sh theme map.html --clear                # back to default

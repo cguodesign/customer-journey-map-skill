@@ -632,6 +632,8 @@ _TOK_BEGIN='/* tokens:begin */'
 _TOK_END='/* tokens:end */'
 _THM_BEGIN='/* theme:begin */'
 _THM_END='/* theme:end */'
+_SW_BEGIN='<!-- switcher:begin -->'
+_SW_END='<!-- switcher:end -->'
 
 # Light or dark? Read it off the surface colour instead of asking, because the
 # answer decides a specificity fight the author cannot see: the token file's dark
@@ -703,7 +705,7 @@ _theme_pin_mode() {
 }
 
 cmd_theme() {
-  local file="" preset="" mode="" clear=0 init=0 show=1
+  local file="" preset="" mode="" clear=0 init=0 show=1 no_switcher=0
   local primary="" surface="" text="" on_primary="" secondary="" positive="" negative=""
   while [ $# -gt 0 ]; do
     case "$1" in
@@ -718,6 +720,7 @@ cmd_theme() {
       --mode)        mode="${2:-}"; shift 2; show=0 ;;
       --clear)       clear=1; shift; show=0 ;;
       --init)        init=1; shift; show=0 ;;
+      --no-switcher) no_switcher=1; shift ;;
       -*)            die "theme: unknown flag: $1" ;;
       *)             file="$1"; shift ;;
     esac
@@ -764,6 +767,20 @@ cmd_theme() {
     _theme_write_region "$file" "$_TOK_BEGIN" "$_TOK_END" "$(cat "$tokens")" \
       || die "theme: could not write the token region in $file"
     printf 'journey.sh: token layer written to %s\n' "$file"
+
+    # the switcher ships with the tokens — a palette the reader cannot try is a
+    # claim, not a demonstration
+    if [ "$no_switcher" -eq 0 ] && [ -f "$THEME_DIR/switcher.js" ] && grep -q '</body>' "$file"; then
+      if ! grep -qF "$_SW_BEGIN" "$file"; then
+        awk -v b="$_SW_BEGIN" -v e="$_SW_END" '
+          !d && /<\/body>/ { print b; print "<script>"; print "SWITCHER_JS"; print "</script>"; print e; d=1 }
+          { print }' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+      fi
+      _theme_write_region "$file" "$_SW_BEGIN" "$_SW_END" \
+        "<script>
+$(cat "$THEME_DIR/switcher.js")
+</script>" || die "theme: could not write the switcher region in $file"
+    fi
   fi
 
   # --init on its own is a complete job: the file now carries the default
@@ -880,6 +897,7 @@ THEME
   --primary/--surface/--text/--on-primary/--secondary/--positive/--negative <c>
   --mode light|dark|auto pin the artifact's theme (default: read off the surface)
   --clear                back to the default palette
+  --no-switcher          skip the in-page theme control (print-only artifacts)
   (no flags)             report what theme the file currently carries
 
 QUERY FILTERS

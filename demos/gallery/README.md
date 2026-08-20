@@ -49,14 +49,19 @@ brand seed values, Tier 2 derives the semantic palette from them in OKLab, Tier 
 to each file. The renderings themselves contain **no literal colour values at all**, except where an
 artifact reseeds Tier 1 on purpose — which is the whole point of Tier 1:
 
-| Rendering | What it seeds | Result |
-|---|---|---|
-| `job-application--swimlane-zoompan` | 4 values (`#A97BF0` + surface, text, on-primary) | a whole brand, derived — and it stays dark, like its siblings |
-| `job-application--storyboard` | 4 values (warm paper) | a printed artifact that ignores the reader's theme |
-| `food-delivery--swimlane-themed` | 4 values (`#6C2BD9` + surface, text, on-primary) | the same swap on the other journey |
-| `job-application--multiview` | nothing | the default palette, following the reader's preference |
-| `job-application--timeline-dark` | nothing (pins `data-theme="dark"`) | dark is a theme, not a file |
-| flow graph · time to scale · coverage x-ray | nothing (light/dark/auto switch) | re-theming, live, in the page |
+Every rendering **opens dark and carries a switch** — Dark · Light · Paper · Brand — so the
+palette is something the reader tries rather than something the gallery asserts. None of them
+ships a fixed identity any more:
+
+| What the switch does | Mechanism |
+|---|---|
+| Dark (default) / Light | sets `data-theme`; the shipped palette re-derives |
+| Paper | re-seeds 4 Tier-1 values — warm paper, the printed-artifact look |
+| Brand | re-seeds 4 Tier-1 values — a purple brand, dark |
+
+The seeds are written as inline custom properties on `<html>`, which outranks every stylesheet
+rule — so the control never loses the specificity fight that a hand-written `:root` override
+does.
 
 Semantic colours — `momentOfTruth`, `failureMode`, valence — are deliberately **not**
 derived from the brand: a marker that repaints itself when the logo changes is not a

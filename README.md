@@ -106,8 +106,9 @@ output; you just ask. All eight are live on the
 Plus a dark timeline where the weeks-long wait dwarfs every step, and the whole service
 blueprint on a pannable canvas.
 
-**Your colours, in one line.** Renderings contain no literal colours — only token names — so
-re-theming isn't a rewrite:
+**Your colours, in one line.** Every rendering opens dark and carries a **Dark · Light · Paper ·
+Brand** switch, so you can see the palette re-derive before you commit to anything. Renderings
+contain no literal colours — only token names — so re-theming isn't a rewrite either:
 
 ```bash
 journey.sh theme map.html --primary '#6C2BD9' --surface '#fff' --text '#1a1320'
