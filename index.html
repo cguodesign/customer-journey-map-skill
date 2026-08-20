@@ -249,8 +249,9 @@ footer .fbottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12
 
 <section id="demos" style="background:var(--bg-elev);border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap">
   <div class="sec-head"><div class="kicker">Express</div><h2>One map, rendered for <em>the room</em>.</h2>
-    <p>Every one of these is the same fifteen-step file, asked a different question — nothing
-       is redrawn by hand, and no two were styled separately. Click any to explore it live.</p></div>
+    <p>Every one of these is the same fifteen-step file, asked a different question — nothing is
+       redrawn by hand. They all open dark; the switch in the corner of each one re-seeds the
+       palette live. Click any to explore it.</p></div>
 
   <div class="gallery">
     <div class="shot"><img src="img/hero-multiview.png" alt="Multi-view interactive map"><div class="body"><p class="say">Make an interactive map our team can pull up in the review.</p><a class="view" href="renderings/job-application--multiview.html">Explore live →</a></div></div>
@@ -259,15 +260,16 @@ footer .fbottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12
     <div class="shot"><img src="img/coverage-xray.png" alt="Coverage and provenance matrix"><div class="body"><p class="say">Where is this map thin — and which parts of it are guesses?</p><a class="view" href="renderings/job-application--coverage-xray.html">Explore live →</a></div></div>
     <div class="shot"><img src="img/timeline-dark.png" alt="Dark-mode timeline"><div class="body"><p class="say">Give me a dark timeline where the weeks-long wait dwarfs every step.</p><a class="view" href="renderings/job-application--timeline-dark.html">Explore live →</a></div></div>
     <div class="shot"><img src="img/storyboard.png" alt="Film storyboard"><div class="body"><p class="say">Turn it into a storyboard — frame by frame, like a film.</p><a class="view" href="renderings/job-application--storyboard.html">Explore live →</a></div></div>
-    <div class="shot wide"><img src="img/swimlane-zoompan.png" alt="Brand-themed swimlane on a zoom-pan canvas"><div class="body"><p class="say">Put the whole blueprint on one canvas I can pan around — in our brand colours.</p><a class="view" href="renderings/job-application--swimlane-zoompan.html">Explore live →</a></div></div>
+    <div class="shot wide"><img src="img/swimlane-zoompan.png" alt="Swimlane on a zoom-pan canvas"><div class="body"><p class="say">Put the whole blueprint on one canvas I can pan around.</p><a class="view" href="renderings/job-application--swimlane-zoompan.html">Explore live →</a></div></div>
   </div>
 
 <div class="sub-head"><div class="kicker">Theming</div>
     <h3>Your colours are <em>four values</em>, not a rewrite.</h3>
     <p>Renderings hold no literal colours — only token names. Re-seed the top tier and the whole
-       palette re-derives: lane tints, the valence scale, rules, shadows, dark mode. Semantic
-       colours deliberately stay put, because a <em>moment of truth</em> marker that repaints itself
-       when your logo changes isn't a marker.</p></div>
+       palette re-derives: lane tints, the valence scale, rules, shadows, dark mode. That is what
+       the switch in the corner of every rendering above is doing — four values, live, no rebuild.
+       Semantic colours deliberately stay put, because a <em>moment of truth</em> marker that
+       repaints itself when your logo changes isn't a marker.</p></div>
   <div class="snippet"><span class="c"># your brand</span><br>journey.sh theme map.html --primary <span class="k">'#6C2BD9'</span> --surface <span class="k">'#fff'</span> --text <span class="k">'#1a1320'</span><br><br><span class="c"># or one of the presets</span><br>journey.sh theme map.html --preset <span class="k">paper</span>&nbsp;&nbsp;<span class="c"># paper · midnight · blueprint · contrast</span></div>
 </div></section>
 
