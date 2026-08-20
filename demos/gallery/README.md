@@ -28,6 +28,8 @@ stay lean); the source journeys stay here.
 
 | Rendering × interaction | Argument it makes | Live |
 |---|---|---|
+| **Card grid**, scroll | Every step as a card, opened on demand | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--card-grid.html) |
+| **Emotion curve**, scroll | Rejection is not the low point | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--emotion-curve.html) |
 | Multi-view (emotion / timeline / cards), scroll | One map, three audiences | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--multiview.html) |
 | Timeline, scroll, **dark** | The wait dwarfs every step | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--timeline-dark.html) |
 | Swimlane × **zoom-pan**, brand-themed | What the customer never sees — and what a brand swap costs (4 values) | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--swimlane-zoompan.html) |
@@ -36,7 +38,7 @@ stay lean); the source journeys stay here.
 | **Time to scale** | An hour of work, then weeks of nothing | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--time-to-scale.html) |
 | **Coverage x-ray** | What the map knows, and how it knows it | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--coverage-xray.html) |
 
-Seven readings of **one** file. The eighth rendering,
+Nine readings of **one** file. The eighth rendering,
 [`food-delivery--swimlane-themed`](https://cguodesign.github.io/customer-journey-map-skill/renderings/food-delivery--swimlane-themed.html),
 is deliberately kept off that list: it runs on the other source journey and is here as the
 service-layer teaching example, not as part of the one-map showcase.

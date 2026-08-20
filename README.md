@@ -91,12 +91,13 @@ comes from **one** journey file — fifteen steps, read for different rooms. (Fu
 > - [ ] An automated rejection states that it was automated, and offers one correction path.
 
 **Interactive HTML** — self-contained, explorable maps. Rendering is a *choice*, not a fixed
-output; you just ask. All eight are live on the
+output; you just ask. All nine are live on the
 [showcase site](https://cguodesign.github.io/customer-journey-map-skill/#demos).
 
 | Effect | What you say |
 |---|---|
 | ![Multi-view — emotion curve / timeline / cards](https://raw.githubusercontent.com/cguodesign/customer-journey-map-skill/gh-pages/img/hero-multiview.png) | *"Make an interactive map our team can pull up in the review."* |
+| ![Emotion curve across the journey](https://raw.githubusercontent.com/cguodesign/customer-journey-map-skill/gh-pages/img/emotion-curve.png) | *"Plot the emotional arc — I want to see where it bottoms out."* |
 | ![Flow graph showing the journey's forks, loop and dead end](https://raw.githubusercontent.com/cguodesign/customer-journey-map-skill/gh-pages/img/flow-graph.png) | *"Show me where this journey actually forks — and where it dead-ends."* |
 | ![The journey drawn to true time scale](https://raw.githubusercontent.com/cguodesign/customer-journey-map-skill/gh-pages/img/time-to-scale.png) | *"Draw the time to scale. I want to see how much of this is waiting."* |
 | ![Coverage and provenance matrix](https://raw.githubusercontent.com/cguodesign/customer-journey-map-skill/gh-pages/img/coverage-xray.png) | *"Where is this map thin? What are we asserting without evidence?"* |
