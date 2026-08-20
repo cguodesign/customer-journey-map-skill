@@ -30,12 +30,16 @@ stay lean); the source journeys stay here.
 |---|---|---|
 | Multi-view (emotion / timeline / cards), scroll | One map, three audiences | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--multiview.html) |
 | Timeline, scroll, **dark** | The wait dwarfs every step | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--timeline-dark.html) |
-| Swimlane × **zoom-pan** | What the customer never sees | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--swimlane-zoompan.html) |
+| Swimlane × **zoom-pan**, brand-themed | What the customer never sees — and what a brand swap costs (4 values) | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--swimlane-zoompan.html) |
 | **Storyboard**, scroll | Live it frame by frame | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--storyboard.html) |
 | **Flow graph** | A journey is not a line — one entry, two forks, five endings | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--flow-graph.html) |
 | **Time to scale** | An hour of work, then weeks of nothing | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--time-to-scale.html) |
 | **Coverage x-ray** | What the map knows, and how it knows it | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/job-application--coverage-xray.html) |
-| Swimlane, scroll, **brand-themed** | Any brand, one token swap *(food delivery)* | [open ↗](https://cguodesign.github.io/customer-journey-map-skill/renderings/food-delivery--swimlane-themed.html) |
+
+Seven readings of **one** file. The eighth rendering,
+[`food-delivery--swimlane-themed`](https://cguodesign.github.io/customer-journey-map-skill/renderings/food-delivery--swimlane-themed.html),
+is deliberately kept off that list: it runs on the other source journey and is here as the
+service-layer teaching example, not as part of the one-map showcase.
 
 ## Colour is a token, not a rewrite
 
@@ -47,9 +51,9 @@ artifact reseeds Tier 1 on purpose — which is the whole point of Tier 1:
 
 | Rendering | What it seeds | Result |
 |---|---|---|
-| `food-delivery--swimlane-themed` | 4 values (`#6C2BD9` + surface, text, on-primary) | a whole brand, derived |
+| `job-application--swimlane-zoompan` | 4 values (`#A97BF0` + surface, text, on-primary) | a whole brand, derived — and it stays dark, like its siblings |
 | `job-application--storyboard` | 4 values (warm paper) | a printed artifact that ignores the reader's theme |
-| `job-application--swimlane-zoompan` | 3 values (blue) | a second brand, same code |
+| `food-delivery--swimlane-themed` | 4 values (`#6C2BD9` + surface, text, on-primary) | the same swap on the other journey |
 | `job-application--multiview` | nothing | the default palette, following the reader's preference |
 | `job-application--timeline-dark` | nothing (pins `data-theme="dark"`) | dark is a theme, not a file |
 | flow graph · time to scale · coverage x-ray | nothing (light/dark/auto switch) | re-theming, live, in the page |
