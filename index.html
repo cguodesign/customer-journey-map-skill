@@ -120,6 +120,7 @@ section{padding:68px 0}
 
 /* renderings gallery */
 .gallery{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.gallery .shot.wide{grid-column:1/-1}
 @media(max-width:740px){.gallery{grid-template-columns:1fr}}
 .sub-head{margin:56px 0 0;padding-top:34px;border-top:1px solid var(--line)}
 .sub-head h3{font-size:22px;font-weight:500;letter-spacing:-.02em;margin:8px 0 8px}
@@ -248,9 +249,8 @@ footer .fbottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12
 
 <section id="demos" style="background:var(--bg-elev);border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap">
   <div class="sec-head"><div class="kicker">Express</div><h2>One map, rendered for <em>the room</em>.</h2>
-    <p>Every one of these is the same fifteen-step file, asked a different question — nothing is
-       redrawn by hand. The last is a different journey entirely, because the skill isn't one
-       map's trick. Click any to explore it live.</p></div>
+    <p>Every one of these is the same fifteen-step file, asked a different question — nothing
+       is redrawn by hand, and no two were styled separately. Click any to explore it live.</p></div>
 
   <div class="gallery">
     <div class="shot"><img src="img/hero-multiview.png" alt="Multi-view interactive map"><div class="body"><p class="say">Make an interactive map our team can pull up in the review.</p><a class="view" href="renderings/job-application--multiview.html">Explore live →</a></div></div>
@@ -259,8 +259,7 @@ footer .fbottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12
     <div class="shot"><img src="img/coverage-xray.png" alt="Coverage and provenance matrix"><div class="body"><p class="say">Where is this map thin — and which parts of it are guesses?</p><a class="view" href="renderings/job-application--coverage-xray.html">Explore live →</a></div></div>
     <div class="shot"><img src="img/timeline-dark.png" alt="Dark-mode timeline"><div class="body"><p class="say">Give me a dark timeline where the weeks-long wait dwarfs every step.</p><a class="view" href="renderings/job-application--timeline-dark.html">Explore live →</a></div></div>
     <div class="shot"><img src="img/storyboard.png" alt="Film storyboard"><div class="body"><p class="say">Turn it into a storyboard — frame by frame, like a film.</p><a class="view" href="renderings/job-application--storyboard.html">Explore live →</a></div></div>
-    <div class="shot"><img src="img/swimlane-zoompan.png" alt="Swimlane on a zoom-pan canvas"><div class="body"><p class="say">Put the whole blueprint on one canvas I can pan around.</p><a class="view" href="renderings/job-application--swimlane-zoompan.html">Explore live →</a></div></div>
-    <div class="shot"><img src="img/swimlane-themed.png" alt="Brand-themed swimlane"><div class="body"><p class="say">Render it as a swimlane, themed to our brand colors.</p><a class="view" href="renderings/food-delivery--swimlane-themed.html">Explore live →</a></div></div>
+    <div class="shot wide"><img src="img/swimlane-zoompan.png" alt="Brand-themed swimlane on a zoom-pan canvas"><div class="body"><p class="say">Put the whole blueprint on one canvas I can pan around — in our brand colours.</p><a class="view" href="renderings/job-application--swimlane-zoompan.html">Explore live →</a></div></div>
   </div>
 
 <div class="sub-head"><div class="kicker">Theming</div>

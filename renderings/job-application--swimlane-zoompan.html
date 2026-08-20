@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-theme="light" lang="en">
+<html data-theme="dark" lang="en">
 <!-- Job Application Portal journey — Swimlane × Zoom-pan.
      Rendering: Swimlane (service blueprint). Interaction: Zoom + Pan (user override).
      Self-contained, zero dependencies. Built for big-wall workshop display. -->
@@ -219,10 +219,11 @@
 /* Tier 1 override — the whole theme. Every colour in this file derives
    from these; nothing below Tier 1 may hold a literal. Written by
    `journey.sh theme`; edit here or re-run the command. */
-:root{
-  --brand-primary: #2563eb;
-  --brand-surface: #f5f6f8;
-  --brand-text: #1a1f2b;
+:root, :root[data-theme="dark"]{
+  --brand-primary: #A97BF0;
+  --brand-surface: #14101c;
+  --brand-text: #ece8f5;
+  --brand-on-primary: #14101c;
 }
 /* theme:end */
 
