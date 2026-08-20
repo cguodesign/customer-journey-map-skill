@@ -1,10 +1,9 @@
-<!doctype html>
+<!DOCTYPE html>
 <html data-theme="dark" lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>To scale — Applying for a job through an online application portal</title>
-<meta name="description" content="The same journey map with its time fields drawn to true scale: forty minutes of work, then weeks of nothing.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Application Black Hole — Emotion Curve</title>
 <style>
 /* tokens:begin */
 /* ============================================================================
@@ -216,165 +215,96 @@
 /* theme:begin */
 /* theme:end */
 
-/* ── Tier 3 ── */
-:root{
-  --seg-active:  var(--accent);
-  --seg-machine: var(--marker-machine);
-  --seg-void:    var(--line-strong);
-  --rule:        var(--line);
-}
-*{box-sizing:border-box}
-body{
-  margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
-  font-size:var(--step-0);line-height:1.55;-webkit-font-smoothing:antialiased;
-}
-.sheet{max-width:1180px;margin:0 auto;padding:var(--sp-6) var(--sp-5) var(--sp-7)}
+  :root{--v:var(--line-strong)}   /* set per selected point at runtime */
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
+       line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:44px 24px 70px}
 
-/* ── masthead ── */
-.eyebrow{font-size:var(--step--2);letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);font-weight:600}
-h1{font-size:var(--step-3);font-weight:520;letter-spacing:-.024em;margin:var(--sp-3) 0 0;line-height:1.1;max-width:19ch}
-h1 em{font-style:normal;color:var(--accent)}
-.lede{margin:var(--sp-4) 0 0;max-width:60ch;color:var(--ink-muted)}
-.masthead{display:flex;flex-wrap:wrap;gap:var(--sp-5);align-items:flex-end;justify-content:space-between}
+  .kicker{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);
+          margin-bottom:10px}
+  h1{font-size:clamp(1.7rem,3.6vw,2.3rem);line-height:1.12;letter-spacing:-.025em;margin:0 0 12px}
+  h1 em{font-style:normal;color:var(--accent)}
+  .lede{color:var(--ink-muted);max-width:64ch;margin:0 0 30px}
 
-  font:inherit;font-size:var(--step--2);letter-spacing:.06em;text-transform:uppercase;
-  background:none;border:1px solid var(--line);color:var(--ink-muted);
-  padding:5px 9px;border-radius:var(--radius);cursor:pointer;transition:var(--dur-fast) var(--ease);
-}
-  background:var(--accent-soft);border-color:var(--accent-line);color:var(--ink)}
+  .chart{border:1px solid var(--line);border-radius:10px;background:var(--surface-1);
+         padding:26px 22px 14px;overflow-x:auto}
+  svg{display:block;width:100%;height:auto;min-width:640px}
 
-/* ── the number ── */
-.verdict{
-  display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--sp-5);
-  margin:var(--sp-6) 0 var(--sp-5);padding-bottom:var(--sp-4);border-bottom:1px solid var(--rule);
-}
-.big{font-size:var(--step-4);font-weight:500;letter-spacing:-.045em;line-height:.9;font-variant-numeric:tabular-nums}
-.verdict p{margin:0;max-width:44ch;color:var(--ink-muted);font-size:var(--step--1)}
-.verdict p b{color:var(--ink);font-weight:540}
+  .axis-line{stroke:var(--line);stroke-width:1}
+  .zero-line{stroke:var(--line-strong);stroke-width:1}
+  .axis-lbl{fill:var(--ink-faint);font-size:10px;font-family:var(--font-mono)}
+  .mst-div{stroke:var(--line);stroke-width:1;stroke-dasharray:3 4}
+  .mst-lbl{fill:var(--ink-faint);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase}
 
-/* ── controls ── */
-.ctl{display:flex;flex-wrap:wrap;gap:var(--sp-4);align-items:center;margin-bottom:var(--sp-4);font-size:var(--step--1);color:var(--ink-faint)}
-.ctl .grp{display:flex;gap:var(--sp-1);align-items:center}
-.ctl label{letter-spacing:.06em;text-transform:uppercase;font-size:var(--step--2);margin-right:var(--sp-1)}
+  .area{fill:var(--accent);opacity:.10}
+  .area.neg{fill:var(--marker-fail);opacity:.13}
+  .curve{fill:none;stroke:var(--ink-muted);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
 
-/* ── the strip ── */
-.strip-wrap{position:relative;margin:var(--sp-7) 0 0}
-.strip{position:relative;height:76px;border-left:1px solid var(--line-strong);border-right:0}
-.seg{
-  position:absolute;top:0;height:100%;left:0;transform-origin:left center;
-  transition:transform var(--dur-slow) var(--ease);will-change:transform;
-}
-.seg i{position:absolute;inset:0;display:block}
-.seg[data-kind="active"]  i{background:var(--seg-active)}
-.seg[data-kind="machine"] i{background:repeating-linear-gradient(90deg,var(--seg-machine) 0 1px,transparent 1px 5px)}
-.seg[data-kind="void"]    i{background:repeating-linear-gradient(135deg,var(--seg-void) 0 1px,transparent 1px 6px)}
-.seg::after{
-  content:"";position:absolute;top:0;bottom:0;left:0;width:1px;background:var(--bg);opacity:.85;
-}
-.seg.open i{-webkit-mask-image:linear-gradient(90deg,black 40%,transparent);mask-image:linear-gradient(90deg,black 40%,transparent)}
-.seg:hover i,.seg:focus-visible i{outline:1px solid var(--ink);outline-offset:0}
-.seg:focus-visible{outline:none}
+  .pt{cursor:pointer}
+  .pt circle{stroke:var(--surface-1);stroke-width:2;transition:r .12s}
+  .pt:hover circle,.pt:focus-visible circle{r:9}
+  .pt:focus-visible{outline:none}
+  .pt text.n{font-family:var(--font-mono);font-size:9px;fill:var(--ink-on-fill);
+             text-anchor:middle;pointer-events:none}
+  .pt.is-truth circle{stroke:var(--marker-critical);stroke-width:2.5}
+  .x-lbl{fill:var(--ink-faint);font-size:10px;text-anchor:end}
+  .x-lbl.low{fill:var(--marker-fail);font-weight:600}
 
-/* valence ribbon, same x-axis — the low point and the long segment are the same place */
-.ribbon{position:relative;height:7px;margin-top:5px}
-.ribbon .v{position:absolute;top:0;height:100%;left:0;transform-origin:left center;
-  transition:transform var(--dur-slow) var(--ease)}
+  .note{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);
+        display:grid;grid-template-columns:1fr 1fr;gap:26px}
+  .note h2{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
+           margin:0 0 8px}
+  .note p{margin:0;font-size:13.5px;color:var(--ink-muted)}
+  .note b{color:var(--ink);font-weight:600}
 
-/* ruler */
-.ribbon-key{font-family:var(--font-mono);font-size:var(--step--2);color:var(--ink-faint);margin:4px 0 var(--sp-3);letter-spacing:.03em}
-.ruler{position:relative;height:34px;margin-top:2px;border-top:1px solid var(--rule)}
-.tick{position:absolute;top:0;transform:translateX(-.5px);transition:left var(--dur-slow) var(--ease)}
-.tick span{
-  position:absolute;top:7px;left:4px;white-space:nowrap;
-  font-family:var(--font-mono);font-size:var(--step--2);color:var(--ink-faint);letter-spacing:.03em;
-}
-.tick::before{content:"";position:absolute;top:0;width:1px;height:6px;background:var(--line-strong)}
+  .readout{margin-top:22px;border:1px solid var(--line);border-left:3px solid var(--v,var(--line-strong));
+           border-radius:8px;background:var(--surface-2);padding:16px 18px;min-height:118px}
+  .readout .hd{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;margin-bottom:6px}
+  .readout .step{font-weight:600;font-size:15px}
+  .readout .sid{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-ghost)}
+  .readout .v{font-family:var(--font-mono);font-size:12px;color:var(--v);margin-left:auto}
+  .readout .emo{color:var(--v);font-size:13.5px;margin:0 0 6px}
+  .readout .think{color:var(--ink);font-size:13.5px;margin:0;font-style:italic}
+  .readout .hint{color:var(--ink-faint);font-size:13px;margin:0}
 
-/* the bracket over the collapsed part */
-.bracket{position:absolute;top:-34px;height:24px;border:1px solid var(--line-strong);border-bottom:none;
-  transition:left var(--dur-slow) var(--ease),width var(--dur-slow) var(--ease)}
-.bracket span{
-  position:absolute;bottom:calc(100% + 4px);left:0;white-space:nowrap;
-  font-size:var(--step--2);font-family:var(--font-mono);color:var(--ink-muted);letter-spacing:.03em;
-}
-
-/* labels under the strip, only where they fit */
-.labels{position:relative;height:52px;margin-top:var(--sp-2)}
-.lab{position:absolute;top:0;font-size:var(--step--2);color:var(--ink-muted);line-height:1.3;
-  transition:left var(--dur-slow) var(--ease),opacity var(--dur) var(--ease);max-width:190px}
-.lab b{display:block;color:var(--ink);font-weight:540;font-size:var(--step--1);hyphens:auto}
-.lab.hide{opacity:0;pointer-events:none}
-
-/* legend + audit */
-.legend{display:flex;flex-wrap:wrap;gap:var(--sp-4);margin-top:var(--sp-5);font-size:var(--step--1);color:var(--ink-muted)}
-.legend div{display:flex;align-items:center;gap:var(--sp-2)}
-.key{width:26px;height:11px;flex:0 0 auto;display:block}
-.key.active{background:var(--seg-active)}
-.key.machine{background:repeating-linear-gradient(90deg,var(--seg-machine) 0 1px,transparent 1px 5px)}
-.key.void{background:repeating-linear-gradient(135deg,var(--seg-void) 0 1px,transparent 1px 6px)}
-
-.audit{margin-top:var(--sp-6);border-top:1px solid var(--rule);padding-top:var(--sp-4)}
-.audit h2{font-size:var(--step--2);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);font-weight:650;margin:0 0 var(--sp-3)}
-table{border-collapse:collapse;width:100%;font-size:var(--step--1)}
-th,td{text-align:left;padding:6px 10px 6px 0;border-bottom:1px solid var(--line-soft);vertical-align:top}
-th{font-size:var(--step--2);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);font-weight:650}
-td.id{font-family:var(--font-mono);font-size:var(--step--2);color:var(--ink-faint);white-space:nowrap}
-td.src{color:var(--ink-muted)}
-td.num{font-family:var(--font-mono);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-tr.off{opacity:.34}
-.note{margin-top:var(--sp-4);font-size:var(--step--2);color:var(--ink-faint);max-width:76ch;font-family:var(--font-mono);line-height:1.7}
+  .legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:18px;font-size:12px;color:var(--ink-muted)}
+  .legend i{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px;
+            vertical-align:-1px}
+  .foot{margin-top:34px;font-size:12px;color:var(--ink-faint);font-family:var(--font-mono)}
+  @media(max-width:720px){.note{grid-template-columns:1fr;gap:16px}}
 </style>
 </head>
 <body>
-<div class="sheet">
+<div class="wrap">
+  <div class="kicker">Rendering · Emotion curve</div>
+  <h1>Rejection is <em>not</em> the low point.</h1>
+  <p class="lede" id="lede"></p>
 
-  <div class="masthead">
-    <div>
-      <div class="eyebrow">Rendering · time to scale</div>
-      <h1>An hour of work.<br>Then <em>weeks of nothing</em>.</h1>
-    </div>
+  <div class="chart">
+    <svg id="svg" viewBox="0 0 980 400" role="img"
+         aria-label="Emotional valence across the journey, from +2 to -2"></svg>
   </div>
 
-  <p class="lede">The timeline rendering spaces these steps evenly, which quietly throws the time away.
-     Here every segment is drawn from the map's own <code>duration</code> and <code>waitTime</code> strings —
-     so the "application black hole" stops being a figure of speech.</p>
-
-  <div class="verdict">
-    <div class="big" id="pct">—</div>
-    <p id="verdict-copy"></p>
-  </div>
-
-  <div class="ctl">
-    <div class="grp"><label>Path</label><span id="paths"></span></div>
-    <div class="grp"><label>Scale</label>
-      <button data-scale="true" aria-pressed="true">True</button>
-      <button data-scale="log" aria-pressed="false">Log</button>
-    </div>
-  </div>
-
-  <div class="strip-wrap">
-    <div class="bracket" id="bracket"><span id="bracket-label"></span></div>
-    <div class="strip" id="strip" role="img" aria-label="Journey duration drawn to scale"></div>
-    <div class="ribbon" id="ribbon" aria-hidden="true"></div>
-    <div class="ribbon-key">emotionValence, on the same axis</div>
-    <div class="ruler" id="ruler"></div>
-    <div class="labels" id="labels"></div>
+  <div class="readout" id="readout">
+    <p class="hint">Hover or focus any point to read the step behind it.</p>
   </div>
 
   <div class="legend">
-    <div><i class="key active"></i> Maya is doing something</div>
-    <div><i class="key machine"></i> a machine is processing · <code>automation</code></div>
-    <div><i class="key void"></i> nothing is happening · <code>waitTime</code></div>
+    <span><i style="background:var(--valence-p2)"></i>positive</span>
+    <span><i style="background:var(--valence-0)"></i>neutral</span>
+    <span><i style="background:var(--valence-n2)"></i>negative</span>
+    <span><i style="background:none;border:2px solid var(--marker-critical)"></i>moment of truth</span>
   </div>
 
-  <section class="audit">
-    <h2>Every number above, and the string it came from</h2>
-    <table>
-      <thead><tr><th>Step</th><th>Field &amp; value in the map</th><th class="num">Low</th><th class="num">High</th></tr></thead>
-      <tbody id="audit"></tbody>
-    </table>
-    <p class="note" id="note"></p>
-  </section>
+  <div class="note">
+    <div><h2>What the shape says</h2>
+      <p id="n1"></p></div>
+    <div><h2>Where it comes from</h2>
+      <p id="n2"></p></div>
+  </div>
+
+  <p class="foot" id="foot"></p>
 </div>
 
 <script>
@@ -1832,158 +1762,96 @@ const JOURNEY = {
 };
 /* data:end */
 
-/* Prose to seconds. The only judgement call in this rendering, so it is kept in
-   one visible table and printed back in full under the chart — nothing here is
-   a number the map did not already state in words. */
-const SEC = {min:60, hour:3600, day:86400, week:604800};
-const READ = {
-  "see-the-posting":           {lo:30,             hi:30,              kind:"active"},
-  "read-and-assess-fit":       {lo:5*SEC.min,      hi:10*SEC.min,      kind:"active"},
-  "click-apply":               {lo:10,             hi:10,              kind:"active"},
-  "create-account":            {lo:3*SEC.min,      hi:5*SEC.min,       kind:"active"},
-  "fill-application-form":     {lo:20*SEC.min,     hi:40*SEC.min,      kind:"active"},
-  "submit-application":        {lo:1*SEC.min,      hi:1*SEC.min,       kind:"active"},
-  "receive-confirmation":      {lo:5,              hi:5*SEC.min,       kind:"machine"},
-  "ai-resume-screen":          {lo:1*SEC.hour,     hi:24*SEC.hour,     kind:"machine"},
-  "outcome-fast-rejection":    {lo:1*SEC.hour,     hi:24*SEC.hour,     kind:"machine"},
-  "wait-in-silence":           {lo:3*SEC.day,      hi:3*SEC.week,      kind:"void"},
-  "check-status-or-follow-up": {lo:10*SEC.min,     hi:30*SEC.min,      kind:"active"},
-  "hear-back":                 {lo:2*SEC.week,     hi:6*SEC.week,      kind:"void", open:true},
-  "outcome-rejection":         {lo:0,              hi:0,               kind:"void"},
-  "outcome-ghosted":           {lo:6*SEC.week,     hi:6*SEC.week,      kind:"void", open:true, infinite:true},
-  "outcome-advance":           {lo:0,              hi:0,               kind:"void"}
-};
-const PATHS = {
-  cleared: {label:"Cleared the AI screen", ids:["see-the-posting","read-and-assess-fit","click-apply","create-account",
-            "fill-application-form","submit-application","receive-confirmation","ai-resume-screen",
-            "wait-in-silence","check-status-or-follow-up","hear-back"]},
-  fast:    {label:"Auto-rejected in 24h", ids:["see-the-posting","read-and-assess-fit","click-apply","create-account",
-            "fill-application-form","submit-application","receive-confirmation","ai-resume-screen","outcome-fast-rejection"]},
-  ghosted: {label:"Ghosted", ids:["see-the-posting","read-and-assess-fit","click-apply","create-account",
-            "fill-application-form","submit-application","receive-confirmation","ai-resume-screen",
-            "wait-in-silence","check-status-or-follow-up","hear-back","outcome-ghosted"]}
-};
-
-const steps = Object.fromEntries(JOURNEY.milestones.flatMap(m=>m.steps).map(s=>[s.id,s]));
-const humanize = id => id.replace(/-/g," ").replace(/^./,c=>c.toUpperCase());
-const mid = id => (READ[id].lo + READ[id].hi)/2;
-const fmt = s => s>=SEC.week ? (s/SEC.week).toFixed(s<2*SEC.week?1:0)+" wk"
-               : s>=SEC.day  ? (s/SEC.day).toFixed(s<2*SEC.day?1:0)+" d"
-               : s>=SEC.hour ? (s/SEC.hour).toFixed(s<2*SEC.hour?1:0)+" h"
-               : s>=SEC.min  ? Math.round(s/SEC.min)+" min" : Math.round(s)+" sec";
-
-let path = "cleared", scale = "true";
-
-function segments(){
-  const ids = PATHS[path].ids.filter(id=>mid(id)>0);
-  const raw = ids.map(id=>({id, d:mid(id), ...READ[id]}));
-  const total = raw.reduce((a,b)=>a+b.d,0);
-  let acc = 0;
-  return raw.map(r=>{
-    const share = scale==="true" ? r.d/total : null;
-    const o = {...r, x0: acc/total, w: r.d/total};
-    acc += r.d; return o;
-  }).map((o,i,arr)=>{
-    if (scale==="true") return o;
-    const logs = arr.map(a=>Math.log10(1+a.d));
-    const sum  = logs.reduce((a,b)=>a+b,0);
-    let x = 0; for (let k=0;k<i;k++) x += logs[k]/sum;
-    return {...o, x0:x, w:logs[i]/sum};
-  });
-}
-
-const VAL = {"-2":"--valence-n2","-1":"--valence-n1","0":"--valence-0","1":"--valence-p1","2":"--valence-p2"};
 const $ = id => document.getElementById(id);
+const NS = "http://www.w3.org/2000/svg";
+const el = (n, a = {}) => { const e = document.createElementNS(NS, n);
+  for (const k in a) e.setAttribute(k, a[k]); return e; };
+const VTOK = { "-2":"--valence-n2","-1":"--valence-n1","0":"--valence-0","1":"--valence-p1","2":"--valence-p2" };
+const LABEL = s => s.replace(/-/g, " ").replace(/^./, c => c.toUpperCase());
 
-function draw(){
-  const segs = segments();
-  // strip
-  $("strip").innerHTML = segs.map(s=>`
-    <div class="seg${s.open?" open":""}" data-kind="${s.kind}" tabindex="0"
-         style="width:100%;transform:translateX(${(s.x0*100).toFixed(4)}%) scaleX(${Math.max(s.w,0.00002).toFixed(6)})"
-         aria-label="${humanize(s.id)}, ${fmt(s.d)}"><i></i></div>`).join("");
-  // valence ribbon
-  $("ribbon").innerHTML = segs.map(s=>{
-    const v = steps[s.id]?.fields.emotionValence;
-    if (v===undefined) return "";
-    return `<div class="v" style="background:var(${VAL[String(v)]});width:100%;
-      transform:translateX(${(s.x0*100).toFixed(4)}%) scaleX(${Math.max(s.w,0.00002).toFixed(6)})"></div>`;
-  }).join("");
-  // labels — each one is capped to the width of its own segment, so they can
-  // never collide; anything narrower than a readable word simply drops out
-  const px = $("strip").clientWidth || 900;
-  $("labels").innerHTML = segs.map(s=>{
-    const w = s.w * px;
-    return `<div class="lab${w>58?"":" hide"}" style="left:${(s.x0*100).toFixed(3)}%;max-width:${Math.max(w-8,0).toFixed(0)}px">
-      <b>${humanize(s.id)}</b>${fmt(s.d)}${s.infinite?" · and counting":""}</div>`;
-  }).join("");
-  // ruler
-  const total = segs.reduce((a,b)=>a+b.d,0);
-  const marks = [SEC.min, SEC.hour, SEC.day, SEC.week, 4*SEC.week].filter(m=>m<=total*1.02);
-  $("ruler").innerHTML = marks.map(m=>{
-    let pos;
-    if (scale==="true") pos = m/total;
-    else {
-      let acc=0, x=0; const logs=segs.map(s=>Math.log10(1+s.d)); const sum=logs.reduce((a,b)=>a+b,0);
-      for (let i=0;i<segs.length;i++){
-        if (acc+segs[i].d >= m){ const f=(m-acc)/segs[i].d; pos = x + (logs[i]/sum)*f; break; }
-        acc+=segs[i].d; x+=logs[i]/sum;
-      }
-      if (pos===undefined) pos = 1;
-    }
-    return {pos, label:fmt(m)};
-  }).reduce((keep,t)=>{ if(!keep.length || t.pos - keep[keep.length-1].pos > 0.05) keep.push(t); return keep; },[])
-    .map(t=>`<div class="tick" style="left:${(t.pos*100).toFixed(3)}%"><span>${t.label}</span></div>`)
-    .join("");
-  // bracket the application itself — the first unbroken run of doing, not every
-  // active segment (check-status happens *after* the wait; spanning to it would
-  // draw a bracket around the very silence this chart is about)
-  const run = [];
-  for (const s of segs){ if (s.kind==="active") run.push(s); else if (run.length) break; }
-  const hs = run[0], he = run[run.length-1];
-  const runTotal = run.reduce((a,b)=>a+b.d,0);
-  const hTotal = segs.filter(s=>s.kind==="active").reduce((a,b)=>a+b.d,0);
-  $("bracket").style.left = (hs.x0*100)+"%";
-  $("bracket").style.width = Math.max(((he.x0+he.w)-hs.x0)*100,0.15)+"%";
-  $("bracket-label").textContent = `the entire application · ${fmt(runTotal)}`;
-  // verdict
-  const share = hTotal/total;
-  const infinite = segs.some(s=>s.infinite);
-  $("pct").textContent = infinite ? "→ 0"
-    : share < 0.001 ? (share*100).toFixed(3)+"%" : (share*100).toFixed(share<0.01?2:1)+"%";
-  $("verdict-copy").innerHTML = infinite
-    ? `There is no percentage to give: <code>outcome-ghosted</code> carries <b>no terminating event</b>,
-       so the denominator never closes and the designed share trends to nothing. The strip runs off the page instead.`
-    : `of this journey is the part anyone designed — <b>${fmt(hTotal)}</b> of doing, inside <b>${fmt(total)}</b> of elapsed time.
-       Every pixel to the right of the bracket is Maya waiting.`;
-  document.querySelectorAll("[data-scale]").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.scale===scale)));
-  document.querySelectorAll("[data-path]").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.path===path)));
-  // audit table
-  $("audit").innerHTML = Object.keys(READ).map(id=>{
-    const on = PATHS[path].ids.includes(id) && mid(id)>0;
-    const st = steps[id]; if(!st) return "";
-    const src = st.fields.waitTime ? ["waitTime", st.fields.waitTime] :
-                st.fields.duration ? ["duration", st.fields.duration] : ["—","—"];
-    return `<tr class="${on?"":"off"}"><td class="id">${id}</td>
-      <td class="src"><code>${src[0]}</code> ${src[1]}</td>
-      <td class="num">${READ[id].lo?fmt(READ[id].lo):"–"}</td>
-      <td class="num">${READ[id].hi?fmt(READ[id].hi):"–"}</td></tr>`;
-  }).join("");
-}
+// A step with no human in it has no emotion to plot. Dropping it is the honest
+// move: interpolating a number for the AI screen would invent a feeling.
+const PTS = JOURNEY.milestones.flatMap(m => m.steps.map(s => ({ s, m })))
+  .map(({ s, m }) => ({ s, m, v: parseInt(s.fields.emotionValence, 10) }))
+  .filter(p => Number.isFinite(p.v));
 
-$("paths").innerHTML = Object.entries(PATHS).map(([k,v])=>
-  `<button data-path="${k}" aria-pressed="${k===path}">${v.label}</button>`).join("");
-document.addEventListener("click", e=>{
-  const b = e.target.closest("[data-path],[data-scale]");
-  if (!b) return;
-  if (b.dataset.path) path = b.dataset.path; else scale = b.dataset.scale;
-  draw();
+const W = 980, H = 400, L = 96, R = 30, T = 28, B = 96;
+const x = i => L + (i * (W - L - R)) / Math.max(1, PTS.length - 1);
+const y = v => T + ((2 - v) * (H - T - B)) / 4;
+
+const svg = $("svg");
+
+// milestone bands first, so everything else sits on top of them
+let seen = null;
+PTS.forEach((p, i) => {
+  if (p.m.id === seen) return;
+  seen = p.m.id;
+  if (i > 0) svg.appendChild(el("line", { class: "mst-div", x1: x(i) - 18, x2: x(i) - 18, y1: T, y2: H - B }));
+  const t = el("text", { class: "mst-lbl", x: x(i) - (i ? 10 : 0), y: T - 10 });
+  t.textContent = p.m.fields.title || p.m.id;
+  svg.appendChild(t);
 });
-$("note").textContent =
-  `Ranges are the midpoint of what the map states in words; branch steps that are not on the selected path are greyed out. `
-  + `Nothing here is measured — the source journey carries no metrics fields, so no drop-off or conversion number is claimed. `
-  + `source · ${JOURNEY.source}`;
-draw();
+
+// grid + y axis
+[2, 1, 0, -1, -2].forEach(v => {
+  svg.appendChild(el("line", { class: v === 0 ? "zero-line" : "axis-line",
+    x1: L - 8, x2: W - R, y1: y(v), y2: y(v) }));
+  const t = el("text", { class: "axis-lbl", x: L - 14, y: y(v) + 3.5, "text-anchor": "end" });
+  t.textContent = v > 0 ? "+" + v : v;
+  svg.appendChild(t);
+});
+
+const line = PTS.map((p, i) => x(i) + "," + y(p.v)).join(" ");
+// split the fill at the zero line so falling below it reads as a different thing
+svg.appendChild(el("polygon", { class: "area",
+  points: L + "," + y(0) + " " + line + " " + x(PTS.length - 1) + "," + y(0) }));
+svg.appendChild(el("polyline", { class: "curve", points: line }));
+
+const MIN = Math.min(...PTS.map(p => p.v));
+const FLOOR = PTS.filter(p => p.v === MIN).map(p => p.s.id);
+const REJECTIONS = PTS.filter(p => /rejection/.test(p.s.id));
+
+PTS.forEach((p, i) => {
+  const g = el("g", { class: "pt" + (p.s.fields.momentOfTruth ? " is-truth" : ""),
+                      tabindex: "0", role: "button" });
+  g.appendChild(el("circle", { cx: x(i), cy: y(p.v), r: 6.5,
+                               fill: "var(" + VTOK[String(p.v)] + ")" }));
+  const lbl = el("text", { class: "x-lbl" + (FLOOR.includes(p.s.id) ? " low" : ""),
+                           x: x(i), y: H - B + 20,
+                           transform: "rotate(-38 " + x(i) + " " + (H - B + 20) + ")" });
+  lbl.textContent = LABEL(p.s.id);
+  svg.appendChild(g); svg.appendChild(lbl);
+
+  const show = () => {
+    const f = p.s.fields;
+    $("readout").style.setProperty("--v", "var(" + VTOK[String(p.v)] + ")");
+    $("readout").innerHTML =
+      '<div class="hd"><span class="step">' + LABEL(p.s.id) + "</span>" +
+      '<span class="sid">' + p.s.id + "</span>" +
+      '<span class="v">' + (p.v > 0 ? "+" : "") + p.v +
+        (f.emotionIntensity ? " · " + f.emotionIntensity : "") + "</span></div>" +
+      (f.emotion ? '<p class="emo">' + f.emotion + "</p>" : "") +
+      (f.thinking ? '<p class="think">' + f.thinking + "</p>"
+                  : '<p class="hint">' + (f.description || "") + "</p>");
+  };
+  g.addEventListener("mouseenter", show);
+  g.addEventListener("focus", show);
+});
+
+$("lede").textContent = JOURNEY.journey +
+  " — emotional valence for every step that has a person in it. " +
+  "The AI screen is absent on purpose: nobody is feeling anything during it.";
+$("n1").innerHTML =
+  "Every rejection on this map scores " +
+  [...new Set(REJECTIONS.map(p => p.v))].map(v => "<b>" + v + "</b>").join(" and ") +
+  ". The floor — " + MIN + " — is somewhere else entirely, and it is not one step but " +
+  FLOOR.length + ": <b>" + FLOOR.map(LABEL).join("</b>, <b>") + "</b>. " +
+  "Getting told no is survivable. Not being told anything is what the shape is about.";
+$("n2").innerHTML = "Every point is the step's own <b>emotionValence</b>, authored with the map " +
+  "rather than inferred from the prose at render time. " + PTS.length + " of " +
+  JOURNEY.stepCount + " steps carry one; the rest have no human in them.";
+$("foot").textContent = "source · " + JOURNEY.source + " · " + PTS.length + " plotted of " +
+  JOURNEY.stepCount + " steps";
 </script>
 <!-- switcher:begin -->
 <script>
