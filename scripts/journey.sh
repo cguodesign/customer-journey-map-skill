@@ -79,8 +79,12 @@ _today_utc() { date -u +%Y-%m-%d; }
 _field_list() {
   [ -f "$JOURNEY_SCHEMA" ] || die "schema not found: $JOURNEY_SCHEMA"
   local mtime cache
-  # portable mtime: try BSD stat then GNU stat
-  mtime="$(stat -f %m "$JOURNEY_SCHEMA" 2>/dev/null || stat -c %Y "$JOURNEY_SCHEMA" 2>/dev/null || echo 0)"
+  # portable mtime: try GNU stat first, then BSD stat.
+  # Order matters: on GNU/Linux `stat -f` is valid (it means "filesystem status"),
+  # so trying BSD first succeeds with multi-line filesystem output and corrupts
+  # the cache path. BSD stat rejects `-c`, so GNU-first falls through cleanly.
+  mtime="$(stat -c %Y "$JOURNEY_SCHEMA" 2>/dev/null || stat -f %m "$JOURNEY_SCHEMA" 2>/dev/null || echo 0)"
+  case "$mtime" in ''|*[!0-9]*) mtime=0 ;; esac
   cache="$CACHE_DIR/fields-$mtime.txt"
   if [ ! -f "$cache" ]; then
     mkdir -p "$CACHE_DIR"
