@@ -1,10 +1,10 @@
 # scripts/ — the deterministic toolbelt
 
 One bash dispatcher, **`journey.sh <cmd>`**, in POSIX shell + awk/grep/sed — no
-Python/Node, so it runs in any agent's shell (Claude Code, Codex, …). Full design
-rationale and decisions live in the internal `docs/data-layer.md`.
+Python/Node, so it runs in any agent's shell (Claude Code, Codex, …). The design
+rationale and decisions are summarized below.
 
-**Principle (from usage-model.md › Design principles):** the LLM decides *what*; these
+**Principle:** the LLM decides *what*; these
 scripts enforce *how* — placement, validation, logging, search. Generative/judgment work
 stays with the model; mechanical/correctness work is deterministic here.
 
@@ -32,9 +32,9 @@ loses even after pinning `data-theme="dark"`, because `:root[data-theme="dark"]`
 it too. The command reads the mode off the surface colour and emits the selector that
 wins. That is exactly the split this toolbelt exists for.
 
-Tests: `tests/journey.sh.test.sh` (in the outer repo) — 44 assertions over validate / CRUD /
+Tests: a regression suite (not shipped in this repo) covers validate / CRUD /
 provenance-preserving replace / query / search / audit / author identity / custom-field
-registration, against the sandbox fixture. Run: `bash tests/journey.sh.test.sh`.
+registration / theme, and runs on both macOS (BSD) and Linux (GNU) userlands.
 
 ### Two deviations from the original design (be honest about the ceiling)
 - **Linear `next:` regeneration is deferred, not automatic.** Auto-rewriting `next:` from
@@ -43,7 +43,7 @@ registration, against the sandbox fixture. Run: `bash tests/journey.sh.test.sh`.
 - **Provenance-preserving `replace` is top-level only.** Unchanged top-level field values keep
   their `_provenance`; nested provenance (under `backstage:` etc.) is the LLM's to reproduce.
 
-## Key decisions (see data-layer.md for the why)
+## Key decisions
 
 - **Ids** are stable semantic slugs; display numbers are render-time. Insert is positioned
   by `--after <id>` / `--before <id>`, never by index.

@@ -5,7 +5,7 @@
 # One bash dispatcher (POSIX shell + awk/grep/sed, no Python/Node) that does the
 # mechanical work the LLM should not: place, validate, log, query. The LLM decides
 # *what* (composes node blocks, writes prose); this script enforces *how*
-# (placement, validation, logging, search). See docs/data-layer.md for the design.
+# (placement, validation, logging, search). See scripts/README.md for the design.
 #
 # Commands:
 #   validate <journey>                 well-formed + field names ∈ schema
