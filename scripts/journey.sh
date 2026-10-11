@@ -167,8 +167,9 @@ _validate_path() {
         next
       }
 
-      # --- provenance notation (any indentation) ---
+      # --- provenance notation (indented under the field it annotates) ---
       if ($0 ~ /_provenance:/) {
+        if ($0 ~ /^- _provenance:/) add(FNR,"_provenance must be indented under the field it annotates (\"  - _provenance: ...\")")
         pv=$0; sub(/^.*_provenance:[ \t]*/,"",pv); gsub(/[ \t]+$/,"",pv)
         if (pv ~ /^user-modified, [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$/) {}
         else if (pv ~ /^source:[ \t]*.+/) {}
