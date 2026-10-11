@@ -589,12 +589,14 @@ cmd_audit() {
     logs=("$JOURNEY_DIR"/*.log)
   fi
   [ ${#logs[@]} -gt 0 ] || { printf '(no changelog entries)\n'; return 0; }
+  # Order by time only, and keep it stable: timestamps are whole seconds, so several
+  # commits in one second must stay in the order they were appended to the log.
   awk -F'\t' -v since="$since" -v author="$author" -v target="$target" '
     { if (since!="" && $1<since) next
       if (author!="" && $2!=author) next
       if (target!="" && $5!=target) next
       print }
-  ' "${logs[@]}" | sort
+  ' "${logs[@]}" | sort -s -t "$(printf '\t')" -k1,1
 }
 
 # ---------------------------------------------------------------------------
