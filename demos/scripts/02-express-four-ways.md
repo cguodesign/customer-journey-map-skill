@@ -32,7 +32,7 @@ table. Save as `../gallery/job-application-handoff.md`.
 
 ### 2d — Interactive HTML (for a workshop: let them *explore*)
 ```
-Create an interactive HTML version my design team can use as a workshop reference. Save it to site/renderings/job-application--cardgrid.html.
+Create an interactive HTML version my design team can use as a workshop reference. Save it to ../gallery/job-application-map.html.
 ```
 **Expect:** the skill picks a rendering + interaction mode from the data shape and step
 count (≤15 steps → scroll-driven; emotional arc → emotion-curve, often multi-view with a
