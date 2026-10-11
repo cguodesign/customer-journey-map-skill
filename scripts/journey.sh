@@ -79,8 +79,12 @@ _today_utc() { date -u +%Y-%m-%d; }
 _field_list() {
   [ -f "$JOURNEY_SCHEMA" ] || die "schema not found: $JOURNEY_SCHEMA"
   local mtime cache
-  # portable mtime: try BSD stat then GNU stat
-  mtime="$(stat -f %m "$JOURNEY_SCHEMA" 2>/dev/null || stat -c %Y "$JOURNEY_SCHEMA" 2>/dev/null || echo 0)"
+  # portable mtime: try GNU stat first, then BSD stat.
+  # Order matters: on GNU/Linux `stat -f` is valid (it means "filesystem status"),
+  # so trying BSD first succeeds with multi-line filesystem output and corrupts
+  # the cache path. BSD stat rejects `-c`, so GNU-first falls through cleanly.
+  mtime="$(stat -c %Y "$JOURNEY_SCHEMA" 2>/dev/null || stat -f %m "$JOURNEY_SCHEMA" 2>/dev/null || echo 0)"
+  case "$mtime" in ''|*[!0-9]*) mtime=0 ;; esac
   cache="$CACHE_DIR/fields-$mtime.txt"
   if [ ! -f "$cache" ]; then
     mkdir -p "$CACHE_DIR"
@@ -163,8 +167,9 @@ _validate_path() {
         next
       }
 
-      # --- provenance notation (any indentation) ---
+      # --- provenance notation (indented under the field it annotates) ---
       if ($0 ~ /_provenance:/) {
+        if ($0 ~ /^- _provenance:/) add(FNR,"_provenance must be indented under the field it annotates (\"  - _provenance: ...\")")
         pv=$0; sub(/^.*_provenance:[ \t]*/,"",pv); gsub(/[ \t]+$/,"",pv)
         if (pv ~ /^user-modified, [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$/) {}
         else if (pv ~ /^source:[ \t]*.+/) {}
@@ -292,7 +297,7 @@ cmd_commit() {
   local name="$1" op="$2"; shift 2
   local f; f="$(_journey_file "$name")"
 
-  local anchor="" pos="" target="" note="" author="" blockfile=""
+  local anchor="" pos="" target="" note="" author="" blockfile="" new_id=""
   local -a pos_args=()
   while [ $# -gt 0 ]; do
     case "$1" in
@@ -325,7 +330,12 @@ cmd_commit() {
   case "$op" in
     insert-step)
       [ -n "$anchor" ] || die "insert-step requires --after <id> or --before <id>"
-      target="$anchor"
+      # the log target is the step being inserted, not the anchor it is placed next to
+      new_id="$(awk 'NF { if ($0 ~ /^### Step:/) { sub(/^### Step:[ \t]*/,""); gsub(/[ \t]+$/,""); print } exit }' "$blk")"
+      [ -n "$new_id" ] || { rm -f "$blk"; die "insert-step: block must start with a '### Step: <id>' line"; }
+      [ -z "$target" ] || [ "$target" = "$new_id" ] || { rm -f "$blk"; die "insert-step: id argument '$target' does not match the block's '### Step: $new_id'"; }
+      grep -qxF "### Step: $new_id" "$f" && { rm -f "$blk"; die "insert-step: step id already exists: $new_id"; }
+      target="$new_id"
       awk -v id="$anchor" -v pos="$pos" -v bf="$blk" '
         BEGIN{ while((getline l<bf)>0) B[++nb]=l }
         function emit(){ print ""; for(i=1;i<=nb;i++) print B[i] }
@@ -539,15 +549,18 @@ cmd_query() {
       /^### Step:/ {
         flush()
         sid=$0; sub(/^### Step:[ \t]*/,"",sid); gsub(/[ \t]+$/,"",sid)
-        f_failure=f_recovery=f_moment=f_evidence=f_usermod=f_has=f_persona=0
+        f_failure=f_recovery=f_moment=f_evidence=f_usermod=f_has=f_persona=0; lastf=""
         next
       }
       /^## Milestone:/ { flush(); sid=""; next }
       sid!="" {
         if ($0 ~ /^- failureMode:/)   f_failure=1
         if ($0 ~ /^- recoveryPath:/)  f_recovery=1
+        if ($0 ~ /^- [a-zA-Z][a-zA-Z0-9_-]*:/) { lastf=$0; sub(/^- /,"",lastf); sub(/:.*/,"",lastf) }
         if ($0 ~ /^- momentOfTruth:/) f_moment=1
-        if ($0 ~ /_provenance:[ \t]*source:/ || $0 ~ /^- metric:/ || $0 ~ /^- kpi:/ || $0 ~ /^- dropoffRate:/) f_evidence=1
+        # evidence for the moment = a source marker on momentOfTruth itself, or a measured field
+        # on the step. A source on some other field (say emotion) does not back the moment.
+        if (($0 ~ /^[ \t]+- _provenance:[ \t]*source:/ && lastf=="momentOfTruth") || $0 ~ /^- metric:/ || $0 ~ /^- kpi:/ || $0 ~ /^- dropoffRate:/) f_evidence=1
         if ($0 ~ /_provenance:[ \t]*user-modified/) f_usermod=1
         if (mode=="field"   && $0 ~ ("^- " arg ":")) f_has=1
         if (mode=="missing" && $0 ~ ("^- " arg ":")) f_has=1
@@ -581,12 +594,14 @@ cmd_audit() {
     logs=("$JOURNEY_DIR"/*.log)
   fi
   [ ${#logs[@]} -gt 0 ] || { printf '(no changelog entries)\n'; return 0; }
+  # Order by time only, and keep it stable: timestamps are whole seconds, so several
+  # commits in one second must stay in the order they were appended to the log.
   awk -F'\t' -v since="$since" -v author="$author" -v target="$target" '
     { if (since!="" && $1<since) next
       if (author!="" && $2!=author) next
       if (target!="" && $5!=target) next
       print }
-  ' "${logs[@]}" | sort
+  ' "${logs[@]}" | sort -s -t "$(printf '\t')" -k1,1
 }
 
 # ---------------------------------------------------------------------------
