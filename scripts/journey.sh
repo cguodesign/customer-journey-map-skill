@@ -297,7 +297,7 @@ cmd_commit() {
   local name="$1" op="$2"; shift 2
   local f; f="$(_journey_file "$name")"
 
-  local anchor="" pos="" target="" note="" author="" blockfile=""
+  local anchor="" pos="" target="" note="" author="" blockfile="" new_id=""
   local -a pos_args=()
   while [ $# -gt 0 ]; do
     case "$1" in
@@ -330,7 +330,12 @@ cmd_commit() {
   case "$op" in
     insert-step)
       [ -n "$anchor" ] || die "insert-step requires --after <id> or --before <id>"
-      target="$anchor"
+      # the log target is the step being inserted, not the anchor it is placed next to
+      new_id="$(awk 'NF { if ($0 ~ /^### Step:/) { sub(/^### Step:[ \t]*/,""); gsub(/[ \t]+$/,""); print } exit }' "$blk")"
+      [ -n "$new_id" ] || { rm -f "$blk"; die "insert-step: block must start with a '### Step: <id>' line"; }
+      [ -z "$target" ] || [ "$target" = "$new_id" ] || { rm -f "$blk"; die "insert-step: id argument '$target' does not match the block's '### Step: $new_id'"; }
+      grep -qxF "### Step: $new_id" "$f" && { rm -f "$blk"; die "insert-step: step id already exists: $new_id"; }
+      target="$new_id"
       awk -v id="$anchor" -v pos="$pos" -v bf="$blk" '
         BEGIN{ while((getline l<bf)>0) B[++nb]=l }
         function emit(){ print ""; for(i=1;i<=nb;i++) print B[i] }
