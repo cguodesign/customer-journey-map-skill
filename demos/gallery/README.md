@@ -69,9 +69,9 @@ Semantic colours — `momentOfTruth`, `failureMode`, valence — are deliberatel
 derived from the brand: a marker that repaints itself when the logo changes is not a
 marker.
 
-The tokens and the journey data are inlined at build time by
-`site/build-renderings.py` (in the internal repo), so the files stay single-file and
-self-contained while still having one source of truth.
+The tokens and the journey data are inlined into each rendering at build time, between
+marked `tokens:` and `data:` regions, so the files stay single-file and self-contained
+while still having one source of truth.
 
 ## How these were made / how to refresh them
 

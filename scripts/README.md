@@ -36,10 +36,12 @@ Tests: a regression suite (not shipped in this repo) covers validate / CRUD /
 provenance-preserving replace / query / search / audit / author identity / custom-field
 registration / theme, and runs on both macOS (BSD) and Linux (GNU) userlands.
 
-### Two deviations from the original design (be honest about the ceiling)
+### Deviations from the original design (be honest about the ceiling)
 - **Linear `next:` regeneration is deferred, not automatic.** Auto-rewriting `next:` from
   document order corrupts branchy maps (failure steps, exit points). The LLM composes the
   correct `next:` in the block it hands to `commit`; `commit` does not touch links. (phase 2)
+- **No locking yet.** There is no `flock` or lock directory: `commit` assumes a single writer.
+  Two concurrent commits to the same journey can lose one of the updates. (phase 2)
 - **Provenance-preserving `replace` is top-level only.** Unchanged top-level field values keep
   their `_provenance`; nested provenance (under `backstage:` etc.) is the LLM's to reproduce.
 
@@ -47,10 +49,11 @@ registration / theme, and runs on both macOS (BSD) and Linux (GNU) userlands.
 
 - **Ids** are stable semantic slugs; display numbers are render-time. Insert is positioned
   by `--after <id>` / `--before <id>`, never by index.
-- **Document order is authoritative** for sequence; `commit` regenerates linear `next:`
-  links; explicit branch links are preserved.
+- **Document order is authoritative** for placement. `commit` puts the block where
+  `--after` / `--before` says and leaves every `next:` as written; the caller's block
+  carries its own links, and `validate` rejects one that points at a step that does not exist.
 - **`replace` diffs** the new block against the old to preserve provenance on untouched
-  fields (no clobber). **Atomic write**: temp → `validate` → `mv`. **`flock`** when shared.
+  fields (no clobber). **Atomic write**: temp → `validate` → `mv` (nothing is written if the result is invalid).
 - **Changelog**: per-journey sidecar `./.journey/<name>.log`, TSV —
   `iso_time \t author \t journey \t op \t target \t note`. Written only by `commit`.
 
