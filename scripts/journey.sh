@@ -544,15 +544,18 @@ cmd_query() {
       /^### Step:/ {
         flush()
         sid=$0; sub(/^### Step:[ \t]*/,"",sid); gsub(/[ \t]+$/,"",sid)
-        f_failure=f_recovery=f_moment=f_evidence=f_usermod=f_has=f_persona=0
+        f_failure=f_recovery=f_moment=f_evidence=f_usermod=f_has=f_persona=0; lastf=""
         next
       }
       /^## Milestone:/ { flush(); sid=""; next }
       sid!="" {
         if ($0 ~ /^- failureMode:/)   f_failure=1
         if ($0 ~ /^- recoveryPath:/)  f_recovery=1
+        if ($0 ~ /^- [a-zA-Z][a-zA-Z0-9_-]*:/) { lastf=$0; sub(/^- /,"",lastf); sub(/:.*/,"",lastf) }
         if ($0 ~ /^- momentOfTruth:/) f_moment=1
-        if ($0 ~ /_provenance:[ \t]*source:/ || $0 ~ /^- metric:/ || $0 ~ /^- kpi:/ || $0 ~ /^- dropoffRate:/) f_evidence=1
+        # evidence for the moment = a source marker on momentOfTruth itself, or a measured field
+        # on the step. A source on some other field (say emotion) does not back the moment.
+        if (($0 ~ /^[ \t]+- _provenance:[ \t]*source:/ && lastf=="momentOfTruth") || $0 ~ /^- metric:/ || $0 ~ /^- kpi:/ || $0 ~ /^- dropoffRate:/) f_evidence=1
         if ($0 ~ /_provenance:[ \t]*user-modified/) f_usermod=1
         if (mode=="field"   && $0 ~ ("^- " arg ":")) f_has=1
         if (mode=="missing" && $0 ~ ("^- " arg ":")) f_has=1
