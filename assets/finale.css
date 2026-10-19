@@ -1,0 +1,64 @@
+/* A full-viewport closing statement, independent from the gallery behind it. */
+#features.story-end{height:140svh;min-height:700px;padding:0;background:transparent;position:relative;z-index:12}
+.finale-panel{position:fixed;inset:0;z-index:12;display:none;isolation:isolate;overflow:auto;background:#080a08;color:#eef1e8;padding:110px var(--gutter) 34px;min-height:100svh}
+.finale-active .finale-panel{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.finale-art{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+.finale-panel:after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(#080a08 4%,transparent 45%,transparent 85%,#080a08)}
+.finale-top{position:absolute;top:34px;left:var(--gutter);font:12px/1.5 var(--fm);letter-spacing:.1em;color:#bac5af}
+.finale-body{width:100%;text-align:center;margin-top:-4vh;position:relative}
+.finale-kicker{font:12px/1.5 var(--fm);letter-spacing:.16em;color:#a9b69d;margin-bottom:28px}
+#features.story-end .finale-title{font:400 clamp(52px,7.7vw,136px)/1.17 var(--f);letter-spacing:-.055em;margin:0 auto;max-width:1600px;text-wrap:balance}
+.finale-title span{display:block}.finale-title em{font:inherit;color:#bdcbaa}
+.finale-description{font-size:clamp(16px,1.3vw,21px);line-height:1.9;color:#b8c1af;max-width:670px;margin:32px auto 0;text-wrap:pretty}
+.finale-actions{display:flex;justify-content:center;margin-top:34px}
+.finale-install{display:inline-flex;align-items:center;justify-content:center;gap:46px;min-height:56px;padding:16px 25px;background:#dce7cf;color:#10150d;border:1px solid #dce7cf;font:15px/1.4 var(--f)}
+.finale-install:hover{background:#eff5e8;border-color:#eff5e8}.finale-install:focus-visible{outline:2px solid #eef1e8;outline-offset:5px}
+.finale-bottom{position:absolute;bottom:34px;left:var(--gutter);right:var(--gutter);display:flex;align-items:center;justify-content:space-between;gap:20px;color:#a8b49b;font:12px/1.6 var(--fm)}
+.finale-bottom a{min-height:44px;display:inline-flex;align-items:center;gap:18px;border-bottom:1px solid #59634f;font:13px var(--f);color:#d4ddca}
+.finale-active #stage,.finale-active #labs,.finale-active #hud,.finale-active #fx,.finale-active .chapter-rail,.finale-active>.site-header{visibility:hidden!important;pointer-events:none!important}
+/* Old install/footer stay available to the engine but never follow the finale. */
+body:has(.finale-panel)>#install,body:has(.finale-panel)>footer{display:none}
+.finale-active .finale-body{animation:finale-arrive .85s cubic-bezier(.16,1,.3,1) both}
+@keyframes finale-arrive{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:760px){
+ .finale-panel{padding:100px 24px 100px}.finale-top{top:27px;font-size:11px;letter-spacing:.05em}.finale-body{margin-top:-3vh}
+ .finale-kicker{font-size:10px;letter-spacing:.12em;margin-bottom:25px}
+ #features.story-end .finale-title{font-size:clamp(38px,9.6vw,68px);line-height:1.24;letter-spacing:-.055em}
+ .finale-title span:last-child{max-width:8em;margin-inline:auto}
+ .finale-description{font-size:15px;line-height:1.85;margin-top:25px;max-width:290px}
+ .finale-actions{margin-top:28px}.finale-install{min-height:52px;font-size:14px;padding:13px 20px;gap:28px}
+ .finale-bottom{bottom:22px;font-size:10px;gap:12px}.finale-bottom a{font-size:12px;gap:8px}
+ html[lang=en] #features.story-end .finale-title{font-size:clamp(36px,9.5vw,64px)}
+}
+@media(max-height:600px){.finale-panel{justify-content:flex-start!important;padding-top:105px;padding-bottom:90px}.finale-body{margin:0}#features.story-end .finale-title{font-size:clamp(36px,6vw,72px)}.finale-bottom{position:relative;left:auto;right:auto;bottom:auto;width:100%;margin-top:60px}.finale-description{margin-top:20px}.finale-kicker{margin-bottom:15px}}
+@media(prefers-reduced-motion:reduce){.finale-active .finale-body{animation:none}}
+/* The final threshold fills the viewport; the words occupy its quiet left side. */
+.finale-panel:after{background:linear-gradient(90deg,#080a08 0%,rgba(8,10,8,.94) 17%,rgba(8,10,8,.45) 43%,transparent 66%)}
+.finale-body{text-align:left;margin-top:0}
+#features.story-end .finale-title{font-size:clamp(48px,6.4vw,110px);max-width:12em;margin:0;line-height:1.2}
+.finale-title span{max-width:9.5em}
+.finale-description{margin:32px 0 0;max-width:540px}
+.finale-actions{justify-content:flex-start}
+.finale-active .finale-body{animation-delay:.65s;animation-duration:1.1s}
+.finale-still .finale-body{animation:none}
+.finale-bottom>span{margin-right:auto}
+.finale-motion{min-height:44px;min-width:80px;padding:0 12px;background:transparent;border:1px solid #58634e;color:#d4ddca;font:13px var(--f);cursor:pointer}
+.finale-motion:hover{background:#1b2117}.finale-motion:focus-visible{outline:2px solid #c3d0b1;outline-offset:4px}
+@media(max-width:760px){
+ .finale-active .finale-panel{justify-content:flex-start;padding-top:125px}
+ .finale-panel:after{background:linear-gradient(#080a08 0%,rgba(8,10,8,.7) 27%,transparent 58%)}
+ .finale-body{text-align:center}.finale-title span{max-width:none}.finale-title span:last-child{max-width:none}
+ #features.story-end .finale-title{font-size:clamp(32px,8.8vw,64px);margin:auto}
+ .finale-kicker{margin-bottom:20px}.finale-description{margin:20px auto 0;font-size:14px;max-width:310px;line-height:1.65}
+ .finale-actions{justify-content:center;margin-top:22px}.finale-install{min-height:48px}
+ .finale-bottom>span{display:none}.finale-bottom{justify-content:space-between}.finale-motion{font-size:12px}
+}
+@media(max-height:700px){.finale-active .finale-panel{padding-top:92px}.finale-kicker{margin-bottom:12px}.finale-description{margin-top:14px}.finale-actions{margin-top:18px}}
+/* A shared map is the conclusion, not a metaphorical portal. */
+#features.story-end .finale-title{font-size:clamp(44px,5.2vw,92px);max-width:8em}
+.finale-description{max-width:450px}
+.finale-panel:after{background:linear-gradient(90deg,#080a08 0%,rgba(8,10,8,.85) 22%,transparent 53%)}
+@media(max-width:760px){
+ #features.story-end .finale-title{font-size:clamp(30px,8.4vw,62px);max-width:none}
+ .finale-panel:after{background:linear-gradient(#080a08,rgba(8,10,8,.8) 28%,transparent 52%)}
+}

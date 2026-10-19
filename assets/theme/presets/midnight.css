@@ -1,0 +1,7 @@
+/* midnight — ships dark regardless of the reader's setting. For a map that
+   will be projected in a dark room. mode: dark */
+--brand-surface:    oklch(15% 0.010 265);
+--brand-text:       oklch(94% 0.008 250);
+--brand-primary:    oklch(76% 0.126 214);
+--brand-positive:   oklch(74% 0.112 158);
+--brand-negative:   oklch(68% 0.152 22);

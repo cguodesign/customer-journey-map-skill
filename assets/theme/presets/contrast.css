@@ -1,0 +1,9 @@
+/* contrast — maximum legibility: heavier ink, stronger rules, saturated
+   markers. For projection, print, and low-vision readers. mode: light */
+--brand-surface:    oklch(100% 0 0);
+--brand-text:       oklch(12% 0 0);
+--brand-primary:    oklch(48% 0.182 258);
+--brand-positive:   oklch(45% 0.148 150);
+--brand-negative:   oklch(47% 0.192 28);
+--brand-attention:  oklch(58% 0.168 62);
+--brand-on-primary: oklch(100% 0 0);

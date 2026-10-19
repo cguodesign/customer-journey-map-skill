@@ -1,0 +1,1211 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="journey-build" content="cf855afed1"><meta name="description" content="Journey Skill gives your coding agent a map of the human experience. An interactive particle story about building in the right direction.">
+<title>推门即用 · Journey Skill</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Geist:wght@400;700&family=Geist+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;700&display=swap">
+<style>
+:root{
+  color-scheme: dark;
+  --bg:#050505; --bg2:#111; --ink:#f2f2f2; --dim:#8a8a8a; --ash:#5c5c5c; --line:rgba(255,255,255,.16);
+  --acc:#ffffff; --ok:#ffffff;
+  --parch:#ffffff; --pink:#000000; --pdim:#6b6b6b; --bone:#e2e2e2;
+  --f:"Geist","Noto Sans SC",-apple-system,"PingFang SC",system-ui,sans-serif;
+  --fm:"Geist Mono",ui-monospace,Menlo,Consolas,monospace;
+  --gut:clamp(16px,5vw,64px); --ease:cubic-bezier(.2,0,0,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.55 var(--f);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,p{margin:0}
+h1,h2{font-weight:400;letter-spacing:-.025em;text-wrap:balance}
+a{color:inherit}
+:focus-visible{outline:1.5px solid var(--ink);outline-offset:3px}
+
+/* fixed stage */
+#stage{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+#labs{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.lab{position:absolute;left:0;top:0;font:500 11.5px/1.3 var(--fm);letter-spacing:.04em;color:var(--ink);white-space:nowrap;opacity:0;will-change:transform,opacity}
+.lab span{display:inline-block;transform:translate(-50%,-150%);background:rgba(5,5,5,.55);padding:3px 6px;border-radius:3px}
+.lab.acc span{color:var(--acc);border:1px solid rgba(255,255,255,.7)}
+.lab.dim span{color:var(--dim);background:none}
+.lab.ok span{color:var(--ok)}
+.lab.below span{transform:translate(-50%,60%)}
+.lab.left span{transform:translate(-104%,-50%)}
+.lab.right span{transform:translate(8px,-50%)}
+.lab.screen span{font-size:12px;background:var(--acc);color:#050505;font-weight:500;transform:translate(-50%,-170%)}
+.lab.screen.free span{background:var(--ok)}
+#fx{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:0;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 2px,transparent 2px 4px)}
+#hud{position:fixed;left:var(--gut);top:22px;z-index:5;font:500 12px/1 var(--fm);letter-spacing:.08em;color:var(--dim);display:flex;gap:10px;align-items:center;pointer-events:none;transition:opacity .4s}
+#hud i{width:8px;height:8px;border-radius:50%;background:var(--acc);display:inline-block;animation:rec 1.2s steps(2,start) infinite}
+@keyframes rec{to{opacity:.2}}
+nav{position:fixed;right:var(--gut);top:14px;z-index:6;display:flex;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:8px;font:400 14px/1 var(--f);text-decoration:none;color:var(--ink);border:1px solid rgba(255,255,255,.45);border-radius:100px;padding:9px 16px;background:rgba(5,5,5,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);cursor:pointer}
+.pill:hover{background:var(--ink);color:var(--bg)}
+
+main{position:relative;z-index:3}
+.act{position:relative}
+.stick{position:sticky;top:0;height:100vh;height:100svh;display:flex;flex-direction:column;justify-content:center;padding:0 var(--gut)}
+.tag{display:inline-block;font:500 11.5px/1 var(--fm);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line);border-radius:4px;padding:5px 8px}
+.tag.acc{color:var(--acc);border-color:rgba(255,255,255,.7)}
+
+/* act 1: a coding-agent conversation */
+#a1{height:170vh}
+#a1 .stick{align-items:flex-start;text-align:left;padding-left:12vw}
+.agent-window{width:min(720px,100%);background:#141615;border:1px solid #343734;border-radius:12px;overflow:hidden;box-shadow:0 24px 90px #0007;color:#e4e7e1}
+.agent-toolbar{height:52px;display:flex;align-items:center;gap:10px;padding:0 22px;border-bottom:1px solid #2a2d2a;font:12px var(--f);color:#9fa69e}
+.agent-toolbar svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.agent-project{color:#e1e5de;font-weight:500}.agent-branch{display:flex;align-items:center;gap:5px;padding-left:10px;border-left:1px solid #363a35;font:11px var(--fm)}
+.agent-session{margin-left:auto;font-size:11px;color:#858d83}
+.agent-thread{padding:28px 28px 22px;min-height:320px}
+.prompt{margin-left:auto;width:fit-content;max-width:91%;padding:14px 18px;background:#282c27;border:1px solid #363b33;border-radius:16px 16px 4px 16px;text-align:left}
+.prompt .q{font-size:15px;line-height:1.7;min-height:1.7em}
+.caret{display:inline-block;width:2px;height:1.05em;vertical-align:-3px;background:var(--ink);margin-left:2px;animation:blink 1s steps(2,start) infinite}
+@keyframes blink{to{opacity:0}}
+.prompt.sent .caret{visibility:hidden}
+.agent-execution{margin:26px 0 0;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s;color:#99a294;font:11px/1.8 var(--fm)}
+.agent-execution.on{opacity:1;transform:none}
+.agent-identity{display:flex;align-items:center;gap:8px;color:#d6dcd1;font:500 12px var(--f);margin-bottom:13px}
+.agent-mark{font-size:18px;line-height:1;color:#e0e6d9}
+.agent-command{border-left:1px solid #3a4235;padding:3px 0 3px 14px;margin-left:7px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.agent-command code{font:11px var(--fm);color:#b8c2b0}.agent-command span{color:#8c9786}
+.reply{margin:20px 0 0 22px;opacity:0;transform:translateY(8px);transition:opacity .4s var(--ease),transform .4s var(--ease)}
+.reply.on{opacity:1;transform:none}
+.reply .q{font-size:15px;line-height:1.8;max-width:560px}
+.reply .status{margin-top:12px;font:12px/1.6 var(--fm);color:#aeb7a5}
+.reply b{color:#e3e9da;font-weight:500}
+.agent-composer{margin:0 20px 18px;padding:15px 16px 12px;background:#1b1e1a;border:1px solid #3a4036;border-radius:10px}
+.agent-placeholder{font:13px/1.6 var(--f);color:#828b7d}
+.agent-composer-bar{display:flex;align-items:center;gap:9px;margin-top:18px;font:11px var(--f);color:#9ba591}
+.agent-plus{font:20px/1 var(--f);color:#bdc6b3;margin-right:5px}.agent-mode{color:#c7cfbe}.agent-composer-bar .send{margin-left:auto;width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:#30362c;color:#87917d;font-size:16px}
+.agent-window.finished .send{background:#dde5d3;color:#20271b}
+.scrollhint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);font:500 11px/1 var(--fm);letter-spacing:.14em;color:var(--ash);transition:opacity .3s}
+@media(max-width:760px){#a1 .stick{padding-left:var(--gut)}.agent-toolbar{padding:0 15px;height:45px;gap:8px}.agent-thread{padding:22px 16px;min-height:310px}.prompt{max-width:96%;padding:12px 14px}.prompt .q,.reply .q{font-size:14px}.agent-session{font-size:9px}.agent-branch{font-size:10px}.reply{margin-left:0}.agent-composer{margin:0 12px 12px;padding:13px}.agent-placeholder{font-size:12px}}
+
+/* act 2: reality */
+#a2{height:300vh}
+#a2 .stick{justify-content:flex-end;padding-bottom:9vh}
+.cap{max-width:560px;position:relative;min-height:9.5em}
+.cap p{position:absolute;left:0;bottom:0;font-size:clamp(24px,3vw,38px);line-height:1.22;letter-spacing:-.02em;opacity:0;transform:translateY(12px);transition:opacity .2s,transform .2s;text-shadow:0 2px 24px rgba(5,5,5,.9)}
+.cap p.on{opacity:1;transform:none;transition:opacity .6s var(--ease) .15s,transform .6s var(--ease) .15s}
+.cap p small{display:block;font-size:.5em;line-height:1.5;color:var(--dim);letter-spacing:0;margin-top:10px}
+
+/* rewind */
+#rw{height:160vh}
+#rw .stick{align-items:center;text-align:center}
+.rwbig{font:500 clamp(54px,11vw,140px)/1 var(--fm);letter-spacing:-.04em;color:var(--ink);opacity:0;text-shadow:4px 0 0 rgba(255,255,255,.35),-4px 0 0 rgba(255,255,255,.15)}
+.rwtc{margin-top:18px;font:500 clamp(16px,2vw,22px)/1 var(--fm);letter-spacing:.06em;color:var(--dim);opacity:0}
+
+/* flowing acts */
+.flow{padding:18vh var(--gut) 14vh;min-height:100vh}
+.col{max-width:540px}
+.col>*+*{margin-top:22px}
+.big{font-size:clamp(32px,4.4vw,58px);line-height:1.06}
+.big em{font-style:normal;color:var(--acc)}
+.big .d{color:var(--dim)}
+.body{font-size:clamp(16px,1.3vw,18px);color:#bdbdbd;max-width:32em}
+.body b{color:var(--ink);font-weight:700}
+.gapline{font:500 13px/1.6 var(--fm);color:var(--acc)}
+.spacer{height:46vh}
+.term{background:rgba(0,0,0,.86);border:1px solid var(--line);border-radius:8px;overflow:hidden;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);max-width:620px}
+.term .top{display:flex;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);font:500 11px/1 var(--fm);letter-spacing:.08em;color:var(--ash);text-transform:uppercase}
+.term pre{margin:0;padding:14px 16px;font:400 12.5px/1.75 var(--fm);color:#cfcfcf;white-space:pre-wrap;word-break:break-word}
+.term .p{color:var(--ash)}
+.term .e{color:var(--acc)}
+.term .o{color:var(--ok)}
+.term .n{color:var(--dim)}
+.note{font:400 13px/1.6 var(--fm);color:var(--dim);border-left:2px solid var(--line);padding-left:12px}
+.note.acc{border-color:var(--acc);color:#fff}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font:400 13px/1.5 var(--fm);color:#cfcfcf;max-width:620px;background:rgba(0,0,0,.7);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.kv dt{color:var(--ash)} .kv dd{margin:0}
+.kv s{color:var(--ash)}
+.kv .up{color:var(--ok)}
+.install-mini{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;background:rgba(0,0,0,.86);border:1px solid rgba(255,255,255,.7);border-radius:10px;padding:14px 16px;max-width:620px}
+.install-mini code{font:400 12.5px/1.6 var(--fm);color:var(--ink);flex:1 1 280px;min-width:0;overflow-wrap:anywhere}
+.btn{font:500 14px/1 var(--f);border:0;border-radius:100px;padding:10px 16px;background:var(--acc);color:#050505;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn.ghost{background:none;color:var(--ink);border:1px solid rgba(255,255,255,.45)}
+
+/* express card */
+.page{background:var(--parch);color:var(--pink);border-radius:6px;padding:22px 22px 18px;max-width:560px;box-shadow:0 24px 70px rgba(0,0,0,.45)}
+.page .h{font:500 11px/1 var(--fm);letter-spacing:.12em;color:var(--pdim);text-transform:uppercase;display:flex;justify-content:space-between}
+.page ul{margin-top:12px}
+.page h3{font-size:22px;line-height:1.25;margin:12px 0 14px;font-weight:700;letter-spacing:-.01em}
+.page ul{margin:0;padding:0;list-style:none;display:grid;gap:9px;font-size:15px;line-height:1.45}
+.page li{display:grid;grid-template-columns:96px 1fr;gap:10px;border-top:1px solid var(--bone);padding-top:9px}
+.page li b{font:500 12px/1.5 var(--fm);color:var(--pdim);font-weight:500}
+.page .src{margin-top:14px;font:400 11.5px/1.5 var(--fm);color:var(--pdim)}
+
+/* gallery */
+#gal{height:100vh;height:100svh}
+#gal .stick{justify-content:space-between;padding-top:13vh;padding-bottom:5vh}
+.gctl{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:500 12.5px/1 var(--fm);letter-spacing:.04em;color:var(--dim);background:rgba(10,10,10,.6);border:1px solid var(--line);border-radius:100px;padding:9px 13px;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.seg button[aria-pressed="true"]{color:var(--bg);background:var(--ink);border-color:var(--ink)}
+.gnote{font:400 12.5px/1.6 var(--fm);color:var(--dim);max-width:520px}
+body.gallery-paper #gal .big, body.gallery-paper .gnote{color:#000}
+body.gallery-paper .seg button{color:#555;background:rgba(255,255,255,.6);border-color:#e2e2e2}
+body.gallery-paper .seg button[aria-pressed="true"]{color:#fff;background:#000;border-color:#000}
+body.gallery-paper .lab span{color:#000;background:rgba(243,241,237,.7)}
+body.gallery-blue .lab span{background:rgba(14,37,66,.6)}
+
+/* install (solid) */
+#install{background:var(--parch);color:var(--pink);position:relative;z-index:4;padding:16vh var(--gut) 12vh}
+#install .wrap{max-width:900px}
+#install h2{font-size:clamp(30px,3.6vw,46px);line-height:1.1}
+#install h2 span{color:#888}
+
+#install .body{color:var(--pdim)}
+.tcard{margin-top:36px;background:#000;color:#fff;border-radius:6px;overflow:hidden}
+.ctop{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.12);font:500 11.5px/1 var(--fm);letter-spacing:.08em;text-transform:uppercase;color:#8a8a8a;min-height:40px}
+.tabs{display:flex;gap:4px;margin-left:auto}
+.tabs button{font:500 11.5px/1 var(--fm);letter-spacing:.06em;color:#8a8a8a;background:none;border:1px solid transparent;border-radius:4px;padding:7px 10px;cursor:pointer}
+.tabs button[aria-selected="true"]{border-color:rgba(255,255,255,.25);color:#fff}
+.cmd{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:20px}
+.cmd pre{margin:0;font:400 14px/1.7 var(--fm);overflow-x:auto;min-width:0;flex:1 1 360px;white-space:pre-wrap;word-break:break-all}
+.cmd pre .c{color:#8a8a8a}
+.copy{font:400 14px/1 var(--f);background:#fff;color:#000;border:0;border-radius:100px;padding:10px 18px;cursor:pointer}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:36px}
+.steps div{border-top:1px solid #000;padding-top:14px;min-width:0}
+.steps b{display:block;font:500 11.5px/1 var(--fm);letter-spacing:.1em;margin-bottom:10px}
+.steps p{color:var(--pdim);font-size:15px}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin-top:36px}
+.links a{display:inline-flex;font:400 15px/1 var(--f);text-decoration:none;color:#000;border:1px solid #000;border-radius:100px;padding:10px 20px}
+.links a:hover{background:#000;color:var(--parch)}
+footer{position:relative;z-index:4;background:var(--parch);color:var(--pdim);font-size:13px;border-top:1px solid var(--bone)}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:22px var(--gut) 32px}
+
+@media (max-width:760px){
+  body{font-size:16px}
+  .flow{padding:56vh var(--gut) 10vh}
+  .flow .col{background:rgba(5,5,5,.86);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-radius:12px;padding:18px 16px;margin-inline:-8px}
+  .flow .col .term,.flow .col .kv{background:rgba(0,0,0,.7)}
+  .col{max-width:none}
+  .flow .col>*{position:relative}
+  .flow .col>.big,.flow .col>.body,.flow .col>.tag{text-shadow:0 1px 16px rgba(5,5,5,.95)}
+  .spacer{height:62vh}
+  #a2 .stick{padding-bottom:6vh}
+  .cap{min-height:8.5em}
+  .steps{grid-template-columns:1fr}
+  #hud{top:20px;max-width:calc(100% - 190px);overflow:hidden}
+  #hud span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lab{font-size:10.5px}
+  .page li{grid-template-columns:78px 1fr}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.caret,#hud i{animation:none}}
+
+/* mono overrides */
+.lab.acc span{color:#000;background:#fff;border:0}
+.lab.screen span{background:#fff;color:#000}
+.lab.screen.free span{background:transparent;color:#fff;outline:1px solid #fff}
+.lab.ok span{color:#fff}
+.big em{font-style:normal;color:#000;background:#fff;padding:0 .14em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.tag.acc{color:#000;background:#fff;border-color:#fff}
+.btn{background:#fff;color:#000}
+.send.go{background:#fff;color:#000}
+.term .e{color:#fff;background:rgba(255,255,255,.1);font-weight:500}
+.term .o{color:#fff;font-weight:500}
+.reply b{color:#fff}
+.kv .up{color:#fff;font-weight:500}
+.gapline{color:#fff}
+#hud i{background:#fff}
+.page{box-shadow:0 24px 70px rgba(0,0,0,.6)}
+
+/* Cinematic editorial system. The canvas is the continuous world between chapters. */
+:root{--bg:#080909;--ink:#efefea;--dim:#9a9d99;--ash:#777d79;--line:rgba(230,235,225,.18);--gut:clamp(24px,5.2vw,88px);--f:"DM Sans","Noto Sans SC",sans-serif;--serif:"Instrument Serif",Georgia,serif;--ease:cubic-bezier(.22,1,.36,1)}
+::selection{background:#e7e9df;color:#080909}
+body{background:var(--bg)}
+.skip-link{position:fixed;top:-80px;left:24px;z-index:30;background:var(--ink);color:var(--bg);padding:12px}.skip-link:focus{top:80px}
+.site-nav{left:var(--gut);right:var(--gut);top:0;height:88px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);gap:20px;background:linear-gradient(#080909aa,transparent);backdrop-filter:none}
+.brand{display:flex;gap:11px;align-items:center;text-decoration:none;font-size:20px;font-weight:500;letter-spacing:-.7px}.brand small{font:400 9px var(--fm);letter-spacing:1.7px;margin-left:3px;color:var(--dim)}
+.brand-mark{position:relative;display:block;width:23px;height:23px}.brand-mark:before,.brand-mark:after{content:"";position:absolute;width:10px;height:10px;background:var(--ink)}.brand-mark:before{left:0;top:0}.brand-mark:after{right:0;bottom:0}
+.nav-middle{display:flex;gap:30px}.nav-middle a{font-size:12px;text-decoration:none;color:var(--dim);transition:color .2s}.nav-middle a:hover{color:var(--ink)}
+.nav-actions{display:flex;align-items:center;gap:16px}.pill{border:0;border-radius:0;background:none;backdrop-filter:none;padding:10px 0;font-size:12px;transition:color .2s,background .2s}.pill:hover{background:none;color:#fff}.pill.install-link{background:var(--ink);color:var(--bg);padding:11px 18px}.install-link:hover{background:#c7cbc0}.motion-toggle{border:1px solid var(--line);background:none;color:var(--ink);width:29px;height:29px;cursor:pointer;font-size:12px}
+#hud{z-index:7;top:110px;left:var(--gut);font-size:9px;letter-spacing:.11em}#hud i{width:4px;height:4px;animation:none;background:#bfc6b9}
+#intro{height:170vh;min-height:900px}#intro .stick{align-items:flex-start;padding-top:30px}
+.hero-content{position:relative;width:56%;transform-origin:left center;will-change:transform,opacity}.eyebrow{display:flex;align-items:center;gap:14px;font:400 10px/1.4 var(--fm);letter-spacing:.15em;text-transform:uppercase;color:#a0a69d;margin-bottom:32px}.eyebrow:before{content:"";width:25px;height:1px;background:#92998c}
+.hero-title{font-size:clamp(50px,5.6vw,88px);line-height:.96;letter-spacing:-.065em;font-weight:400}.hero-title em{font:italic 1.14em/.9 var(--serif);letter-spacing:-.04em;color:#d0d5c9}.hero-description{max-width:360px;margin-top:32px;font-size:14px;line-height:1.8;color:#a3a89f;text-wrap:pretty}.hero-cta{display:inline-flex;gap:37px;align-items:center;text-decoration:none;font-size:12px;margin-top:28px;padding-bottom:10px;border-bottom:1px solid #a4aca0}.hero-cta span:last-child{transition:transform .3s}.hero-cta:hover span:last-child{transform:translate(3px,3px)}
+.hero-index{position:absolute;right:var(--gut);top:130px;font:10px var(--fm);color:var(--dim);letter-spacing:.06em}.hero-index span{display:block;margin-top:8px;color:#686f68;font-size:9px}.story-hero-caption{position:absolute;right:14%;bottom:22%;font:9px var(--fm);color:#9da694;letter-spacing:.17em;display:flex;align-items:center;gap:10px}.story-hero-caption:before{content:"+";color:#e5e9df;font-size:16px}
+.story-hero-bottom{position:absolute;bottom:calc(93px + env(safe-area-inset-bottom));left:var(--gut);right:var(--gut);display:flex;justify-content:space-between;align-items:flex-end;font:9px/1.7 var(--fm);letter-spacing:.1em;color:#92998d}.story-hero-bottom .scroll-cue{display:flex;align-items:center;gap:15px}.scroll-cue i{display:block;width:21px;height:32px;border:1px solid #626a60;border-radius:20px;position:relative}.scroll-cue i:after{content:"";position:absolute;left:9px;top:6px;width:1px;height:7px;background:#c3ccbc;animation:scroll-cue 2s ease-out infinite}body.motion-paused .scroll-cue i:after{animation-play-state:paused}@keyframes scroll-cue{to{transform:translateY(12px);opacity:0}}
+.chapter-rail{position:fixed;z-index:6;left:var(--gut);right:var(--gut);bottom:0;height:calc(65px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);display:flex;align-items:center;gap:24px;background:linear-gradient(transparent,#080909 85%);border-top:1px solid var(--line);transition:opacity .3s}.rail-label{font:9px var(--fm);letter-spacing:.12em;color:var(--ash);margin-right:auto}.chapter-rail a{display:flex;align-items:center;gap:8px;color:#858d82;text-decoration:none;font-size:10px;transition:color .3s}.chapter-rail a b{font:9px var(--fm);font-weight:400;color:#656d62}.chapter-rail a[aria-current="step"]{color:#f0f2e9}.chapter-rail a[aria-current="step"] b{color:#f0f2e9}.rail-progress{position:absolute;top:-1px;left:0;width:100%;height:1px;background:#d3dcc9;transform:scaleX(0);transform-origin:left}
+
+#a2{height:240vh}#a2 .stick{padding-bottom:17vh}.cap{max-width:330px}.cap p{font-size:clamp(20px,2.2vw,30px);line-height:1.5;letter-spacing:-.02em}.cap p:before{content:"02 / THE REALITY";display:block;font:9px var(--fm);letter-spacing:.14em;color:#92998d;margin-bottom:26px}
+#rw{height:90vh}.rwbig{font:italic clamp(64px,10vw,140px) var(--serif);text-shadow:none}.rwtc{font-size:11px}
+.flow{padding:28vh var(--gut) 20vh;min-height:150vh}.col{max-width:430px}.col>*+*{margin-top:26px}.big{font-size:clamp(36px,4.6vw,68px);letter-spacing:-.052em;line-height:1.07}.big em{font-style:normal;color:#e9ede2;background:none;padding:0}.big .d{color:var(--dim)}.spacer{height:42vh}.chapter-kicker{display:block;font:9px var(--fm);letter-spacing:.13em;color:#a3ab9a;margin-bottom:28px}.gapline{font-size:10px;color:#a9b49f}.term{border-radius:0;background:rgba(8,9,9,.9);backdrop-filter:none;border-width:1px 0;overflow:visible}.term pre{font-size:10.5px;line-height:1.9;padding:18px 0}.term .p{color:#8f9989}.term .e{background:none;color:#e1e6d9}.note{font:12px var(--f);border:0;padding:0;color:#aeb7a6}.install-mini{border-radius:0;border-width:1px 0;padding:18px 0;background:rgba(8,9,9,.9)}.install-mini code{font-size:10px}.btn{border-radius:0;font-size:11px;padding:12px 17px;background:#e1e8d8}.page{border-radius:0;background:#e5e7de;padding:24px;box-shadow:none}.page ul{margin-top:18px}.page li{font-size:13px}.page .h{font-size:9px}.page li b{font-size:10px}
+.lab.scene-note span{background:none;color:#aab3a0;font:9px var(--fm);letter-spacing:.08em}.lab.layer{font-size:8px;letter-spacing:.12em}.lab.layer span{background:none;border-top:1px solid #8a9383;padding:6px 0;color:#aab2a3}.lab.evidence{font-size:8px}
+.lab{font-size:10px}.lab span{border-radius:0;background:rgba(8,9,9,.8);padding:4px 7px}.lab.acc span{background:#dce3d3}.lab.screen span{font-size:10px;background:#e6ebde}.lab.dim span{color:#8e9985}.lab.screen.free span{background:#080909;color:#e0e8d5;outline:1px solid #87937b}
+#gal{height:115vh}#gal .stick{padding-top:19vh;padding-bottom:16vh}.seg{gap:0}.seg button{border-radius:0;backdrop-filter:none;padding:11px 15px;font:11px var(--f);color:#aab1a3}.gnote{font-size:10px}.gctl{gap:24px}
+#install{padding-top:16vh;padding-bottom:12vh;background:#e4e6dd;color:#151813}#install .wrap{max-width:none}#install h2{font-size:clamp(45px,7.2vw,110px);letter-spacing:-.06em;max-width:1060px;line-height:1.05}#install h2 span{color:#78816d}.tcard{max-width:780px;border-radius:0;background:#11150f;margin-top:55px}.ctop{padding:18px 22px}.cmd{padding:22px}.links{margin-top:35px}footer{background:#e4e6dd;color:#65705b;padding-bottom:50px}footer .wrap{max-width:none;border-top:1px solid #bac2af;padding-top:24px}.copy{border-radius:0}
+html[lang="zh-CN"] .hero-title{word-break:keep-all;font-size:clamp(52px,6vw,92px);line-height:1.17;letter-spacing:-.055em}html[lang="zh-CN"] .hero-title em{font:inherit;color:#b8c2af}html[lang="zh-CN"] .hero-description{max-width:340px;line-height:1.9}html[lang="zh-CN"] .big{line-height:1.2;font-size:clamp(32px,3.8vw,58px)}
+@media(min-width:1600px){.col{max-width:520px}.term pre{font-size:12px}}
+@media(max-width:900px){.nav-middle{display:none}.chapter-rail{gap:17px}.rail-label{display:none}.chapter-rail a{flex:1;justify-content:center;gap:5px}.hero-content{width:65%}.story-hero-caption{right:9%;bottom:26%}}
+@media(max-width:760px){.site-nav{height:72px;gap:10px}.brand{font-size:18px}.brand small{display:none}.nav-actions{gap:13px}.pill.install-link{padding:9px 12px}#hud{top:91px;max-width:90%;font-size:8px}#intro{height:145vh;min-height:800px}#intro .stick{justify-content:flex-start;padding-top:21vh}.hero-content{width:100%}.eyebrow{font-size:8px;margin-bottom:23px}.hero-title{font-size:clamp(44px,10.5vw,68px)}html[lang="zh-CN"] .hero-title{font-size:clamp(42px,10.5vw,64px)}.hero-description{font-size:12px;max-width:245px;margin-top:22px}.hero-cta{font-size:11px;margin-top:20px}.hero-index{display:none}.story-hero-caption{bottom:19%;right:8%;font-size:7px}.story-hero-bottom{bottom:calc(88px + env(safe-area-inset-bottom));font-size:7px}.story-hero-bottom>span:last-child{max-width:130px;text-align:right}.chapter-rail{height:calc(60px + env(safe-area-inset-bottom));gap:8px}.chapter-rail a{font-size:8px;flex-direction:column;gap:5px}.chapter-rail a b{font-size:8px}#a2 .stick{padding-bottom:18vh}.cap p{font-size:22px}.cap{max-width:310px}.flow{padding:65vh var(--gut) 20vh;min-height:160vh}.flow .col{padding:20px 0;margin:0;border-radius:0;background:linear-gradient(90deg,#080909f0,#080909bb);backdrop-filter:none}.spacer{height:35vh}.col{max-width:100%}.big{font-size:42px}.chapter-kicker{font-size:8px;margin-bottom:23px}.term pre{font-size:10px}.lab.layer{font-size:6px}.lab.evidence{font-size:7px}.lab{font-size:8px}.lab span{padding:3px 4px}.lab.screen span{font-size:8px}.seg button{font-size:10px;padding:9px 10px}#gal .stick{padding-top:18vh;padding-bottom:15vh}.gctl{gap:18px}#install h2{font-size:46px}.cmd{padding:16px}.ctop{padding:16px}.tcard{margin-top:32px}footer .wrap{font-size:9px;gap:15px}.motion-toggle{width:26px;height:26px}}
+.site-nav:before{content:"";position:absolute;left:calc(-1 * var(--gut));right:calc(-1 * var(--gut));top:0;height:140px;z-index:-1;pointer-events:none;background:linear-gradient(#080909 50%,#080909e8 75%,transparent)}body.light-ui .site-nav:before{background:linear-gradient(#eaece3 50%,#eaece3e8 75%,transparent)}
+body.light-ui .site-nav{background:transparent;border-color:#b6bcae;color:#21261c}body.light-ui .brand-mark:before,body.light-ui .brand-mark:after{background:#21261c}body.light-ui .brand small,body.light-ui .nav-middle a,body.light-ui .pill,body.light-ui #hud{color:#4c5842}body.light-ui .install-link{background:#21261c;color:#eef0e8}body.light-ui .motion-toggle{color:#21261c;border-color:#abb4a0}body.light-ui .chapter-rail{background:linear-gradient(transparent,#eaece3 85%);border-color:#b6bcae}body.light-ui .chapter-rail a,body.light-ui .chapter-rail a b,body.light-ui .rail-label{color:#515e45}body.light-ui .rail-progress{background:#58654a}
+.lab.record{font:10px/1.7 var(--f);letter-spacing:0}.lab.record span{white-space:pre-line;text-align:center;max-width:180px;padding:7px 9px;background:rgba(8,9,9,.9);transform:translate(-50%,-50%);border:1px solid rgba(225,230,219,.16)}.lab.human-thought{font:11px var(--f)}.lab.human-thought span{padding:5px 10px;background:#dde2d5;color:#182014;border-radius:0}
+body.gallery-paper .lab.record span{background:#eaece3;color:#20251a}
+@media(max-width:760px){.lab.record{font-size:7px}.lab.record span{max-width:108px;padding:4px}.lab.human-thought{font-size:8px}.lab.layer{font-size:6px}}
+@keyframes enter{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.hero-content>.eyebrow{animation:enter .8s var(--ease) both}.hero-title{animation:enter 1s var(--ease) .1s both}.hero-description{animation:enter 1s var(--ease) .22s both}.hero-cta{animation:enter 1s var(--ease) .32s both}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}.hero-content{will-change:auto}}
+
+/* Feature atlas — eight illustrated plates, read as a single editorial grid. */
+#features{position:relative;background:#080909;color:#e2e5dc;padding:112px var(--gut) 0;scroll-margin-top:68px}
+.features-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;padding-bottom:45px}
+.features-heading .eyebrow{margin-bottom:20px;font-size:9px}
+.features-heading h2{font-size:clamp(32px,3.8vw,54px);line-height:1.18;letter-spacing:-.045em}
+.features-heading h2 em{font:italic 1.07em var(--serif);color:#aab39d}
+.features-edition{font:9px/1.8 var(--fm);color:#818b7b;text-align:right;letter-spacing:.08em}
+.features-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid #454b40;border-left:1px solid #454b40}
+.feature{position:relative;min-width:0;min-height:380px;padding:23px 24px 25px;border-right:1px solid #454b40;border-bottom:1px solid #454b40;display:flex;flex-direction:column;overflow:hidden}
+.feature-index{font:11px var(--fm);color:#acb4a4;display:flex;justify-content:space-between;align-items:center}
+.feature-index .feature-mode{font-size:8px;letter-spacing:.13em;color:#798472}
+.feature-index>span:first-child:after{content:"";display:block;width:14px;height:1px;background:#89937e;transform:rotate(-7deg);margin-top:6px}
+.feature h3{font:400 30px/1.12 var(--serif);letter-spacing:-.025em;margin:25px 0 0;min-height:70px;text-wrap:balance}
+html[lang="zh-CN"] .feature h3{font:400 clamp(20px,1.9vw,27px)/1.5 var(--f);letter-spacing:-.04em}
+.feature-art{width:calc(100% + 20px);margin:10px -10px 12px;aspect-ratio:260/180;display:block;transition:transform .5s var(--ease);color:#d7e0cc}
+.feature-art svg{display:block;width:100%;height:100%;overflow:visible}
+@media(hover:hover){.feature:hover .feature-art{transform:translateY(-4px)}.feature:hover .feature-mode{color:#c6d0b9}}
+.feature p{margin-top:auto;font:12px/1.85 var(--f);color:#a0ab94;max-width:26em;text-wrap:pretty}
+.features-foot{display:flex;justify-content:space-between;align-items:center;gap:30px;border-bottom:1px solid #454b40;padding:28px 0 35px;font:12px/1.8 var(--f);color:#a6b19a}
+.features-foot .feature-principle{display:flex;align-items:center;gap:17px;max-width:600px}.feature-asterisk{font:34px var(--serif);color:#d5ddc9}
+.features-foot a{flex:none;font:11px var(--fm);text-decoration:none;padding:8px 0;border-bottom:1px solid #77836c;color:#d7e0cb}
+@media(max-width:1050px){.feature{padding:20px 17px;min-height:355px}.feature h3{font-size:27px}.feature-index .feature-mode{font-size:7px}}
+@media(max-width:760px){#features{padding-top:112px}.features-heading{padding-bottom:30px}.features-heading h2{font-size:34px}.features-edition{display:none}.features-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.feature{padding:18px 15px;min-height:310px}.feature h3{font-size:25px;min-height:64px;margin-top:23px}html[lang="zh-CN"] .feature h3{font-size:20px}.feature-art{margin-top:9px;margin-bottom:15px}.feature p{font-size:11px;line-height:1.8}.feature-index{font-size:10px}.feature-index .feature-mode{font-size:7px;letter-spacing:.03em}.features-foot{display:block;font-size:11px}.features-foot a{display:inline-block;margin-top:22px;margin-left:37px}}
+@media(max-width:359px){.feature{padding:15px 10px}.feature-index .feature-mode{font-size:6px}html[lang="zh-CN"] .feature h3{font-size:18px}}
+@media(prefers-reduced-motion:reduce){.feature-art{transition:none;transform:none!important}}
+</style><link rel="stylesheet" href="../assets/site.css?v=f73405a584"><style>
+.site-header{right:auto;width:100%;position:fixed;top:0}.site-header nav{position:static;right:auto;top:auto}.site-header .brand-mark:before,.site-header .brand-mark:after{background:var(--ink)}
+#features.story-end{padding:100px var(--gutter);background:var(--bg)}.story-end h2{font-size:clamp(32px,4vw,55px);line-height:1.35;margin-top:25px}#install{background:var(--bg);color:var(--ink);padding:65px var(--gutter)}#install .wrap{padding:0}#install h2{font-size:clamp(34px,4vw,52px)}#install .tcard{max-width:740px}footer.site-footer{background:var(--bg);color:var(--ink);position:relative;z-index:4}body.light-ui .site-header .brand-mark:before,body.light-ui .site-header .brand-mark:after{background:var(--ink)}
+@media(max-width:760px){.site-header nav{position:absolute;top:71px;left:0;right:0}.site-header .header-actions{gap:6px}.site-header .motion-control{display:none}.site-header .reading-toggle{padding:5px}.site-header .brand{font-size:20px}.site-header{gap:8px}}
+</style><link rel="stylesheet" href="../assets/story-ui.css?v=3b458655fb"><link rel="stylesheet" href="../assets/finale.css?v=45970b5dbd">
+
+<a class="skip-link" href="#install" data-en="Skip to installation">跳到安装</a>
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="labs" aria-hidden="true"></div>
+<div id="fx" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true"><i></i><span id="tc">第 0 天 · 需求评审</span></div>
+<a class="skip" href="#main">跳到正文</a><header class="site-header"><a class="brand" href="../" aria-label="Journey 首页"><span class="brand-mark" aria-hidden="true"></span>journey<small>SKILL</small></a><nav class="nav-links" id="main-nav" aria-label="主导航"><a href="../story/" data-story aria-current="page">故事</a><a href="../examples/">示例</a><a href="../docs/">文档</a><a href="https://github.com/cguodesign/customer-journey-map-skill" target="_blank" rel="noopener">GitHub ↗</a></nav><div class="header-actions"><button class="motion-control" id="motionBtn" aria-label="暂停环境动画" aria-pressed="false">Ⅱ</button><button class="reading-toggle" id="langBtn" aria-label="切换语言">EN</button><a class="button" href="../docs/#install">安装 ↗</a><button class="menu-button" aria-controls="main-nav" aria-expanded="false">菜单</button></div></header>
+<div class="chapter-rail" aria-label="Story chapters" hidden inert><div class="rail-progress" id="railProgress"></div><span class="rail-label">A JOURNEY IN SIX ACTS</span>
+<a href="#a1"><b>01</b><span data-en="Promise">需求</span></a><a href="#a2"><b>02</b><span data-en="Reality">现实</span></a><a href="#a3"><b>03</b><span data-en="Gap">落差</span></a><a href="#a4"><b>04</b><span data-en="Change">修正</span></a><a href="#a5"><b>05</b><span data-en="Evidence">证据</span></a><a href="#a6"><b>06</b><span data-en="Forward">前行</span></a></div>
+
+<main id="main">
+<section class="act" id="intro" data-shot="portal" aria-labelledby="heroTitle">
+<div class="stick">
+<div class="hero-content" id="heroContent">
+<div class="eyebrow" data-en="Journey maps for coding agents">给 CODING AGENT 的用户旅程地图</div>
+<h1 class="hero-title" id="heroTitle" tabindex="-1" data-en="Your agent knows your code.<br><em>Does it know your users?</em>">Agent 懂代码。<br><em>懂用户吗？</em></h1>
+<p class="hero-description" data-en="Your code is in the repo. Your users’ experience isn’t. Journey keeps it as a map, right next to your code.">代码在 repo 里，agent 读得到。人的体验不在。Journey 把它记成一张地图，放在代码旁边。</p>
+<a class="hero-cta" href="#a1"><span data-en="Follow the journey">走进这个故事</span><span aria-hidden="true">↘</span></a>
+</div>
+<div class="hero-index">FIELD NOTES — 001<span>HUMAN EXPERIENCE / AGENT INTELLIGENCE</span></div>
+<div class="story-hero-caption" data-en="EXPERIENCE → A SHARED MAP">人的经历 → 共同的地图</div>
+<div class="story-hero-bottom"><span class="scroll-cue"><i aria-hidden="true"></i><span data-en="SCROLL TO EXPLORE">滚动，探索</span></span><span data-en="FROM A LINE OF CODE<br>TO A MOMENT IN SOMEONE’S LIFE">从一行代码<br>到一个人的真实体验</span></div>
+</div></section>
+<!-- ACT 1 · 需求 -->
+<section class="act" id="a1" data-shot="dust">
+  <div class="stick">
+    <div class="agent-window" id="agentWindow">
+      <div class="agent-toolbar">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 5.5h5l1.5 2h8.5v9h-15zM2.5 5.5v-2H8l1.5 2H17v2"/></svg>
+        <span class="agent-project">meeting-rooms</span>
+        <span class="agent-branch"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="5" cy="4" r="2"/><circle cx="5" cy="16" r="2"/><circle cx="15" cy="5" r="2"/><path d="M5 6v8m10-7c0 5-10 2-10 7"/></svg>main</span>
+        <span class="agent-session" data-en="Local session">本地会话</span>
+      </div>
+      <div class="agent-thread">
+        <div class="prompt" role="group" aria-label="对 agent 输入：会议室必须提前 15 分钟预订，杜绝占用。">
+          <div class="q"><span id="typed"></span><span class="caret"></span></div>
+        </div>
+        <div class="agent-execution" id="agentExecution" aria-hidden="true">
+          <div class="agent-identity"><span class="agent-mark" aria-hidden="true">✳</span><span>Agent</span></div>
+          <div class="agent-command"><code>$ npm test</code><span data-en="Completed">执行完成</span></div>
+        </div>
+        <div class="reply" id="reply" role="group" aria-hidden="true">
+          <div class="q" data-en="Implemented. Meeting rooms now require booking at least 15 minutes in advance.">已实现。会议室现在必须提前 15 分钟预订。</div>
+          <div class="status" data-en="✓ <b>12 / 12</b> tests passing">✓ <b>12 / 12</b> 项测试通过</div>
+        </div>
+      </div>
+      <div class="agent-composer" role="img" aria-label="会话输入栏示意">
+        <div class="agent-placeholder" data-en="Describe what you’d like to change next…">继续描述你想修改的内容…</div>
+        <div class="agent-composer-bar"><span class="agent-plus" aria-hidden="true">+</span><span class="agent-mode">Agent</span><span aria-hidden="true">⌄</span><span class="send" aria-hidden="true">↑</span></div>
+      </div>
+    </div>
+    <div class="scrollhint" id="hint" data-en="Scroll ↓">向下滚动 ↓</div>
+  </div>
+</section>
+
+<!-- ACT 2 · 现实 -->
+<section class="act" id="a2" data-shot="room">
+  <div class="stick">
+    <div class="cap" id="cap">
+      <p data-en="They need a whiteboard.<br>Now.">他们需要一面白板。<br>现在。</p>
+      <p data-en="An empty room.<br>A 15-minute wait.">房间空着。<br>还要等 15 分钟。</p>
+      <p data-en="The room is empty.<br>They’re still waiting.">房间空着。<br>他们等着。</p>
+    </div>
+  </div>
+</section>
+
+<!-- rewind -->
+<section class="act" id="rw" data-shot="rewind">
+  <div class="stick">
+    <div class="rwbig" id="rwbig" data-en="What if we rewind?">如果，重来一次。</div>
+    <div class="rwtc" id="rwtc">倒带</div>
+  </div>
+</section>
+
+<!-- ACT 3 · 落差 -->
+<section class="act flow" id="a3" data-shot="gap">
+  <div class="col">
+    <span class="chapter-kicker" data-en="03 / SEE THE GAP">03 / 看见落差</span>
+    <h2 class="big" data-en="The tests passed.<br>The people didn’t.">测试通过了。<br>人没通过。</h2>
+    <p class="gapline" data-en="Gap · 15 min wait · mood −2">落差 · 等 15 分钟 · 情绪 −2</p>
+  </div>
+  <div class="spacer"></div>
+  <div class="col">
+    <h2 class="big" data-en="61% of meetings start within 10 minutes.<br><em>The rule says wait 15.</em>">61% 的会，<br>10 分钟内就开。<br><em>规则要等<br>15 分钟。</em></h2>
+    <p class="note" data-en="Badge and calendar logs, 3 weeks. The data was there before launch.">门禁 + 日历记录，3 周。上线前就查得到。</p>
+  </div>
+</section>
+
+<!-- ACT 4 · 改 -->
+<section class="act flow" id="a4" data-shot="fix">
+  <div class="col">
+    <span class="chapter-kicker" data-en="04 / CHANGE THE COURSE">04 / 修正方向</span>
+    <h2 class="big" data-en="<em>Give your agent the map.</em>"><em>给 agent 一张地图。</em></h2>
+    <div class="install-mini">
+      <code id="miniCmd">git clone --depth 1 https://github.com/cguodesign/customer-journey-map-skill ~/.claude/skills/journey</code>
+      <button class="btn" id="miniCopy" aria-live="polite" type="button" data-en="Copy">复制</button>
+    </div>
+    <p class="note" data-en="Journey Skill connects the experience to observations, changes, and the reasons behind them.">Journey Skill 把人的体验与观察、修改和依据连在一起。</p>
+  </div>
+  <div class="spacer"></div>
+  <div class="col">
+    <h2 class="big" data-en="“Let people just walk in.”">「改成推门即用。」</h2>
+    <div class="term"><pre><span class="p">$ journey.sh commit … remove-step book-ahead</span>
+<span class="e">ERROR … dangling cross-ref: → book-ahead
+commit rejected (no changes written)</span></pre></div>
+    <p class="note" data-en="A broken map won’t save.">改坏的地图，存不进去。</p>
+  </div>
+  <div class="spacer"></div>
+  <div class="col">
+    <div class="term"><pre><span class="p">$ journey.sh commit … replace-step find-room</span>
+<span class="o">committed replace-step find-room on meeting-room — logged …</span>
+<span class="p">$ journey.sh validate meeting-room</span>
+<span class="o">OK: meeting-room (4 steps, 3 milestones)</span></pre></div>
+    <h2 class="big" data-en="Walk-in,<br>saved to the map.">推门即用，<br>写进了地图。</h2>
+    <p class="note" data-en="validate checks structure and references. Whether it works for people is still yours to judge.">validate 只查结构和引用。对人好不好，还要你来判断。</p>
+  </div>
+</section>
+
+<!-- ACT 5 · 证据 -->
+<section class="act flow" id="a5" data-shot="prov">
+  <div class="col">
+    <span class="chapter-kicker" data-en="05 / FOLLOW THE EVIDENCE">05 / 让证据说话</span>
+    <h2 class="big" data-en="“Add a check‑in anyway.”">「还是加个签到吧。」</h2>
+    <p class="note" data-en="One more step. Why?">多一步，为什么？</p>
+    <div class="term"><pre><span class="p">$ journey.sh query moment-no-evidence</span>
+<span class="e">check-in  momentOfTruth without source/metric</span></pre></div>
+    <p class="note" data-en="The step saves. The query lists what it’s missing.">这一步能存进去。查询会列出它缺什么。</p>
+  </div>
+  <div class="spacer"></div>
+  <div class="col">
+    <h2 class="big" data-en="No evidence.<br><em>So you roll it back.</em>">没有证据。<br><em>你们决定撤回。</em></h2>
+    <div class="term"><pre><span class="p">$ journey.sh commit … remove-step check-in</span>
+<span class="o">committed remove-step check-in on meeting-room — logged …</span></pre></div>
+    <p class="note" data-en="The query only lists it. Rolling back is your call, and the reason goes in the change log.">查询只负责列出来，撤不撤由你们定。撤回的理由写进修改记录。</p>
+  </div>
+</section>
+
+<!-- ACT 6 · 交 -->
+<section class="act flow" id="a6" data-shot="happy">
+  <div class="col">
+    <span class="chapter-kicker" data-en="06 / BACK TO THE HUMAN">06 / 回到人的体验</span>
+    <h2 class="big" data-en="Push. Walk in.">推门，进。</h2>
+  </div>
+  <div class="spacer"></div>
+  <div class="col">
+    <article class="page" aria-label="一页说明示意">
+      <div class="h"><span data-en="Express · for Facilities">Express · 给行政</span><span data-en="illustrative">示意</span></div>
+      <ul>
+        <li><b data-en="Find a room">找房间</b><span data-en="15 min → 0">15 分钟 → 0</span></li>
+        <li><b data-en="Idle rooms">空占</b><span data-en="Auto-release after 10 empty minutes">10 分钟无人自动释放</span></li>
+        <li><b data-en="Check-in">签到</b><span data-en="Not adopted · no evidence">未采纳 · 无证据</span></li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<!-- Act 6 continues: the same journey, expressed through views and themes. -->
+<section class="act" id="gal" data-shot="gal" aria-labelledby="demo-title">
+ <div class="stick demo-stick">
+  <header class="demo-heading"><h2 id="demo-title" data-en="Same map. Other views.">同一张地图，换个看法。</h2></header>
+  <div class="demo-caption"><div class="demo-step"><span id="demo-count">01 / 06</span><span id="demo-kind">视图演示</span></div><h3 id="demo-name">等轴旅程</h3><p id="demo-description">把真实场景与人的体验放在一起，看见它们之间的关系。</p><p class="demo-scroll" data-en="Scroll to transform · scroll back to compare">向下滚动切换 · 向上回看对照</p><p class="demo-scroll" data-en="Particle sketches, not the skill’s output. The skill renders interactive HTML views. <a href=&quot;../examples/&quot;>Real examples ↗</a>">粒子示意，不是 Skill 的实际输出。Skill 生成可交互的 HTML 视图。<a href="../examples/">实际示例 ↗</a></p></div>
+ </div>
+</section>
+
+<section id="features" class="story-end" aria-labelledby="finale-title"><div class="finale-panel" aria-hidden="true" inert><canvas class="finale-art" aria-hidden="true"></canvas><div class="finale-top">JOURNEY / <span data-en="EPILOGUE">终章</span></div><div class="finale-body"><p class="finale-kicker" data-en="PUT THE PEOPLE IN THE REPO.">把人的体验，放进 REPO</p><h2 class="finale-title" id="finale-title" data-en="<span>Your code has a map.</span><span><em>So should the people using it.</em></span>"><span>代码有地图，</span><span><em>人的体验也该有一张。</em></span></h2><p class="finale-description" data-en="Keep people's goals, feelings and evidence as a map next to your code, and update it as requirements change.">把人的目标、感受与依据记成一张地图，<br>放在代码旁边，随需求一起更新。</p><div class="finale-actions"><a class="finale-install" href="../docs/#install"><span data-en="Give your agent the map">给你的 agent 装上这张地图</span><span aria-hidden="true">↗</span></a></div></div><div class="finale-bottom"><span>BUILD · UPDATE · EXPRESS</span><a href="#intro" data-replay><span data-en="Replay the story">再看一次故事</span><span aria-hidden="true">↺</span></a></div></div></section></main>
+
+<section id="install">
+  <div class="wrap">
+    <h2 data-en="Your code has a map.<br><span>So should the people using it.</span>">代码有地图，<br><span>人的体验也该有一张。</span></h2>
+    <div class="tcard">
+      <div class="ctop"><span>terminal</span><div class="tabs" role="tablist" aria-label="安装目标"><button type="button" role="tab" id="tabCC" aria-selected="true">Claude Code</button><button type="button" role="tab" id="tabCX" aria-selected="false">Codex</button></div></div>
+      <div class="cmd"><pre><span class="c" id="cmdNote"># 装到 Claude Code 的 skills 目录</span>
+<span id="cmdText">git clone --depth 1 https://github.com/cguodesign/customer-journey-map-skill ~/.claude/skills/journey</span></pre><button type="button" class="copy" id="copyBtn" aria-live="polite" data-en="Copy">复制</button></div>
+    </div>
+    <div class="links"><a href="https://github.com/cguodesign/customer-journey-map-skill" target="_blank" rel="noopener">GitHub ↗</a><a href="https://github.com/cguodesign/customer-journey-map-skill/blob/master/demos/walkthrough.md" target="_blank" rel="noopener" data-en="10-min walkthrough ↗">10 分钟导览 ↗</a><a href="../examples/" target="_blank" rel="noopener">Showcase ↗</a></div>
+  </div>
+</section>
+<footer class="site-footer"><div class="footer-top"><div><a class="brand" href="../">journey<small>SKILL</small></a><p>代码有地图，人的体验也该有一张。</p></div><div class="footer-links"><a data-story href="../story/">走进故事</a><a href="../examples/">实际示例</a><a href="../docs/">使用指南</a></div></div><div class="footer-bottom"><span>JOURNEY SKILL · OPEN SOURCE · MIT</span><a href="https://github.com/cguodesign/customer-journey-map-skill" target="_blank" rel="noopener">SOURCE ON GITHUB ↗</a></div></footer>
+
+<script>
+/* Shared illustration, sampled from the four-step meeting-room example.
+   A recognisable journey matrix replaces the unrelated ring / doorway motifs. */
+(()=>{
+ function model(){
+  let seed=617;const rnd=()=>((seed=seed*16807%2147483647)-1)/2147483646,points=[],labels=[];
+  const dot=(x,y,b=.6,z=0)=>points.push([x,y,z,b]);
+  function line(x,y,xx,yy,b=.5){const n=Math.ceil(Math.hypot(xx-x,yy-y)*220);for(let i=0;i<=n;i++){const u=i/n;dot(x+(xx-x)*u+(rnd()-.5)*.006,y+(yy-y)*u+(rnd()-.5)*.006,b*(.6+rnd()*.4))}}
+  const left=-1.28,right=1.48,top=.82,bottom=-.66,cw=(right-left)/4;
+  [top,.49,.02,-.4,bottom].forEach(y=>line(left,y,right,y,.42));
+  for(let j=0;j<=4;j++)line(left+j*cw,top,left+j*cw,bottom,.3);
+  const xs=Array.from({length:4},(_,i)=>left+cw*(i+.5)),values=[0,1,1,0],ys=values.map(v=>-.24+v*.13);
+  for(let j=0;j<3;j++)line(xs[j],ys[j],xs[j+1],ys[j+1],1);
+  xs.forEach((x,j)=>{for(let i=0;i<100;i++){let a=rnd()*6.283,r=Math.sqrt(rnd())*.025;dot(x+Math.cos(a)*r,ys[j]+Math.sin(a)*r,1)} });
+  const rows=[['想聊一下','推门即用','一起讨论','散会'],['需要一面白板','空房，直接进入','白板讨论 20 分钟','提前结束'],['门禁 / 日历','走廊观察','讨论记录','门口传感器']];
+  const english=[['Need to talk','Walk in','Discuss','Leave'],['Need a whiteboard','Enter an empty room','20 min at the board','Finish early'],['Badge / calendar','Hallway observation','Meeting notes','Door sensor']];
+  // The third step has no source annotation in the example; keep that gap visible.
+  rows[2][2]='依据待补充';english[2][2]='Source not recorded';
+  [.66,.26,-.54].forEach((y,k)=>xs.forEach((x,j)=>labels.push({x,y,t:rows[k][j],en:english[k][j],small:k>0})));
+  labels.push({x:-1.54,y:.66,t:'阶段',en:'STAGE'},{x:-1.54,y:.26,t:'行为',en:'ACTION'},{x:-1.54,y:-.19,t:'感受',en:'EMOTION'},{x:-1.54,y:-.54,t:'依据',en:'SOURCE'});
+  xs.forEach((x,j)=>labels.push({x,y:ys[j]+.08,t:values[j]>0?'+'+values[j]:'0',en:values[j]>0?'+'+values[j]:'0',small:true}));
+  // Two people remain below their map; the visual begins with human experience.
+  for(const x of [-.5,-.18]){
+   for(let i=0;i<160;i++){const a=rnd()*6.283;dot(x+Math.cos(a)*.042,-.85+Math.sin(a)*.05,.8)}
+   for(let i=0;i<450;i++){const u=rnd(),side=rnd()>.5?1:-1;dot(x+side*(u<.5?.05:.025)+(rnd()-.5)*.025,-.92-u*.32,.6+rnd()*.4)}
+   line(x-.05,-.95,x-.1,-1.1,.6);line(x+.05,-.95,x+.1,-1.1,.6);
+  }
+  labels.push({x:.55,y:-1.05,t:'从人的经历，到共同的理解',en:'FROM EXPERIENCE TO SHARED UNDERSTANDING',small:true});
+  return{points,labels};
+ }
+ function draw(ctx,w,h,t,{finale=false,still=false,en=false}={}){
+  const m=data,mobile=w<760,cx=w*(mobile?.53:.76),cy=h*(mobile?(finale?.72:.77):.49),scale=mobile?w*.27:Math.min(w*.135,h*.31),assemble=still?1:Math.min(1,t/2.2),ease=1-Math.pow(1-assemble,4);
+  const project=(x,y)=>[cx+(x+y*.08)*scale,cy-y*scale];
+  ctx.clearRect(0,0,w,h);ctx.fillStyle='#e7e8e2';
+  for(let i=0;i<m.points.length;i++){
+   const [x,y,z,b]=m.points[i],a=i*2.399,spread=(1-ease)*(1+(i%23)/23),p=project(x+Math.cos(a)*spread,y+Math.sin(a)*spread);
+   const highlight=still?0:Math.pow(Math.max(0,Math.cos(x*2.4-t*.8)),12)*.25;
+   ctx.globalAlpha=Math.min(1,b+highlight);const s=i%19===0?1.6:1;ctx.fillRect(p[0],p[1],s,s);
+  }
+  // Incoming notes retain a trace of their origin as they join the matrix.
+  for(let i=0;i<110;i++){const phase=still?i/110:(i/110+t*.055)%1,x=-2.3+phase*1.05,y=Math.sin(i*7.1)*.7;const p=project(x,y);ctx.globalAlpha=Math.sin(phase*Math.PI)*.3;ctx.fillRect(p[0],p[1],1,1)}
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  const labelOpacity=Math.max(0,(ease-.75)*4);
+  for(const l of m.labels){const p=project(l.x,l.y);ctx.globalAlpha=labelOpacity*(l.small?.72:.95);ctx.font=(mobile?(l.small?8:10):(l.small?11:13))+'px "Noto Sans SC",sans-serif';ctx.fillText(en?l.en:l.t,p[0],p[1])}
+  ctx.globalAlpha=1;
+ }
+ const data=model();window.JourneyArt={model,draw};
+})();
+
+(function(){
+"use strict";
+var LANG=(function(){try{var q=new URLSearchParams(location.search).get("lang")||location.hash.replace("#lang=","");if(q==="en"||q==="zh")return q}catch(e){}try{var s=localStorage.getItem("journey-doc-language");if(s==="en"||s==="zh")return s}catch(e){}return "zh"})();
+var EN={"想聊一下": "Need to talk", "提前 15 分钟预订": "Book 15 min ahead", "站在空房门口等": "Wait at an empty room", "开会": "Meet", "散会 · 房间空置": "Leave · room sits idle", "需求以为的体验": "What the spec assumed", "落差 · 等 15 分钟 · 情绪 −2": "Gap · 15 min wait · mood −2", "推门即用": "Walk in", "✕ 提前 15 分钟预订": "✕ Book 15 min ahead", "签到 · 证据：无": "Check-in · evidence: none", "签到": "Check-in", "门禁 + 日历 · 3 周": "Badge + calendar · 3 wks", "门口传感器 · 2 周": "Door sensor · 2 wks", "散会": "Leave", "小林": "Lin", "预订系统": "Booking system", "门口传感器": "Door sensor", "可见线": "Line of visibility", "想聊": "Talk", "预订": "Book", "等 15 分钟": "Wait 15 min", "开会 · 20 分钟": "Meet · 20 min", "推门": "Walk in", "之前": "Before", "之后": "After", "空闲 · 推门即用": "Free · walk in", "第 0 天 · 需求评审": "Day 0 · spec review", "上线后第 3 周 · 周二 14:02": "Week 3 after launch · Tue 14:02", "第 0 天 · 需求评审 · 地图视图": "Day 0 · map view", "第 0 天 · 改": "Day 0 · modify", "第 2 天 · 新需求": "Day 2 · new request", "◀◀ 倒带": "◀◀ Rewind", "复制": "Copy", "已复制": "Copied", "已选中": "Selected", "# 装到 Claude Code 的 skills 目录": "# Install into Claude Code skills", "# 装到 Codex 的 skills 目录": "# Install into Codex skills"};
+Object.assign(EN,{"需要一面白板":"Need a whiteboard","情绪 0 · 想马上聊":"Mood 0 · urgent","门口屏：空闲":"Display: available","等待 0 分钟":"Wait: 0 minutes","白板讨论约 20 分钟":"Talk: ~20 minutes","问题说清楚了":"Problem clarified","提前散会":"Leave early","空占仍待解决":"Idle time remains","06 / 同一张地图，多种表达":"06 / ONE MAP, MANY EXPRESSIONS","01 / 体验":"01 / EXPERIENCE","02 / 触点":"02 / TOUCHPOINTS","03 / 证据":"03 / EVIDENCE","证据待补充":"Evidence not yet linked"});
+function tx(s){return LANG==="en"&&EN[s]!=null?EN[s]:s}
+var motionQuery=matchMedia("(prefers-reduced-motion: reduce)"),REDUCED=motionQuery.matches,PAUSED=false;
+var cv=document.getElementById("stage"),ctx=cv.getContext("2d"),labsEl=document.getElementById("labs");
+var dpr=Math.min(2,window.devicePixelRatio||1),W=0,H=0,MOB=false;
+var NP=innerWidth<760?10000:26000;
+function rnd(seed){var s=seed||1;return function(){s=(s*16807)%2147483647;return(s-1)/2147483646}}
+function sm(a,b,x){x=Math.min(1,Math.max(0,(x-a)/(b-a)));return x*x*(3-2*x)}
+function lerp(a,b,t){return a+(b-a)*t}
+function cl(x){return Math.min(1,Math.max(0,x))}
+
+/* per-particle randoms */
+var R=rnd(9),R1=new Float32Array(NP),R2=new Float32Array(NP),R3=new Float32Array(NP),G1=new Float32Array(NP),G2=new Float32Array(NP),PH=new Float32Array(NP);
+function g(){return(R()+R()+R()-1.5)/1.5}
+for(var i=0;i<NP;i++){R1[i]=R();R2[i]=R();R3[i]=R();G1[i]=g();G2[i]=g();PH[i]=R()*6.283}
+
+/* ---------- model sampler (from v1) ---------- */
+function M(){this.a=[];this.c=[];this.col=0;this.R=rnd(11)}
+M.prototype.p=function(x,y,z,b){this.a.push(x,y,z,b==null?.6:b);this.c.push(this.col);return this};
+M.prototype.line=function(a,b,step,br){var L=Math.hypot(b[0]-a[0],b[1]-a[1],b[2]-a[2]),n=Math.max(2,Math.round(L/step));for(var i=0;i<=n;i++){var u=i/n;this.p(a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u,a[2]+(b[2]-a[2])*u,br)}return this};
+M.prototype.box=function(x0,y0,z0,x1,y1,z1,step,br,face){var c=[[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1],[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]];
+  var E=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]],self=this;E.forEach(function(e){self.line(c[e[0]],c[e[1]],step,br)});
+  if(face){var area=((x1-x0)*(z1-z0)+(x1-x0)*(y1-y0)+(y1-y0)*(z1-z0))*2,k=Math.round(area*face);for(var i=0;i<k;i++){var Rr=this.R,f=Math.floor(Rr()*6),u=Rr(),v=Rr(),x=x0+(x1-x0)*u,y=y0+(y1-y0)*v,z=z0+(z1-z0)*(f<2?u:v);
+    if(f<2)y=f?y1:y0;else if(f<4)z=f===2?z0:z1;else x=f===4?x0:x1;if(f<2){x=x0+(x1-x0)*u;z=z0+(z1-z0)*v}this.p(x,y,z,br*.45)}}return this};
+M.prototype.circle=function(cx,cy,cz,r,axis,step,br){var n=Math.max(6,Math.round(6.283*r/step));for(var i=0;i<n;i++){var a=i/n*6.283,c=Math.cos(a)*r,s=Math.sin(a)*r;if(axis==="y")this.p(cx+c,cy,cz+s,br);else if(axis==="x")this.p(cx,cy+c,cz+s,br);else this.p(cx+c,cy+s,cz,br)}return this};
+M.prototype.cyl=function(cx,cy,cz,r,h,step,br){for(var y=0;y<=h;y+=step*1.5)this.circle(cx,cy+y,cz,r,"y",step,br*(y===0||y+step*1.5>h?1:.6));return this};
+M.prototype.sphere=function(cx,cy,cz,r,n,br){for(var i=0;i<n;i++){var th=this.R()*6.283,ph=Math.acos(2*this.R()-1);this.p(cx+r*Math.sin(ph)*Math.cos(th),cy+r*Math.cos(ph),cz+r*Math.sin(ph)*Math.sin(th),br)}return this};
+M.prototype.plane=function(x0,x1,y0,y1,z,step,br){for(var x=x0;x<=x1+1e-6;x+=step)for(var y=y0;y<=y1+1e-6;y+=step)this.p(x,y,z,br);return this};
+M.prototype.floor=function(x0,x1,z0,z1,y,step,br){for(var x=x0;x<=x1+1e-6;x+=step)for(var z=z0;z<=z1+1e-6;z+=step)this.p(x,y,z,br);return this};
+/* fit any model into NP slots */
+function fit(m,dy,out){var n=m.a.length/4,a=m.a;
+  for(var i=0;i<NP;i++){var j=n>=NP?Math.floor(i*n/NP):i%n,k=j*4,dup=n<NP&&i>=n;
+    out.P[i*3]=a[k]+(dup?G1[i]*.006:0);out.P[i*3+1]=a[k+1]+dy+(dup?G2[i]*.006:0);out.P[i*3+2]=a[k+2];
+    out.B[i]=a[k+3]*(dup?.7:1);out.C[i]=m.c[j]}
+  return out}
+function buf(){return{P:new Float32Array(NP*3),B:new Float32Array(NP),C:new Uint8Array(NP),L:[]}}
+
+/* ---------- person ---------- */
+function person(m,x,z,br,sit){
+  function limb(ax,ay,az,bx,by,bz,r,n){for(var i=0;i<n;i++){var t=m.R(),a=m.R()*Math.PI*2,rr=r*(.75+.25*Math.sin(t*Math.PI));m.p(lerp(ax,bx,t)+Math.cos(a)*rr,lerp(ay,by,t),lerp(az,bz,t)+Math.sin(a)*rr,br*(.55+.45*m.R()))}}
+  if(sit){limb(x-.04,.3,z,x-.04,.02,z+.12,.03,100);limb(x+.04,.3,z,x+.04,.02,z+.12,.03,100)}
+  else{limb(x-.04,.34,z,x-.055,0,z+.012,.033,160);limb(x+.04,.34,z,x+.06,0,z-.025,.033,160)}
+  for(var i=0;i<480;i++){var y=.33+m.R()*.32,a=m.R()*Math.PI*2,wa=.064+Math.sin((y-.33)/.32*Math.PI)*.015;m.p(x+Math.cos(a)*wa,y,z+Math.sin(a)*.045,br*(.5+.5*m.R()))}
+  limb(x-.073,.63,z,x-.115,.36,z+.02,.023,130);limb(x+.073,.63,z,x+.12,.39,z+.025,.023,130);
+  m.sphere(x,.745,z,.069,290,br);
+}
+
+/* The opening is the same journey matrix shown on the normal homepage. */
+function shotPortal(){var m=new M(),art=JourneyArt.model();art.points.forEach(function(p){m.p(p[0],p[1],p[2],p[3])});var o=fit(m,0,buf());o.L=art.labels.map(function(l){EN[l.t]=l.en;return{x:l.x,y:l.y,z:0,t:l.t,cls:l.small?"card-detail":"",op:1}});return o;}
+
+/* ---------- shot: dust (act 1) ---------- */
+function shotDust(){var o=buf(),Rr=rnd(5);
+  for(var i=0;i<NP;i++){var arm=i%3,r=Math.pow(Rr(),.6)*2.3,th=r*2.1+arm*2.094+Rr()*.55;
+    o.P[i*3]=Math.cos(th)*r;o.P[i*3+1]=(Rr()-.5)*.3*(2.3-r)*.5;o.P[i*3+2]=Math.sin(th)*r;o.B[i]=.25+.5*Rr()*(1-r/2.6);o.C[i]=Rr()<.06?1:0}
+  return o}
+
+/* ---------- shot: room ---------- */
+var ROOM={x0:-1.2,x1:1.2,z0:-.8,z1:.8,h:1.15};
+function roomBase(m,lit){var b=lit?1:.62;
+  m.col=2;m.floor(-1.15,1.15,-.75,.75,0,.06,lit?.5:.32);           // room floor
+  m.floor(-1.7,1.7,.9,1.7,0,.11,.16);                                  // corridor
+  m.col=2;
+  m.floor(-2.8,2.8,-2,2.7,-.015,.14,.13);
+  m.circle(0,-.013,0,2.15,"y",.023,.3);
+  m.circle(0,-.013,0,2.23,"y",.045,.18);
+  for(var q=-2;q<=2;q+=.5){m.line([q,-.012,-1.8],[q,-.012,2.2],.045,.15);m.line([-2.3,-.012,q],[2.3,-.012,q],.045,.15)}
+  m.col=0;
+  // glass walls: edges + sparse glass
+  m.box(ROOM.x0,0,ROOM.z0,ROOM.x1,ROOM.h,ROOM.z1,.02,.75*b+.15,lit?14:10);
+  // mullions on front wall
+  [-.6,0].forEach(function(x){m.line([x,0,ROOM.z1],[x,ROOM.h,ROOM.z1],.02,.5*b)});
+  // door frame (x .45..0.8 on front)
+  m.line([.45,0,ROOM.z1],[.45,.95,ROOM.z1],.012,.95);m.line([.8,0,ROOM.z1],[.8,.95,ROOM.z1],.012,.95);m.line([.45,.95,ROOM.z1],[.8,.95,ROOM.z1],.012,.95);
+  // table + legs
+  m.box(-.62,.42,-.3,.62,.46,.3,.022,.85*b+.1,70);
+  [[-.55,-.24],[.52,-.24],[-.55,.21],[.52,.21]].forEach(function(l){m.line([l[0],0,l[1]],[l[0],.42,l[1]],.02,.5*b)});
+  // chairs
+  [-.4,0,.4].forEach(function(x){[-.48,.48].forEach(function(z){m.box(x-.12,.26,z-.1,x+.12,.29,z+.1,.03,.5*b);m.line([x-.1,0,z],[x-.1,.26,z],.03,.35*b);m.line([x+.1,0,z],[x+.1,.26,z],.03,.35*b)})});
+  // whiteboard on back wall
+  m.box(-.6,.45,ROOM.z0+.01,.6,.95,ROOM.z0+.02,.016,.85*b+.1);
+  // ceiling lamp
+  m.box(-.5,1.1,-.12,.5,1.12,.12,.03,lit?.95:.35,lit?120:0);
+}
+function shotRoomWait(){var m=new M();roomBase(m,false);
+  m.col=1;m.plane(.86,1.04,.5,.66,ROOM.z1+.012,.01,1);                 // door screen (red)
+  m.col=0;person(m,.55,1.12,.95);person(m,.98,1.22,.95);
+  var o=fit(m,-.55,buf());o.L=[{x:.95,y:.66-.55,z:ROOM.z1,cls:"screen",key:"screen"}];return o}
+function shotRoomHappy(){var m=new M();roomBase(m,true);
+  m.col=3;m.plane(.86,1.04,.5,.66,ROOM.z1+.012,.012,1);                 // door screen (green)
+  // door leaf swung open
+  m.col=0;m.line([.45,0,ROOM.z1],[.62,0,ROOM.z1+.3],.015,.8);m.line([.45,.95,ROOM.z1],[.62,.95,ROOM.z1+.3],.015,.8);m.line([.62,0,ROOM.z1+.3],[.62,.95,ROOM.z1+.3],.015,.8);
+  // a journey curve sketched on the whiteboard
+  for(var k=0;k<=160;k++){var u=k/160,x=-.52+1.04*u,y=.7+.12*Math.sin(u*5.2+.4)*(1-u*.3);m.p(x,y,ROOM.z0+.03,1)}
+  person(m,-.3,-.45,1);person(m,.25,-.5,1);
+  var o=fit(m,-.55,buf());o.L=[{x:.95,y:.66-.55,z:ROOM.z1,cls:"screen free",key:"screenOk"}];return o}
+
+/* Shared physical world. Stable particle identities keep walls fixed while people
+   walk, the door swings, and the scene becomes the foundation of the map. */
+var WORLD_SHELL=new M(),WORLD_PERSON=new M();roomBase(WORLD_SHELL,false);person(WORLD_PERSON,0,0,1);
+var worldPoint=[0,0,0,0,0];
+function physicalPoint(i,open,approach){
+  var r=i%100,u=R1[i],v=R2[i],q=R3[i],x,y,z,b,c=0;
+  if(r<69){var j=Math.floor(u*WORLD_SHELL.c.length),a=j*4;x=WORLD_SHELL.a[a];y=WORLD_SHELL.a[a+1];z=WORLD_SHELL.a[a+2];b=WORLD_SHELL.a[a+3]*(1+open*.25);c=WORLD_SHELL.c[j]}
+  else if(r<94){var j=Math.floor(u*WORLD_PERSON.c.length)*4,other=v>.5;
+    var walk=sm(.12,1,open),doorX=other?.68:.57,doorZ=other?.8:.75;
+    var px=walk<.4?lerp(other?.98:.55,doorX,walk/.4):lerp(doorX,other?.25:-.3,(walk-.4)/.6);
+    var pz=(walk<.4?lerp(other?1.22:1.12,doorZ,walk/.4):lerp(doorZ,other?-.5:-.45,(walk-.4)/.6))+(1-open)*approach*.65;
+    x=WORLD_PERSON.a[j]+px;y=WORLD_PERSON.a[j+1];z=WORLD_PERSON.a[j+2]+pz;b=.9;c=0;
+  }else if(r<98){var angle=open*1.43,edge=Math.floor(q*4),dx=edge<2?u*.35:edge===2?0:.35;
+    x=.45+Math.cos(angle)*dx;z=ROOM.z1+Math.sin(angle)*dx;y=edge<2?(edge===0?0:.95):u*.95;b=.7;
+  }else{x=.86+u*.18;y=.5+v*.16;z=ROOM.z1+.015;b=1;c=open>.6?3:1}
+  worldPoint[0]=x;worldPoint[1]=y;worldPoint[2]=z;worldPoint[3]=b;worldPoint[4]=c;return worldPoint;
+}
+/* Reality unfolds as an imagined discussion, an empty room, then a blocked route.
+   The board, clock, digits and lock are sampled geometry in the same particle cloud. */
+var WISH_BOARD=new M(),DOOR_LOCK=new M();
+WISH_BOARD.box(-.62,0,0,.62,.64,.006,.013,.7);
+[[-.43,.36],[-.08,.15],[.28,.38]].forEach(function(a){WISH_BOARD.box(a[0]-.09,a[1]-.07,.01,a[0]+.09,a[1]+.07,.012,.012,.9)});
+WISH_BOARD.line([-.33,.36,.01],[-.18,.15,.01],.009,.8);
+WISH_BOARD.line([.02,.15,.01],[.18,.38,.01],.009,.8);
+WISH_BOARD.line([-.42,.55,.01],[.06,.55,.01],.012,.6);
+DOOR_LOCK.box(-.1,-.08,0,.1,.07,.005,.009,1,500);
+for(var a=0;a<=Math.PI;a+=.06)DOOR_LOCK.p(Math.cos(a)*.067,.07+Math.sin(a)*.08,.006,1);
+DOOR_LOCK.line([0,-.035,.01],[0,.015,.01],.007,.8);
+var TIMER_SECONDS=-1,TIMER_MODEL;
+function timerModel(seconds){
+  if(seconds===TIMER_SECONDS)return TIMER_MODEL;
+  TIMER_SECONDS=seconds;var m=new M(),value=String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0");
+  var segments=[[[0,1],[1,1]],[[1,1],[1,.5]],[[1,.5],[1,0]],[[0,0],[1,0]],[[0,.5],[0,0]],[[0,1],[0,.5]],[[0,.5],[1,.5]]];
+  var digits=["012345","12","01643","01236","1256","02563","023456","012","0123456","012356"];
+  for(var j=0;j<value.length;j++){var x=-.35+j*.17;if(value[j]===":"){m.sphere(x+.035,.055,0,.01,22,1);m.sphere(x+.035,.145,0,.01,22,1);continue}
+    digits[+value[j]].split("").forEach(function(d){var e=segments[+d];for(var h=-1;h<=1;h++)m.line([x+e[0][0]*.105+h*.003,e[0][1]*.2,0],[x+e[1][0]*.105+h*.003,e[1][1]*.2,0],.006,1)});
+  }
+  m.circle(-.64,.1,0,.14,"z",.009,.65);m.line([-.64,.1,0],[-.64,.2,0],.008,1);m.line([-.64,.1,0],[-.56,.07,0],.008,1);
+  TIMER_MODEL=m;return m;
+}
+function roomBeat(p){var section=lay&&lay.find(function(l){return l.shot==="room"}),span=section?section.bot-section.top:H*2.4;return cl((p*span-H*.5)/Math.max(1,span-H))}
+function roomState(p){var beat=roomBeat(p);return{beat:beat,wish:1-sm(.2,.4,beat),blocked:sm(.26,.43,beat),waiting:sm(.58,.82,beat),seconds:900-Math.round(sm(.62,1,beat)*12)}}
+function liveRoom(p,out,happy){
+  var state=roomState(p),open=happy?sm(.05,.55,p):0,approach=happy?0:1-sm(0,.24,state.beat);
+  var wish=state.wish,blocked=state.blocked,waiting=state.waiting,timer=happy?null:timerModel(state.seconds);
+  var timerX=MOB?.55:.9,timerScale=MOB?1.1:1.25;
+  // Overlays occupy the front-wall plane, sharing the room’s isometric axes.
+  for(var i=0;i<NP;i++){
+    var k=i*3,r=i%100,u=R1[i],v=R2[i],q=R3[i],x,y,z,b,c=0;
+    if(happy||r<70){var wi=happy?i:Math.floor(i/100)*100+Math.floor(r/70*100),w=physicalPoint(wi,open,approach);x=w[0];y=w[1];z=w[2];b=w[3];c=w[4];
+      if(!happy&&wi%100<69){var furniture=Math.abs(x)<.7&&Math.abs(z)<.65&&y>.05&&y<.55;b*=furniture?lerp(.5,1.65,blocked):lerp(.32,.75,blocked);if(y>1)b*=.35}
+    }else if(r<81){var j=Math.floor(u*WISH_BOARD.c.length)*4,m=WISH_BOARD.a;
+      var settle=sm(.16,.42,state.beat);x=m[j]+lerp(.6,0,settle);y=m[j+1]+lerp(1.02,.4,settle);z=m[j+2]+lerp(1.18,-.77,settle);b=m[j+3]*wish;
+    }else if(r<91){var j=Math.floor(u*timer.c.length)*4,m=timer.a,dx=m[j]*timerScale;
+      x=timerX-dx;y=1.28+m[j+1]*timerScale;z=1.02;b=m[j+3]*blocked;
+    }else if(r<95){var j=Math.floor(u*DOOR_LOCK.c.length)*4,m=DOOR_LOCK.a;
+      x=.625-m[j];y=.66+m[j+1];z=.87;b=m[j+3]*blocked;
+    }else if(r<98){x=.625+G1[i]*.014;y=.018;z=1.85-u*.97;b=(u<sm(0,.3,state.beat)?.75:0)*(Math.floor(u*16)%2?.22:1);
+      // The path ends against a closed threshold. The interior remains unoccupied.
+      if(q>.7){x=.45+u*.35;z=.86+G2[i]*.012;b=blocked*.9}
+    }else{var a=u*6.283,other=v>.5,cx=other?.98:.55,cz=(other?1.22:1.12)+approach*.65;
+      x=cx+Math.cos(a)*.18;y=.009;z=cz+Math.sin(a)*.18;b=.4*waiting*(a<waiting*6.283?1:.12);
+    }
+    out.P[k]=x;out.P[k+1]=y-.55;out.P[k+2]=z;out.B[i]=b;out.C[i]=c;
+  }
+  out.E=[];out.L=[];
+  if(happy)out.L.push({x:.95,y:.11,z:ROOM.z1,cls:open>.6?"screen free":"screen",key:open>.6?"screenOk":"screen"});
+  else{
+    if(wish>.02){out.E.push({a:[.55,.24,1.12+approach*.65],b:[.6,.47,1.18],alpha:wish*.24,dash:true});out.L.push({x:.6,y:1.18,z:1.18,t:"想一起画出来",cls:"scene-note",op:wish})}
+    if(blocked>.02){out.E.push({a:[.95,.1,.82],b:[timerX,.66,1.02],alpha:blocked*.25,dash:true});out.L.push({x:timerX,y:1.14,z:1.02,t:"距离可用",cls:"scene-note",op:blocked});out.L.push({x:-.45,y:.03,z:0,t:"空闲 · 无人使用",cls:"scene-note",op:blocked*(1-waiting*.5)})}
+  }
+  out.reality=state;return out;
+}
+Object.assign(EN,{"想一起画出来":"An idea to work through","距离可用":"UNTIL AVAILABLE","空闲 · 无人使用":"EMPTY · NO ONE INSIDE"});
+/* ---------- shot: journey map ---------- */
+var X0=-1.7,X1=1.7,S=.34,FLOOR=-.95;
+function curveFn(ns){ns=ns.filter(function(n){return n.w>0}).sort(function(a,b){return a.x-b.x});
+  return function(x){if(x<=ns[0].x)return ns[0].v;for(var j=0;j<ns.length-1;j++){if(x<=ns[j+1].x){var t=(x-ns[j].x)/(ns[j+1].x-ns[j].x);t=(1-Math.cos(Math.PI*t))/2;return ns[j].v+(ns[j+1].v-ns[j].v)*t}}return ns[ns.length-1].v}}
+// Exploded axonometric map: experience above touchpoints above source evidence.
+// Elevation expresses emotion; layers express meaning. All layers share one route.
+function mapRoute(x){return Math.sin((x+1.7)*1.45)*.32}
+function mapBuild(o,out){
+  var ns=o.nodes,f=curveFn(ns),L=[],edges=[];
+  var explode=o.explode==null?1:o.explode,top=lerp(.18,.88,explode),mid=-.22,base=lerp(-.48,-1.2,explode);
+  function height(x){return top+f(x)*.23}
+  function edge(a,b,alpha,dash){edges.push({a:a,b:b,alpha:alpha,dash:!!dash})}
+  function plane(y,alpha,grid){
+    var corners=[[-2,y,-.94],[2,y,-.94],[2,y,.94],[-2,y,.94]];
+    corners.forEach(function(a,j){edge(a,corners[(j+1)%4],alpha)});
+    if(grid){for(var x=-1.6;x<2;x+=.4)edge([x,y,-.94],[x,y,.94],alpha*.22);
+      for(var z=-.6;z<.94;z+=.3)edge([-2,y,z],[2,y,z],alpha*.22)}
+    // Offset cut edges give the suspended plates a little physical thickness.
+    edge([-2,y-.035,.94],[2,y-.035,.94],alpha*.4);edge([2,y-.035,.94],[2,y-.035,-.94],alpha*.4);
+  }
+  plane(top,.19,false);plane(mid,.38,true);plane(base,.32,true);
+  [[-2,-.94],[2,-.94],[2,.94],[-2,.94]].forEach(function(p){edge([p[0],base,p[1]],[p[0],top,p[1]],.2,true)});
+  ns.forEach(function(nd){if(nd.b<.03)return;
+    var z=mapRoute(nd.x),h=height(nd.x),w=.23,d=.18;
+    edge([nd.x,mid,z],[nd.x,h,z],.48*nd.b,true);
+    [[-w,-d],[w,-d],[w,d],[-w,d]].forEach(function(a,j,arr){var b=arr[(j+1)%4];edge([nd.x+a[0],mid,z+a[1]],[nd.x+b[0],mid,z+b[1]],.48*nd.b)});
+    if(o.roots&&o.roots.some(function(rt){return Math.abs(rt.x-nd.x)<.05}))edge([nd.x,base,z],[nd.x,mid,z],.7*o.rootW,true);
+  });
+  for(var i=0;i<NP;i++){
+    var r=i%100,u=R1[i],v=R2[i],q=R3[i],x,y,z,b,c=0,k=i*3,nd=ns[Math.floor(q*ns.length)],nx=nd.x,nz=mapRoute(nx);
+    if(r<23){x=X0+(X1-X0)*u;y=height(x)+G1[i]*.012;z=mapRoute(x)+G2[i]*.023;b=.95}
+    else if(r<33){var rr=.065*Math.cbrt(v),th=q*6.283,ph=Math.acos(2*u-1);
+      x=nx+rr*Math.sin(ph)*Math.cos(th);y=height(nx)+rr*Math.cos(ph);z=nz+rr*Math.sin(ph)*Math.sin(th);b=nd.b;c=nd.c||0;
+      if(nd.b<1){y+=(1-nd.b)*(.25+.6*v);x+=(1-nd.b)*G1[i]*.3}}
+    else if(r<39){x=X0+(X1-X0)*u;y=top;z=mapRoute(x);b=((u*48)%1<.48)?.7*o.req:0;c=2}
+    else if(r<49){x=X0+(X1-X0)*u;var yr=f(x)*.23;z=mapRoute(x)+G2[i]*.045;y=top+yr*v;b=yr<-.02?o.gap*(.4+.55*q):0;c=1}
+    else if(r<57){x=nx;y=lerp(mid,height(nx),u);z=nz;b=nd.b*((u*35)%1<.5?.4:0)}
+    else if(r<69){x=X0+(X1-X0)*u;y=mid;z=mapRoute(x)+(v<.5?-.025:.025);b=.65;
+      if(r<64){var a=u*6.283,rad=.09+v*.014;x=nx+Math.cos(a)*rad;z=nz+Math.sin(a)*rad;b=.8*nd.b}}
+    else if(r<81){x=Math.round((-2+4*u)/.085)*.085;z=Math.round((-.92+1.84*v)/.085)*.085;y=base;b=.13+.14*q;c=2}
+    else if(r<88){var a=u*6.283;x=Math.cos(a)*2.33;z=Math.sin(a)*1.18;y=base;b=.32;c=0;
+      if(r>84){x*=1.035;z*=1.035;b=(u*120)%1<.45?.45:0}}
+    else if(r<94){x=nx+(u-.5)*.38;z=nz+(v-.5)*.28;y=mid;b=.15*nd.b;c=2}
+    else{var rt=o.roots&&o.roots.length?o.roots[Math.floor(q*o.roots.length)]:null;
+      x=rt?rt.x:nx;z=mapRoute(x);y=base;
+      if(v<.55){var a=u*6.283,rad=.045+v*.075;x+=Math.cos(a)*rad;z+=Math.sin(a)*rad;b=rt?.85*o.rootW:.14}
+      else{y=lerp(base,mid,u);b=rt?o.rootW*.5:0}}
+    out.P[k]=x;out.P[k+1]=y;out.P[k+2]=z;out.B[i]=b;out.C[i]=c;
+  }
+  ns.forEach(function(nd){if(nd.b>.35&&nd.lab)L.push({x:nd.x,y:height(nd.x)+.11,z:mapRoute(nd.x),t:nd.lab,cls:nd.c===1?"acc":"",op:sm(.35,.8,nd.b)})});
+  (o.extra||[]).forEach(function(e){var l=Object.assign({},e);
+    if(e.y===FLOOR){l.y=base;l.z=mapRoute(e.x)-.24;l.cls="dim below evidence"}
+    else if(e.t==="?"){l.y=(base+mid)*.5;l.z=mapRoute(e.x)}
+    else if(e.t==="落差 · 等 15 分钟 · 情绪 −2"){l.y=height(0)-.1;l.z=mapRoute(0)+.25;l.cls="acc below"}
+    else{l.y=top+e.y*.68;l.z=mapRoute(e.x)-.24}
+    if(!(MOB&&e.t==="落差 · 等 15 分钟 · 情绪 −2"))L.push(l);
+  });
+  ["01 / 体验","02 / 触点","03 / 证据"].forEach(function(label,j){L.push({x:2.08,y:[top,mid,base][j],z:.94,t:label,cls:"layer right",op:.9})});
+  out.L=L;out.E=edges;return out;
+}
+var BASE=function(){return[
+  {id:"idea",lab:"想聊一下",x:-1.6,v:0,b:1,w:1},
+  {id:"book",lab:"提前 15 分钟预订",x:-.8,v:-1,b:1,w:1,below:1},
+  {id:"find",lab:"站在空房门口等",x:0,v:-2,b:1,w:1,c:1,below:1},
+  {id:"hold",lab:"开会",x:.8,v:1,b:1,w:1},
+  {id:"leave",lab:"散会 · 房间空置",x:1.6,v:0,b:1,w:1}]};
+/* The narrative layers contain different information: the actual room,
+   a human goal/action/emotion model, and the records used to make a decision. */
+var STORY_TEXT={
+  "01 / 真实现场":"01 / REAL WORLD","02 / 人的体验":"02 / HUMAN EXPERIENCE","03 / 记录与依据":"03 / RECORDS & REASONING",
+  "想马上一起讨论":"We need to talk. Now.","期待 → 受阻":"Expectation → frustration","直接开始讨论":"Start the conversation","多一步，为什么？":"One more step. Why?",
+  "需求 / 提前 15 分钟预订":"RULE / Book 15 min ahead","依据 / 61% 的会议，10 分钟内开始":"EVIDENCE / 61% of meetings start within 10 min","理解 / 规则挡住了目标":"FINDING / The rule blocks the goal",
+  "修改 / 移除提前预订":"CHANGE / Remove advance booking","校验 / 悬空引用，拒绝写入":"VALIDATION / Dangling reference. Rejected.","记录 / 未写入任何改动":"RECORD / No changes written",
+  "写入 / 关联修正，已保存":"COMMIT / References fixed. Saved.","校验 / 结构完整 · 4 步骤":"VALIDATION / Structure OK · 4 steps",
+  "修改 / 加入签到":"CHANGE / Check-in added","依据 / 无来源、无指标":"EVIDENCE / No source. No metric.","决定 / 团队撤回签到":"DECISION / Team rolls back check-in","查询 / 列出：缺证据":"QUERY / Listed: no evidence",
+  "现场 / 门关着，白板空着":"SCENE / Closed door. Unused whiteboard.","现场 / 门打开，讨论开始":"SCENE / Door open. Conversation started.","提案示意":"PROPOSED",
+  "目标":"GOAL","行为与感受":"ACTIONS & FEELINGS"
+};Object.assign(EN,STORY_TEXT);
+function narrativeBuild(mode,p,out){
+  var reveal=mode==="gap"?(REDUCED?1:sm(.06,.5,p)):1;
+  var recordsReveal=mode==="gap"?0:mode==="fix"?(REDUCED?1:sm(.08,.28,p)):1;
+  var change=mode==="fix"?sm(.58,.78,p):mode==="prov"?1:0;
+  var proposal=mode==="prov"?sm(.08,.22,p)*(1-sm(.65,.84,p)):0;
+  var base=-1.55,experience=lerp(-.5,.08,reveal),records=lerp(experience+.12,1.38,recordsReveal);
+  var nodes=BASE();nodes[1].v=lerp(-1,.5,change);nodes[1].b=1-change;nodes[2].v=lerp(-2,1,change);
+  if(change>.5){nodes[2].lab="推门即用";nodes[2].c=0}
+  if(proposal>.01)nodes.splice(3,0,{id:"check",x:.4,v:lerp(1,-1,proposal),b:proposal,w:1,lab:"签到 · 证据：无",c:1});
+  var f=curveFn(nodes),L=[],E=[];
+  function height(x){return experience+f(x)*.17}
+  function edge(a,b,alpha,dash){E.push({a:a,b:b,alpha:alpha,dash:!!dash})}
+  function label(x,y,z,t,cls,op){L.push({x:x,y:y,z:z,t:t,cls:cls||"",op:op==null?1:op})}
+  // The only full platform is the scene itself. Upper levels are a journey and documents.
+  var corners=[[-1.9,base,-1.25],[1.9,base,-1.25],[1.9,base,1.25],[-1.9,base,1.25]];
+  corners.forEach(function(a,j){edge(a,corners[(j+1)%4],.4)});
+  var docs=mode==="gap"||mode==="fix"&&p<.38?["需求 / 提前 15 分钟预订","依据 / 61% 的会议，10 分钟内开始","理解 / 规则挡住了目标"]:
+    mode==="fix"?["修改 / 移除提前预订",p<.58?"校验 / 悬空引用，拒绝写入":"写入 / 关联修正，已保存",p<.58?"记录 / 未写入任何改动":"校验 / 结构完整 · 4 步骤"]:
+    ["修改 / 加入签到","依据 / 无来源、无指标",p>.65?"决定 / 团队撤回签到":"查询 / 列出：缺证据"];
+  var docsX=[-1.35,0,1.35],docZ=[.35,0,-.35];
+  if(recordsReveal>0)docsX.forEach(function(x,j){var z=docZ[j],w=.53,d=.33;
+    var c=[[x-w,records,z-d],[x+w,records,z-d],[x+w,records,z+d],[x-w,records,z+d]];
+    c.forEach(function(a,k){edge(a,c[(k+1)%4],recordsReveal*(j===1?.7:.32),mode==="prov"&&j===1)});
+    // Folded corners and short lines make these read as documents, not another floor.
+    edge([x+w-.16,records,z+d],[x+w-.16,records,z+d-.15],recordsReveal*.38);
+    edge([x+w-.16,records,z+d-.15],[x+w,records,z+d-.15],recordsReveal*.38);
+    label(x,records+.03,z,docs[j],"record",recordsReveal);
+  });
+  // Semantic links: the waiting person → their goal; screen → frustration; board → meeting.
+  var anchors=[[-lerp(.55,-.3,change)*.78,base+.62,-lerp(1.12,-.45,change)*.78],[-.95*.78,base+.5,-.8*.78],[0,base+.7,.8*.78]];
+  var targets=[-1.6,0,.8];
+  edge([-2.1,experience+.52,-.05],[-1.6,height(-1.6),mapRoute(-1.6)],.25*reveal,true);
+  anchors.forEach(function(a,j){var x=targets[j],end=[x,height(x),mapRoute(x)];edge(a,end,.25*reveal,true);
+    if(recordsReveal>0)edge(end,[docsX[j],records-.035,docZ[j]],(mode==="prov"&&j===1?.18:.3)*recordsReveal,true)});
+  // The uncommitted scanner has its own broken link and never becomes part of the room.
+  if(proposal>.03){var scanner=[-.95,base+.66,-.98];edge(scanner,[.4,height(.4),mapRoute(.4)],proposal*.45,true);
+    edge([.4,height(.4),mapRoute(.4)],[0,records-.35,0],proposal*.5,true);
+    label(-.95,base+.9,-.98,"提案示意","dim",proposal)}
+  for(var i=0;i<NP;i++){
+    var r=i%100,u=R1[i],v=R2[i],q=R3[i],k=i*3,x,y,z,b,c=0;
+    if(r<53){var wi=Math.floor(i/100)*100+Math.floor(r/53*100),w=physicalPoint(wi,change,0);x=-w[0]*.78;y=base+w[1]*.78;z=-w[2]*.78;b=w[3];c=w[4]}
+    else if(r<70){x=X0+(X1-X0)*u;y=height(x)+G1[i]*.009;z=mapRoute(x)+G2[i]*.021;b=.9*reveal}
+    else if(r<77){var nd=nodes[Math.floor(u*nodes.length)],a=v*6.283,rr=.04+q*.013;x=nd.x+Math.cos(a)*rr;y=height(nd.x)+G1[i]*.035;z=mapRoute(nd.x)+Math.sin(a)*rr;b=nd.b*reveal;c=nd.c||0}
+    else if(r<83){x=X0+(X1-X0)*u;var dip=f(x)*.17;y=experience+dip*v;z=mapRoute(x)+G1[i]*.04;b=dip<0?(1-change)*reveal*.65:0;c=1}
+    else if(r<92){var d=Math.floor(u*3),cx=docsX[d],cz=docZ[d];x=cx+(v-.5)*.85;y=records;z=cz+(Math.floor(q*5)-2)*.095;b=recordsReveal*(q>.8?.5:.19);c=2}
+    else if(r<96){x=-.95+(u-.5)*.16;y=base+.26+v*.52;z=-.98+(q-.5)*.1;b=proposal*.65;c=1}
+    else{x=(u-.5)*3.8;y=base;z=(v-.5)*2.5;b=.15;c=2}
+    out.P[k]=x;out.P[k+1]=y;out.P[k+2]=z;out.B[i]=b;out.C[i]=c;
+  }
+  nodes.forEach(function(nd){if(nd.b>.3)label(nd.x,height(nd.x)+.1,mapRoute(nd.x),nd.lab,nd.c===1?"acc":"",nd.b*reveal)});
+  label(-2.1,experience+.52,-.05,proposal>.2?"多一步，为什么？":change>.7?"直接开始讨论":"想马上一起讨论","human-thought",reveal);
+  if(!MOB&&mode==="gap")label(.1,experience-.43,mapRoute(.1)+.1,"期待 → 受阻","dim",reveal);
+  label(1.95,base,1.1,"01 / 真实现场","layer right",1);
+  label(1.95,experience,.7,"02 / 人的体验","layer right",reveal);
+  if(recordsReveal>0)label(1.95,records,.7,"03 / 记录与依据","layer right",recordsReveal);
+  out.L=L;out.E=E;out.story={mode:mode,open:change,proposal:proposal,reveal:reveal,recordsReveal:recordsReveal,records:recordsReveal>0?docs:[]};return out;
+}
+function shotGap(p,out){return narrativeBuild("gap",p,out)}
+function shotFix(p,out){return narrativeBuild("fix",p,out)}
+function shotProv(p,out){return narrativeBuild("prov",p,out)}
+
+/* ---------- gallery views ---------- */
+var STEPS=["想聊一下","推门即用","开会","散会"];
+function galEmotion(out){var n=BASE();n.splice(1,1);n[1].v=1;n[1].lab="推门即用";n[1].c=0;n[1].below=0;n[0].x=-1.5;n[1].x=-.5;n[2].x=.5;n[3].x=1.5;
+  return mapBuild({nodes:n,req:0,gap:0},out)}
+function galLanes(out){var m=new M(),cols=[-1.35,-.45,.45,1.35],lanes=[.55,.05,-.55];
+  m.col=2;lanes.forEach(function(y){for(var x=-1.7;x<=1.7;x+=.025)m.p(x,y,0,.35)});
+  for(var x=-1.7;x<=1.7;x+=.05)if((x*10|0)%2===0)m.p(x,.3,0,.5);
+  m.col=0;var act=[[1,0,0],[1,1,0],[1,0,0],[1,1,1]];
+  cols.forEach(function(cx,j){act[j].forEach(function(on,l){if(!on)return;m.box(cx-.22,lanes[l]-.08,-.02,cx+.22,lanes[l]+.08,.02,.02,.9,200)});
+    var ys=act[j].map(function(on,l){return on?lanes[l]:null}).filter(function(v){return v!=null});if(ys.length>1)m.line([cx,ys[0]-.08,0],[cx,ys[ys.length-1]+.08,0],.02,.6)});
+  m.line([-1.13,lanes[0],0],[-.67,lanes[0],0],.015,.9);m.line([-.23,lanes[0],0],[.23,lanes[0],0],.015,.9);m.line([.67,lanes[0],0],[1.13,lanes[0],0],.015,.9);
+  var o=fit(m,0,buf());o.L=[{x:-1.7,y:lanes[0],z:0,t:"小林",cls:"left dim",op:1},{x:-1.7,y:lanes[1],z:0,t:"预订系统",cls:"left dim",op:1},{x:-1.7,y:lanes[2],z:0,t:"门口传感器",cls:"left dim",op:1},{x:1.7,y:.3,z:0,t:"可见线",cls:"right dim",op:1}]
+    .concat(cols.map(function(cx,j){return{x:cx,y:.75,z:0,t:STEPS[j],op:1}}));return o}
+function galTime(out){var m=new M(),k=.083,x0=-1.55,X=function(t){return x0+t*k};
+  var rows=[{y:.3,segs:[[0,1,0,"想聊"],[1,2,0,"预订"],[2,17,1,"等 15 分钟"],[17,37,0,"开会 · 20 分钟"]]},{y:-.25,segs:[[0,1,0,"想聊"],[1,1.15,3,"推门"],[1.15,21.15,0,"开会 · 20 分钟"]]}];
+  var L=[];
+  m.col=2;for(var x=-1.6;x<=1.6;x+=.02)m.p(x,-.62,0,.4);for(var t=0;t<=35;t+=5){m.line([X(t),-.66,0],[X(t),-.58,0],.02,.5);L.push({x:X(t),y:-.62,z:0,t:t+"′",cls:"dim below",op:1})}
+  rows.forEach(function(r){r.segs.forEach(function(sg){m.col=sg[2];var xa=X(sg[0])+.008,xb=Math.max(X(sg[1])-.008,xa+.025);m.box(xa,r.y-.07,-.02,xb,r.y+.07,.02,.016,1,sg[2]===1?520:240);
+    if(sg[3]&&sg[1]-sg[0]>2)L.push({x:(xa+xb)/2,y:r.y+.07,z:0,t:sg[3],cls:sg[2]===1?"acc":sg[2]===3?"ok":"",op:1})})});
+  L.push({x:x0-.06,y:.3,z:0,t:"之前",cls:"left dim",op:1},{x:x0-.06,y:-.25,z:0,t:"之后",cls:"left dim",op:1});
+  var o=fit(m,0,buf());o.L=L;return o}
+function galBoard(out){var m=new M(),cols=[-1.3,-.43,.43,1.3];
+  cols.forEach(function(cx,j){m.col=0;m.box(cx-.38,-.3,0,cx+.38,.3,.001,.015,.75);
+    m.col=2;m.floor(cx-.36,cx+.36,-.01,.01,-.22,.03,.4);
+    m.col=0;var px=[ -.2,.05,-.1,.15][j];
+    m.line([cx+px,-.22,0],[cx+px,-.02,0],.012,.9);m.sphere(cx+px,.04,0,.04,40,.95);
+    if(j===1){m.line([cx+.2,-.22,0],[cx+.2,.12,0],.012,.8);m.line([cx+.32,-.22,0],[cx+.32,.12,0],.012,.8);m.line([cx+.2,.12,0],[cx+.32,.12,0],.012,.8);m.col=3;m.plane(cx+.24,cx+.3,.15,.2,0,.012,1)}
+    if(j===2){m.col=0;m.box(cx-.15,.0,0,cx+.25,.18,.001,.012,.6)}});
+  var o=fit(m,0,buf());o.L=cols.map(function(cx,j){return{x:cx,y:-.3,z:0,t:STEPS[j],cls:"below",op:1}});return o}
+function galCards(out){var m=new M(),pos=[[-.6,.35],[.6,.35],[-.6,-.35],[.6,-.35]];
+  pos.forEach(function(p,j){m.col=0;m.box(p[0]-.52,p[1]-.27,0,p[0]+.52,p[1]+.27,.001,.016,.75);
+    m.col=2;m.line([p[0]-.42,p[1]+.07,0],[p[0]+.42,p[1]+.07,0],.025,.3);
+    m.col=j===1?3:0;m.sphere(p[0]-.38,p[1]+.17,0,.03,30,1)});
+  var o=fit(m,0,buf());o.L=pos.map(function(p,j){return{x:p[0]-.3,y:p[1]+.17,z:0,t:STEPS[j],cls:"right",op:1}});
+  var details=[["需要一面白板","情绪 0 · 想马上聊"],["门口屏：空闲","等待 0 分钟"],["白板讨论约 20 分钟","问题说清楚了"],["提前散会","空占仍待解决"]];
+  pos.forEach(function(p,j){details[j].forEach(function(text,k){o.L.push({x:p[0],y:p[1]-.045-k*.13,z:0,t:text,cls:"card-detail",op:1})})});return o}
+var GAL=[galEmotion,galLanes,galTime,galBoard,galCards].map(function(fn){return fn(buf())});
+var gView=0,gPrev=0,gT=1,themeFrom="midnight",themeBlend=1;
+var DEMO=[
+ {view:0,theme:"midnight",name:["等轴旅程","Isometric journey"],description:["把真实场景与人的体验放在一起，看见它们之间的关系。","See the real scene and the human experience together."]},
+ {view:1,theme:"midnight",name:["服务蓝图","Service blueprint"],description:["同样四个步骤，展开人、预订系统和传感器之间的协作。","The same four steps, separated into people, booking system and sensor lanes."]},
+ {view:2,theme:"midnight",name:["时间线","Timeline"],description:["把修改前后放在一起，十五分钟的等待就变得清楚。","Compare before and after. The fifteen-minute wait becomes visible."]},
+ {view:3,theme:"midnight",name:["故事板","Storyboard"],description:["一格一步，把找到房间、推门和讨论串成一段经历。","One frame per step: finding a room, walking in and talking together."]},
+ {view:4,theme:"midnight",name:["卡片 · Midnight","Cards · Midnight"],description:["用卡片整理同一份旅程。接下来固定内容，只改变配色。","Organize the same journey as cards. Next, keep the content and change the palette."]},
+ {view:4,theme:"paper",name:["Paper · 纸白","Paper"],description:["浅色纸面，适合安静阅读。步骤和关系保持原样。","A light paper surface for reading. Steps and relationships stay the same."]},
+];
+function updateDemo(){
+ var p=prog(document.getElementById("gal")),position=p*(DEMO.length-.001),index=Math.min(DEMO.length-1,Math.floor(position));
+ var previous=Math.max(0,index-1),blend=REDUCED?1:sm(.08,.42,position-index),a=DEMO[previous],b=DEMO[index];
+ gPrev=a.view;gView=b.view;gT=blend;themeFrom=a.theme;theme=b.theme;themeBlend=blend;
+ var visible=blend<.5?previous:index,item=DEMO[visible],lang=LANG==="en"?1:0;
+ var name=document.getElementById("demo-name"),description=document.getElementById("demo-description");
+ if(name.textContent!==item.name[lang])name.textContent=item.name[lang];if(description.textContent!==item.description[lang])description.textContent=item.description[lang];
+ document.getElementById("demo-kind").textContent=lang?(visible<4?"VIEW DEMO":"THEME DEMO"):(visible<4?"视图演示":"主题演示");
+ document.getElementById("demo-count").textContent=String(visible+1).padStart(2,"0")+" / "+String(DEMO.length).padStart(2,"0");
+ document.getElementById("gal").dataset.demoStep=String(visible);
+}
+
+/* ---------- shots ---------- */
+var CAM={
+  story:{yaw:-.68,pitch:.50,dist:7.1,fov:1.12,cx:.68,cy:.5,ortho:1},
+  arrival:{yaw:2.75,pitch:.23,dist:6.3,fov:1.4,cx:.68,cy:.46},
+  portal:{yaw:-.13,pitch:.12,dist:5.8,fov:1.38,cx:.73,cy:.51,sway:.018},
+  dust:{yaw:-.4,pitch:.65,dist:3.5,fov:1.3,cx:.73,cy:.5,spin:1},
+  room:{yaw:Math.PI*.75,pitch:Math.atan(1/Math.sqrt(2)),dist:7.1,fov:1.3,cx:.67,cy:.48,ortho:1,locked:1},
+  map:{yaw:-.785398,pitch:.61548,dist:6.45,fov:1.1,cx:.68,cy:.47,sway:0,ortho:1},
+  gal:{yaw:0,pitch:.04,dist:3.7,fov:1,cx:.5,cy:.52,sway:.03}};
+var SHOT={
+  portal:{cam:"portal",st:shotPortal()},
+  dust:{cam:"dust",st:shotDust()},
+  rewind:{cam:"room",fn:function(p,out){return liveRoom(1-sm(.08,.9,prog(document.getElementById("rw"))),out,false)}},
+  room:{cam:"room",fn:function(p,out){return liveRoom(p,out,false)}},
+  gap:{cam:"story",fn:shotGap},
+  fix:{cam:"story",fn:shotFix},
+  prov:{cam:"story",fn:shotProv},
+  happy:{cam:"arrival",fn:function(p,out){return liveRoom(p,out,true)}},
+  gal:{cam:"gal",gal:1}};
+var bufA=buf(),bufB=buf(),bufG=buf();
+function getShot(id,p,into){var s=SHOT[id];
+  if(s.st)return s.st;
+  if(s.fn)return s.fn(p,into);
+  // gallery: blend between views
+  var a=GAL[gPrev],b=GAL[gView],e=sm(0,1,gT);
+  if(e>=1)return b;
+  for(var i=0;i<NP;i++){var d=cl(e*1.3-R1[i]*.3);for(var q=0;q<3;q++)bufG.P[i*3+q]=lerp(a.P[i*3+q],b.P[i*3+q],d);bufG.B[i]=lerp(a.B[i],b.B[i],d);bufG.C[i]=d<.5?a.C[i]:b.C[i]}
+  bufG.E=e<.5?a.E:b.E;bufG.L=e<.5?a.L.map(function(l){return Object.assign({},l,{op:(l.op==null?1:l.op)*(1-e*2)})}):b.L.map(function(l){return Object.assign({},l,{op:(l.op==null?1:l.op)*(e*2-1)})});return bufG}
+
+/* ---------- themes ---------- */
+var THEMES={midnight:{bg:[8,9,9],ink:[226,228,224],acc:[243,245,238],dim:[108,112,105],ok:[232,235,226]},
+  paper:{bg:[234,236,227],ink:[28,32,24],acc:[15,19,12],dim:[136,143,127],ok:[20,25,15]},
+  blueprint:{bg:[14,37,66],ink:[207,227,255],acc:[255,196,92],dim:[120,150,190],ok:[150,240,200]},
+  contrast:{bg:[0,0,0],ink:[255,255,255],acc:[255,230,0],dim:[160,160,160],ok:[0,255,160]}};
+var theme="midnight";
+function mix(a,b,t){return[lerp(a[0],b[0],t)|0,lerp(a[1],b[1],t)|0,lerp(a[2],b[2],t)|0]}
+function rgb(c){return"rgb("+c[0]+","+c[1]+","+c[2]+")"}
+
+/* ---------- sections / timeline ---------- */
+var secs=[].slice.call(document.querySelectorAll("main .act")).map(function(el){return{el:el,shot:el.dataset.shot}});
+var lay=[];
+function measure(){var y=scrollY;lay=secs.map(function(s){var r=s.el.getBoundingClientRect();return{top:r.top+y,bot:r.bottom+y,shot:s.shot,el:s.el}})}
+function local(i,vc){var l=lay[i];return cl((vc-l.top)/(l.bot-l.top))}
+function timeline(){
+  var vc=scrollY+H*.5,real=lay.filter(function(l){return l.shot!=="-"}),A,B,f=0,rew=0;
+  // shot holds from (top + .25H) to (bot - .25H); transitions span the gaps between holds
+  for(var i=0;i<real.length;i++){var l=real[i],hs=i===0?-1e9:l.top+H*.25,he=i===real.length-1?1e9:l.bot-H*.25;
+    if(vc>=hs&&vc<=he){A=B=l;f=0;break}
+    var nx=real[i+1];if(nx&&vc>he&&vc<nx.top+H*.25){A=l;B=nx;f=(vc-he)/(nx.top+H*.25-he);break}}
+  if(!A){A=B=real[0]}
+  var rw=lay.find(function(l){return l.shot==="rewind"});
+  if(rw){var rp=cl((scrollY-rw.top)/Math.max(1,rw.bot-rw.top-H));rew=sm(0,.18,rp)*(1-sm(.82,1,rp));}
+  return{A:A,B:B,f:f,rew:rew,vc:vc}}
+
+/* ---------- labels ---------- */
+var labPool={};
+function labEl(key){if(labPool[key])return labPool[key];var d=document.createElement("div");d.className="lab";d.innerHTML="<span></span>";labsEl.appendChild(d);labPool[key]={el:d,sp:d.firstChild,t:"",c:""};return labPool[key]}
+
+/* ---------- render ---------- */
+var X=new Float32Array(NP),Y=new Float32Array(NP),SZ=new Float32Array(NP),AL=new Float32Array(NP),CC=new Uint8Array(NP),VIS=new Uint8Array(NP),DITHER=new Uint8Array(NP);
+var t=0,mx=0,my=0,tmx=0,tmy=0,curTheme=THEMES.midnight,galW=0,screenTxt="请于 15:00 后使用";
+addEventListener("pointermove",function(e){if(!REDUCED&&!PAUSED){tmx=e.clientX/innerWidth-.5;tmy=e.clientY/innerHeight-.5}});
+function camOf(id,p){var c=CAM[id],o=Object.assign({},c);
+  if(id==="gal"){
+    var iso=lerp(gPrev===0?1:0,gView===0?1:0,sm(0,1,gT));
+    o.yaw=lerp(c.yaw,-.785398,iso);o.pitch=lerp(c.pitch,.61548,iso);o.dist=lerp(c.dist,9.2,iso);o.fov=lerp(c.fov,1.12,iso);o.ortho=iso;o.cy=lerp(c.cy,.55,iso);o.cx=lerp(c.cx,.58,iso);
+  }
+  if(!REDUCED){var v=sm(.05,.95,p);if(id==="portal"){o.dist=lerp(5.8,4.6,v);o.yaw+=v*.28;o.cy+=v*.07}
+    if(id==="arrival"){o.dist=lerp(6.6,5.4,v);o.pitch=lerp(.25,.13,v);o.yaw=lerp(2.8,3.08,v)}
+    if(id==="map"){o.yaw+=lerp(-.045,.045,v);o.dist-=v*.15}}
+  if(MOB){o.cx=id==="portal"?.79:id==="room"||id==="arrival"?.55:.5;o.cy=id==="portal"?.67:id==="dust"?.48:id==="gal"?.53:id==="room"||id==="arrival"?.38:id==="story"?.37:.34;o.dist=o.dist*(id==="portal"?1.12:id==="room"?.96:id==="map"?1.03:id==="story"?.97:1)}
+  if(MOB&&id==="gal"){o.dist*=lerp(gPrev===0||gPrev===4?1:1.24,gView===0||gView===4?1:1.24,sm(0,1,gT))}
+  if(MOB&&id==="room"){o.dist=6.5;o.cx=.55;o.cy=.44}
+  return o}
+var starRand=rnd(631),stars=Array.from({length:260},function(){return[starRand(),starRand(),starRand(),starRand()]});
+function drawAtmosphere(col,T){
+  var portal=T.A.shot==="portal"?1-sm(.1,.9,T.f):0;if(T.A===T.B&&T.A.shot==="portal")portal=1;
+  var light=galW&&theme==="paper";ctx.fillStyle=rgb(col.ink);
+  stars.forEach(function(a){ctx.globalAlpha=(.08+a[2]*.24)*(light?.25:1);var yy=(a[1]*H-(REDUCED?0:scrollY*(.015+a[2]*.025)))%H;if(yy<0)yy+=H;ctx.fillRect(Math.round(a[0]*W),Math.round(yy),a[3]>.95?1.5:.7,a[3]>.95?1.5:.7)});
+  if(portal>.01){for(var row=0;row<21;row++){for(var j=0;j<160;j++){var u=j/159,x=u*W,y=H*(.69+row*.016)+Math.sin(u*8+row*.065+t*.13)*H*.033+Math.cos(u*3+row*.09)*H*.022;ctx.globalAlpha=portal*(.045+.16*row/21)*(1-Math.abs(u-.68)*.6);ctx.fillRect(x,y,.8,.8)}}}
+  ctx.globalAlpha=1;
+}
+function frame(){
+  updateDemo();
+  var T=timeline(),A=T.A,B=T.B,f=T.f,e=REDUCED?(f>.5?1:0):sm(.1,.9,f);
+  var pA=local(lay.indexOf(A),T.vc),pB=local(lay.indexOf(B),T.vc);
+  var sa=getShot(A.shot,pA,bufA),sb=A===B?sa:getShot(B.shot,pB,bufB);
+  var ca=camOf(SHOT[A.shot].cam,pA),cb=camOf(SHOT[B.shot].cam,pB);
+  function cm(k){return lerp(ca[k]||0,cb[k]||0,e)}
+  mx+=(tmx-mx)*.05;my+=(tmy-my)*.05;
+  var spin=cm("spin"),sway=cm("sway");
+  var pointer=1-cm("locked"),yaw=cm("yaw")+spin*t*.025+Math.sin(t*.22)*sway+mx*.1*pointer,pitch=-cm("pitch")-my*.045*pointer,D=cm("dist"),fov=cm("fov"),depth=1-cm("ortho");
+  var cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch),F=fov*Math.min(W,H*1.25)*(MOB?1.05:.92),CX=W*cm("cx"),CY=H*cm("cy");
+  // theme blend (gallery only)
+  galW=(A.shot==="gal"?1-e:0)+(B.shot==="gal"?e:0);if(A===B)galW=A.shot==="gal"?1:0;
+  // Hold the demo palette until the full-screen finale takes over.
+  var th={},from=THEMES[themeFrom],to=THEMES[theme];["bg","ink","acc","dim","ok"].forEach(function(key){th[key]=mix(from[key],to[key],themeBlend)});var M0=THEMES.midnight,col={bg:mix(M0.bg,th.bg,galW),ink:mix(M0.ink,th.ink,galW),acc:mix(M0.acc,th.acc,galW),dim:mix(M0.dim,th.dim,galW),ok:mix(M0.ok,th.ok,galW)};
+  document.body.style.background=rgb(col.bg);
+  document.body.classList.toggle("gallery-paper",galW>.5&&theme==="paper");
+  document.body.classList.toggle("gallery-blue",galW>.5&&theme==="blueprint");
+  document.body.classList.toggle("light-ui",galW>.5&&theme==="paper");
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle=rgb(col.bg);ctx.fillRect(0,0,W,H);
+  drawAtmosphere(col,T);
+  // Fine wire edges remain legible under the dithered point surfaces.
+  function wires(shot,opacity){if(!shot.E||opacity<.01)return;ctx.strokeStyle=rgb(col.ink);ctx.lineWidth=.65;
+    function project(p){var xx=p[0]*cy-p[2]*sy,zz=p[0]*sy+p[2]*cy,yy=p[1]*cp-zz*sp,dd=p[1]*sp+zz*cp,sc=F/(D+dd*depth);return[CX+xx*sc,CY-yy*sc]}
+    shot.E.forEach(function(edge){var a=project(edge.a),b=project(edge.b);ctx.globalAlpha=edge.alpha*opacity;ctx.setLineDash(edge.dash?[2,5]:[]);ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke()});ctx.setLineDash([]);ctx.globalAlpha=1;
+  }
+  wires(sa,A===B?1:1-e);if(A!==B)wires(sb,e);
+  var rew=REDUCED?0:T.rew,streak=1+rew*6,arcA=SHOT[A.shot].cam===SHOT[B.shot].cam?.03:.35;
+  // Assemble the opening map once, then trace its stages with a slow light pass.
+  for(var i=0;i<NP;i++){var k=i*3,d=A===B?0:cl(e*1.35-R1[i]*.35);
+    var x=lerp(sa.P[k],sb.P[k],d),y=lerp(sa.P[k+1],sb.P[k+1],d),z=lerp(sa.P[k+2],sb.P[k+2],d),b=lerp(sa.B[i],sb.B[i],d);
+    var portalWeight=(A.shot==="portal"?1-d:0)+(B.shot==="portal"?d:0);
+    if(portalWeight>0&&!REDUCED){
+      var px=SHOT.portal.st.P[k],gather=1-sm(0,2.2,t);
+      x+=G1[i]*gather*2.2*portalWeight;y+=G2[i]*gather*1.6*portalWeight;
+      b+=Math.pow(Math.max(0,Math.cos(px*2.4-t*.8)),12)*.22*portalWeight;
+    }
+
+    VIS[i]=0;if(b<.02)continue;
+    if(d>0&&d<1){var arc=Math.sin(Math.PI*d);y+=arc*G1[i]*arcA;x+=arc*G2[i]*arcA;z+=arc*(R3[i]-.5)*arcA*1.4}
+    if(!REDUCED)y+=Math.sin(t*.65+PH[i])*.004;
+    var x1=x*cy-z*sy,z1=x*sy+z*cy,y2=y*cp-z1*sp,z2=y*sp+z1*cp,w=D+z2*depth;if(w<.25)continue;
+    var s=F/w,Xs=CX+x1*s,Ys=CY-y2*s;
+    if(rew>0){Xs+=Math.sin(i*12.9898+t*31)*rew*70*(R2[i]-.3);Ys+=(Math.round((Ys+t*240)/22)%2?1:-1)*rew*3}
+    if(Xs<-10||Xs>W+10||Ys<-10||Ys>H+10)continue;
+    DITHER[i]=(Math.floor(x*96)&3)+((Math.floor(y*96)&3)*4);
+    X[i]=Xs;Y[i]=Ys;AL[i]=Math.min(1,(.22+.9*b)*(1.55-w/D*.75));SZ[i]=Math.max(.65,1.05*s/F*D*(.55+b*.55));CC[i]=d<.5?sa.C[i]:sb.C[i];VIS[i]=1}
+  var cols=[col.ink,col.acc,col.dim,col.ok];
+  // 4×4 Bayer ordered dithering, anchored in model space to avoid camera shimmer.
+  var bayer=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
+  for(var cI=0;cI<4;cI++){ctx.fillStyle=rgb(cols[cI]);
+    for(var i=0;i<NP;i++){if(!VIS[i]||CC[i]!==cI)continue;
+      var threshold=(bayer[DITHER[i]]+.5)/16;
+      if(AL[i]<threshold*.7)continue;
+      ctx.globalAlpha=cI===1?Math.min(1,AL[i]*1.5):Math.min(.92,AL[i]*1.25);
+      var sz=cI===1?SZ[i]*1.3:SZ[i];ctx.fillRect(Math.round(X[i]-sz*streak/2),Math.round(Y[i]-sz/2),sz*streak,sz)}}
+  ctx.globalAlpha=1;
+  // labels
+  var seen={};
+  function put(L,op,pre){(L||[]).forEach(function(l,j){var key=pre+j+"|"+(l.key||l.t);var o=op*(l.op==null?1:l.op);if(o<.02)return;
+    var x1=l.x*cy-l.z*sy,z1=l.x*sy+l.z*cy,y2=l.y*cp-z1*sp,z2=l.y*sp+z1*cp,s=F/(D+z2*depth);
+    var P=labEl(key);seen[key]=1;
+    var mobileLabels={"提前 15 分钟预订":["提前预订","Book ahead"],"站在空房门口等":["等 15 分钟","Wait 15 min"],"散会 · 房间空置":["散会","Leave"],"签到 · 证据：无":["签到 / 无证据","No evidence"],"需求以为的体验":["需求预期","Expected"]};
+    var txt=MOB&&mobileLabels[l.t]?mobileLabels[l.t][LANG==="en"?1:0]:tx(l.key==="screen"?screenTxt:l.key==="screenOk"?"空闲 · 推门即用":l.t);
+    if(P.t!==txt){P.sp.textContent=(l.cls||"").indexOf("record")>=0?txt.replace(" / ","\n"):txt;P.t=txt;P.width=0}var c="lab "+(l.cls||"");if(P.c!==c){P.el.className=c;P.c=c;P.width=0}
+    if(!P.width)P.width=P.sp.offsetWidth;
+    var offset=c.indexOf("left")>=0?-P.width*1.04:c.indexOf("right")>=0?8:-P.width*.5;
+    var labelX=Math.max(8-offset,Math.min(W-8-offset-P.width,CX+x1*s));
+    P.el.style.transform="translate("+labelX.toFixed(1)+"px,"+(CY-y2*s).toFixed(1)+"px)";P.el.style.opacity=o.toFixed(3)})}
+  var la=A===B?1:sm(.55,1,1-f)*1,lb=A===B?0:sm(.55,1,f);
+  put(sa.L,A===B?1:la,A.shot);if(A!==B)put(sb.L,lb,B.shot);
+  for(var key in labPool)if(!seen[key]&&labPool[key].el.style.opacity!=="0")labPool[key].el.style.opacity="0";
+  return T}
+
+/* ---------- section-local UI ---------- */
+var typed=document.getElementById("typed"),QZ="会议室必须提前 15 分钟预订，杜绝占用。",QE="Meeting rooms must be booked 15 minutes ahead. No squatting.",Q=LANG==="en"?QE:QZ,reply=document.getElementById("reply"),agentWindow=document.getElementById("agentWindow"),agentExecution=document.getElementById("agentExecution"),hint=document.getElementById("hint");
+var caps=[].slice.call(document.querySelectorAll("#cap p")),tc=document.getElementById("tc"),hud=document.getElementById("hud"),fx=document.getElementById("fx"),rwbig=document.getElementById("rwbig"),rwtc=document.getElementById("rwtc");
+function prog(el){var r=el.getBoundingClientRect();return cl(-r.top/Math.max(1,r.height-H))}
+function ui(T){
+  var p1=prog(document.getElementById("a1"));
+  var n=Math.round(sm(.02,.38,p1)*Q.length);if(typed.textContent!==Q.slice(0,n))typed.textContent=Q.slice(0,n);
+  typed.closest(".prompt").classList.toggle("sent",p1>.4);agentExecution.classList.toggle("on",p1>.46);agentExecution.setAttribute("aria-hidden",String(p1<=.46));reply.classList.toggle("on",p1>.62);reply.setAttribute("aria-hidden",String(p1<=.62));agentWindow.classList.toggle("finished",p1>.62);hint.style.opacity=p1>.02?0:1;
+  var p2=prog(document.getElementById("a2"));
+  var ci=p2<.3?0:p2<.62?1:2;caps.forEach(function(c,j){c.classList.toggle("on",j===ci&&T.vc>document.getElementById("a2").offsetTop)});
+  var secs=Math.max(0,900-Math.round(sm(.55,1,p2)*190));var mmss=String(Math.floor(secs/60)).padStart(2,"0")+":"+String(secs%60).padStart(2,"0");screenTxt=LANG==="en"?"Available in "+mmss:"请于 "+mmss+" 后使用";
+  var pr=prog(document.getElementById("rw"));
+  var pi=prog(document.getElementById("intro")),hc=document.getElementById("heroContent");
+  hc.style.transform=REDUCED?"none":"translate3d(0,"+(-pi*H*.13).toFixed(1)+"px,0) scale("+(1-pi*.08).toFixed(3)+")";hc.style.opacity=1-sm(.6,1,pi);
+  updateRail(T);
+  fx.style.opacity=(REDUCED?0:T.rew*.4).toFixed(3);var rewindText=sm(0,.12,pr)*(1-sm(.9,1,pr));rwbig.style.opacity=rewindText.toFixed(3);rwtc.style.opacity=rewindText.toFixed(3);
+  var days=Math.round(lerp(17,0,sm(.15,.85,pr)));rwtc.textContent=LANG==="en"?"Week 3, Tue → "+(days?"Day "+days:"Day 0 · spec review"):"第 3 周 周二 → "+(days?"第 "+days+" 天":"第 0 天 · 需求评审");
+  // HUD timecode
+  var id=T.f>.5?T.B.shot:T.A.shot,lbl={portal:"JOURNEY SKILL / HUMAN EXPERIENCE",dust:"第 0 天 · 需求评审",room:"上线后第 3 周 · 周二 14:02",gap:"第 0 天 · 需求评审 · 地图视图",fix:"第 0 天 · 改",prov:"第 2 天 · 新需求",happy:"上线后第 3 周 · 周二 14:02",gal:"06 / 同一张地图，多种表达",rewind:"◀◀ 倒带"}[id]||"";
+  if(T.rew>.15)lbl="◀◀ 倒带";lbl=tx(lbl);
+  if(tc.textContent!==lbl)tc.textContent=lbl;
+  hud.style.opacity=scrollY>document.getElementById("features").offsetTop-H*.6?0:1;
+}
+
+var rail=document.querySelector(".chapter-rail"),railLinks=[].slice.call(rail.querySelectorAll("a")),railProgress=document.getElementById("railProgress");
+function updateRailVisibility(){
+  var hidden=document.getElementById("features").getBoundingClientRect().top<=innerHeight;
+  rail.hidden=hidden;rail.inert=hidden;rail.setAttribute("aria-hidden",String(hidden));
+}
+addEventListener("scroll",updateRailVisibility,{passive:true});
+addEventListener("resize",updateRailVisibility);
+addEventListener("pageshow",updateRailVisibility);
+addEventListener("load",updateRailVisibility);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(updateRailVisibility);
+updateRailVisibility();
+function updateRail(T){var end=document.getElementById("features").offsetTop;
+  railProgress.style.transform="scaleX("+cl(scrollY/Math.max(1,end-H*.5)).toFixed(4)+")";
+  updateRailVisibility();
+  railLinks.forEach(function(a,i){var sec=document.querySelector(a.getAttribute("href")),next=railLinks[i+1],limit=next?document.querySelector(next.getAttribute("href")).offsetTop:end,active=T.vc>=sec.offsetTop&&T.vc<limit;if(active)a.setAttribute("aria-current","step");else a.removeAttribute("aria-current")});
+}
+
+/* ---------- feature atlas: seeded, code-native miniature illustrations ---------- */
+(function drawFeatureAtlas(){
+  [].forEach.call(document.querySelectorAll('.feature-art'),function(el){
+    var id=+el.dataset.feature,random=rnd(830+id*71),parts=[];
+    function point(x,y,r,o){parts.push('<circle cx="'+x.toFixed(2)+'" cy="'+y.toFixed(2)+'" r="'+r+'" fill="currentColor" opacity="'+o+'"/>')}
+    function line(x1,y1,x2,y2,o,dash){parts.push('<path d="M'+x1+','+y1+'L'+x2+','+y2+'" fill="none" stroke="currentColor" stroke-width=".65" opacity="'+(o||.4)+'"'+(dash?' stroke-dasharray="2 4"':'')+'/>')}
+    function path(d,o,dash){parts.push('<path d="'+d+'" fill="none" stroke="currentColor" stroke-width=".7" opacity="'+(o||.5)+'"'+(dash?' stroke-dasharray="2 4"':'')+'/>')}
+    function circle(x,y,r,o){parts.push('<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="none" stroke="currentColor" stroke-width=".65" opacity="'+(o||.5)+'"/>')}
+    function cloud(fn,n,opacity){for(var i=0;i<n;i++){var p=fn(i/n,random());point(p[0],p[1],random()>.95?.9:.45,(opacity||.7)*(.25+random()*.75))}}
+    function person(x,y,size){circle(x,y-size*.82,size*.065,.95);path('M'+x+','+(y-size*.74)+'L'+x+','+(y-size*.34)+'M'+(x-size*.14)+','+(y-size*.46)+'L'+(x-size*.11)+','+(y-size*.65)+'Q'+x+','+(y-size*.82)+' '+(x+size*.11)+','+(y-size*.65)+'L'+(x+size*.14)+','+(y-size*.45)+'M'+x+','+(y-size*.34)+'L'+(x-size*.09)+','+y+'M'+x+','+(y-size*.34)+'L'+(x+size*.1)+','+y,.9)}
+    function page(x,y,w,h,o){path('M'+x+','+y+'h'+(w-7)+'l7,7v'+(h-7)+'h-'+w+'zM'+(x+w-7)+','+y+'v7h7',o);for(var i=0;i<3;i++)line(x+6,y+14+i*6,x+w-7-(i===2?8:0),y+14+i*6,o*.7)}
+    // A quiet, repeatable star field binds the eight plates together.
+    for(var j=0;j<30;j++)point(12+random()*236,15+random()*150,.4,.12+random()*.2);
+    if(id===0){
+      // A human goal gives the surrounding possibility cloud a center.
+      for(var ring=0;ring<5;ring++){(function(ring){cloud(function(t,q){var a=t*Math.PI*2,r=38+ring*10+q*3;return[130+Math.cos(a)*r,100+Math.sin(a)*r*.43]},100,.55-ring*.075)})(ring)}
+      cloud(function(t,q){var a=t*15.7,r=6+t*65;return[130+Math.cos(a)*r+(q-.5)*8,103+Math.sin(a)*r*.44]},260,.8);
+      person(130,108,50);line(130,64,130,35,.5,true);circle(130,29,5,.8);point(130,29,1.5,.9);
+      line(27,133,230,133,.25);line(34,130,34,136,.6);line(226,130,226,136,.6);
+    }else if(id===1){
+      // Expected flow versus felt experience; the low point is the important one.
+      line(20,134,242,134,.3);[35,97,165,224].forEach(function(x){line(x,132,x,137,.45)});
+      path('M25 66C64 66 70 70 103 74S170 76 232 72',.27,true);
+      var emotion=function(t){return 61+65*Math.exp(-Math.pow((t-.58)*4,2))-22*t};
+      cloud(function(t,q){return[25+t*207,emotion(t)+(q-.5)*4]},460,.95);
+      [.06,.35,.58,.93].forEach(function(t){var x=25+t*207,y=emotion(t);line(x,y,x,134,.25,true);circle(x,y,3,.8);point(x,y,1.1,1)});
+      line(145,80,145,104,.5,true);path('M141 100L145 105L149 100',.7);
+    }else if(id===2){
+      // Lift one node without replacing the surrounding journey.
+      var pts=[[28,105],[87,94],[164,101],[233,85]];
+      for(var j=0;j<3;j++)line(pts[j][0],pts[j][1],pts[j+1][0],pts[j+1][1],.3,j===1);
+      pts.forEach(function(p,j){circle(p[0],p[1],j===2?7:4,j===2?.28:.8);point(p[0],p[1],1,.6)});
+      line(87,94,164,45,.8);line(164,45,233,85,.8);line(164,92,164,56,.45,true);path('M159 61L164 55L169 61',.6);
+      cloud(function(t,q){var a=t*6.283,r=12+q*6;return[164+Math.cos(a)*r,45+Math.sin(a)*r]},155,.6);circle(164,45,5,.9);point(164,45,2,1);
+      path('M146 25h36M146 21v8M182 21v8',.35);
+      line(21,141,240,141,.2);for(var n=0;n<20;n++)point(25+n*11,141,.7,.45);
+    }else if(id===3){
+      // A validation boundary stops the broken branch and admits the valid one.
+      path('M107 27L169 53V144L107 118Z',.65);path('M113 35L161 56V133L113 113Z',.22);
+      line(22,111,102,78,.6);line(172,84,234,57,.75);
+      [0,1,2,3,4].forEach(function(n){point(35+n*13,105-n*5.4,1.5,.8)});
+      circle(140,81,16,.75);path('M131 82L138 89L151 72',.95);
+      path('M56 65L99 83',.25,true);path('M48 55l9 9m0-9l-9 9',.65);
+      cloud(function(t,q){return[174+t*58,83-t*25+(q-.5)*6]},130,.8);
+      path('M46 142L138 169L228 128',.2);
+    }else if(id===4){
+      // Findings remain connected to their source documents.
+      var nodes=[[50,50],[202,38],[215,130],[62,137]];
+      nodes.forEach(function(p,j){line(132,89,p[0],p[1],.35,j===3);page(p[0]-14,p[1]-19,29,36,j===3?.3:.65);point((132+p[0])/2,(89+p[1])/2,1.6,.75)});
+      cloud(function(t,q){var a=t*6.283,r=17+q*13;return[132+Math.cos(a)*r,89+Math.sin(a)*r]},260,.7);
+      circle(132,89,9,.9);point(132,89,2,1);
+      path('M119 89h26M132 76v26',.25);
+    }else if(id===5){
+      // Ordered changes, each preserved as its own record.
+      for(var j=0;j<3;j++){var x=40+j*63,y=26+j*13;path('M'+x+','+y+'l48,16v83l-48,-16z',.35+j*.2);
+        for(var n=0;n<5;n++)line(x+8,y+19+n*11,x+39-(n===4?10:0),y+29+n*11,.15+j*.13);
+        line(x+24,y+97,x+24,153,.28,true);circle(x+24,153,3,.65)}
+      line(25,153,242,153,.45);path('M237 150L242 153L237 156',.65);
+      cloud(function(t,q){return[178+t*24,112+t*8+(q-.5)*3]},80,.9);
+      path('M180 112h6m-3-3v6',.9);
+    }else if(id===6){
+      // Three coordinate-aligned projections of one map.
+      var iso=function(x,z,y){return[130+(x-z)*.83,98+(x+z)*.36-y]};
+      for(var layer=0;layer<3;layer++){var y=layer*30,a=iso(-60,-38,y),b=iso(60,-38,y),c=iso(60,38,y),d=iso(-60,38,y);path('M'+a+'L'+b+'L'+c+'L'+d+'Z',.25+layer*.16);
+        var prev;for(var j=0;j<4;j++){var p=iso(-42+j*28,Math.sin(j*1.4)*16,y);if(prev)line(prev[0],prev[1],p[0],p[1],.6);circle(p[0],p[1],2.5,.8);if(layer<2)line(p[0],p[1],p[0],p[1]-30,.23,true);prev=p}}
+      cloud(function(t,q){var p=iso((t-.5)*118,(q-.5)*74,0);return p},200,.27);
+    }else{
+      // The handoff is a doorway to the next person's work.
+      for(var ring=0;ring<4;ring++){(function(ring){cloud(function(t,q){var a=t*6.283,r=54+ring*2+q*2;return[135+Math.cos(a)*r,84+Math.sin(a)*r]},170,.38+ring*.09)})(ring)}
+      person(133,143,47);line(45,144,221,144,.3);
+      path('M108 111V53h53v58',.3);page(122,60,27,35,.85);
+      line(136,103,136,121,.5,true);path('M133 117L136 121L139 117',.7);
+      cloud(function(t,q){return[135+(q-.5)*(12+t*100),144+t*22]},130,.25);
+    }
+    el.innerHTML='<svg viewBox="0 0 260 180" xmlns="http://www.w3.org/2000/svg" focusable="false">'+parts.join('')+'</svg>';
+  });
+})();
+
+/* ---------- install ---------- */
+var CMDS={cc:["# 装到 Claude Code 的 skills 目录","git clone --depth 1 https://github.com/cguodesign/customer-journey-map-skill ~/.claude/skills/journey"],
+  cx:["# 装到 Codex 的 skills 目录","git clone --depth 1 https://github.com/cguodesign/customer-journey-map-skill ~/.agents/skills/journey"]};
+var ck="cc";function setTab(k){ck=k;document.getElementById("tabCC").tabIndex=k==="cc"?0:-1;document.getElementById("tabCX").tabIndex=k==="cx"?0:-1;document.getElementById("tabCC").setAttribute("aria-selected",String(k==="cc"));document.getElementById("tabCX").setAttribute("aria-selected",String(k==="cx"));document.getElementById("cmdNote").textContent=tx(CMDS[k][0]);document.getElementById("cmdText").textContent=CMDS[k][1]}
+document.getElementById("tabCC").addEventListener("click",function(){setTab("cc")});document.getElementById("tabCX").addEventListener("click",function(){setTab("cx")});
+document.querySelector(".tabs").addEventListener("keydown",function(e){if(["ArrowLeft","ArrowRight","Home","End"].indexOf(e.key)<0)return;e.preventDefault();setTab(e.key==="Home"?"cc":e.key==="End"?"cx":ck==="cc"?"cx":"cc");document.getElementById(ck==="cc"?"tabCC":"tabCX").focus()});
+function copier(btn,getText,sel){btn.addEventListener("click",function(){function fb(){var r=document.createRange();r.selectNodeContents(sel());var s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent=tx("已选中")}
+  try{navigator.clipboard.writeText(getText()).then(function(){btn.textContent=tx("已复制");setTimeout(function(){btn.textContent=tx("复制")},1800)},fb)}catch(e){fb()}})}
+copier(document.getElementById("copyBtn"),function(){return CMDS[ck][1]},function(){return document.getElementById("cmdText")});
+copier(document.getElementById("miniCopy"),function(){return CMDS.cc[1]},function(){return document.getElementById("miniCmd")});
+
+/* ---------- loop ---------- */
+
+function size(){W=innerWidth;H=innerHeight;MOB=W<760;for(var key in labPool)labPool[key].width=0;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);measure()}
+var running=false,lastTime=0;
+function tick(now){
+  if(document.hidden){running=false;lastTime=0;return}
+  var dt=lastTime?Math.min(.05,(now-lastTime)/1000):.016;lastTime=now;
+  if(!REDUCED&&!PAUSED)t+=dt;
+  var T=frame();ui(T);
+  if((REDUCED||PAUSED||scrollY>=document.getElementById("features").offsetTop)){running=false;lastTime=0;return}
+  requestAnimationFrame(tick);
+}
+function kick(){if(!running&&!document.hidden){running=true;requestAnimationFrame(tick)}}
+var motionBtn=document.getElementById("motionBtn");
+function motionState(){var off=REDUCED||PAUSED;document.body.classList.toggle("motion-paused",off);motionBtn.textContent=off?"▷":"Ⅱ";motionBtn.setAttribute("aria-pressed",String(off));motionBtn.setAttribute("aria-label",LANG==="zh"?(off?"播放环境动画":"暂停环境动画"):(off?"Play ambient animation":"Pause ambient animation"));kick()}
+motionBtn.addEventListener("click",function(){PAUSED=!(REDUCED||PAUSED);if(REDUCED)REDUCED=false;motionState()});
+motionQuery.addEventListener("change",function(e){REDUCED=e.matches;motionState()});
+document.addEventListener("visibilitychange",function(){if(!document.hidden)kick()});
+size();
+
+/* ---------- language ---------- */
+var I18N=[].slice.call(document.querySelectorAll("[data-en]"));I18N.forEach(function(el){el.dataset.zh=el.innerHTML});
+function setLang(l){LANG=l;try{localStorage.setItem("journey-doc-language",l)}catch(e){}document.documentElement.lang=l==="en"?"en":"zh-CN";
+  I18N.forEach(function(el){el.innerHTML=l==="en"?el.dataset.en:el.dataset.zh});
+  document.getElementById("langBtn").textContent=l==="en"?"中文":"EN";
+  Q=l==="en"?QE:QZ;typed.textContent="";setTab(ck);
+  document.querySelector(".agent-composer").setAttribute("aria-label",l==="en"?"Illustrative conversation input":"会话输入栏示意");
+  document.querySelector(".prompt").setAttribute("aria-label",l==="en"?"You ask the agent: "+QE:"对 agent 输入："+QZ);
+  document.title=l==="en"?"Walk In · Journey Skill":"推门即用 · Journey Skill";
+  try{history.replaceState(null,"","?lang="+l+(new URLSearchParams(location.search).has("embed")?"&embed=1":"")+location.hash)}catch(e){}
+  measure();motionState();kick()}
+document.getElementById("langBtn").addEventListener("click",function(){setLang(LANG==="en"?"zh":"en")});
+setLang(LANG);
+var rt;addEventListener("resize",function(){clearTimeout(rt);rt=setTimeout(function(){size();kick()},120)});
+addEventListener("scroll",function(){kick()},{passive:true});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(measure);
+addEventListener("load",measure);
+kick();
+window.__v3={realityState:function(p){return roomState(p)},storyState:function(mode,p){return narrativeBuild(mode,p,buf()).story},frame:frame,measure:measure,setT:function(x){t=x},CAM:CAM};
+})();
+
+</script>
+<script src="../assets/site.js?v=ea7db47540" defer></script>
+<script src="../assets/story-embed.js?v=0424d3e684" defer></script><script src="../assets/finale.js?v=191d837226" defer></script></html>

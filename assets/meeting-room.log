@@ -1,0 +1,6 @@
+2026-10-19T01:07:52Z	林	meeting-room	create	meeting-room	需求：会议室必须提前 15 分钟预订
+2026-10-19T01:07:52Z	林	meeting-room	replace-step	idea-to-talk	想聊就直接去找房间
+2026-10-19T01:07:52Z	林	meeting-room	remove-step	book-ahead	预订改为可选，删掉提前 15 分钟这一步
+2026-10-19T01:07:52Z	林	meeting-room	replace-step	find-room	推门即用，10 分钟无人自动释放
+2026-10-19T01:07:52Z	林	meeting-room	insert-step	check-in	行政：加签到，防止有人占着不用
+2026-10-19T01:07:52Z	林	meeting-room	remove-step	check-in	撤回：签到没有证据；空占来自预订本身（leave-room）

@@ -1,0 +1,1451 @@
+window.JOB_DATA={
+  "personas": [
+    {
+      "name": "Maya",
+      "role": "Mid-career applicant job-hunting while employed",
+      "type": "primary"
+    },
+    {
+      "name": "ATS",
+      "role": "Applicant Tracking System (resume parsing, status, automated mail)",
+      "type": "system"
+    },
+    {
+      "name": "AI Screener",
+      "role": "Automated resume-screening step that matches applicants against role criteria and auto-rejects non-matches within 24h",
+      "type": "system"
+    },
+    {
+      "name": "Recruiter",
+      "role": "In-house recruiter / talent team screening applications",
+      "type": "backstage"
+    },
+    {
+      "name": "Hiring Manager",
+      "role": "Owns the role, makes the final call",
+      "type": "backstage"
+    }
+  ],
+  "activeCategories": [
+    "emotional",
+    "channel",
+    "temporal",
+    "people",
+    "actions",
+    "systems",
+    "service-layers",
+    "failure",
+    "path",
+    "design",
+    "accessibility"
+  ],
+  "milestones": [
+    {
+      "id": "discovery",
+      "fields": {
+        "title": "Discovery",
+        "description": "Maya encounters the job posting and decides it's worth pursuing"
+      },
+      "steps": [
+        {
+          "id": "see-the-posting",
+          "fields": {
+            "persona": [
+              "Maya"
+            ],
+            "description": "Comes across the role on a job board, LinkedIn, or the company careers page",
+            "emotion": "Spark of interest, cautious optimism",
+            "emotionValence": "1",
+            "emotionIntensity": "low",
+            "thinking": "\"This could actually be a good fit — let me see what they want\"",
+            "channel": "LinkedIn / job board / careers page",
+            "device": "Phone, in a gap between other things",
+            "trigger": "Active search, alert email, or a link shared by a contact",
+            "duration": "~30 sec skim",
+            "pacing": "normal",
+            "entryPoint": "true",
+            "next": "→ read-and-assess-fit"
+          },
+          "meta": {},
+          "index": 0,
+          "milestone": "discovery",
+          "coverage": {
+            "A": {
+              "count": 4,
+              "fields": [
+                "emotion",
+                "emotionValence",
+                "emotionIntensity",
+                "thinking"
+              ]
+            },
+            "B": {
+              "count": 2,
+              "fields": [
+                "channel",
+                "device"
+              ]
+            },
+            "C": {
+              "count": 3,
+              "fields": [
+                "trigger",
+                "duration",
+                "pacing"
+              ]
+            },
+            "K": {
+              "count": 2,
+              "fields": [
+                "entryPoint",
+                "next"
+              ]
+            }
+          }
+        },
+        {
+          "id": "read-and-assess-fit",
+          "fields": {
+            "persona": [
+              "Maya"
+            ],
+            "description": "Reads the description and self-assesses whether to apply",
+            "emotion": "Mix of excitement and self-doubt",
+            "emotionValence": "0",
+            "emotionIntensity": "medium",
+            "thinking": "\"I hit most of these, but not all — is it worth my time?\"",
+            "cognitiveLoad": "medium",
+            "duration": "~5-10 min",
+            "painPoint": "Vague or inflated requirements make it hard to judge fit",
+            "decision": "Apply now, bookmark for later, or pass",
+            "failureMode": "Talks self out of applying (\"I only meet 7 of 10 bullets\")",
+            "failureProbability": "high",
+            "failureImpact": "medium",
+            "literacyRequirement": "Job descriptions are written in internal jargon and inflated requirement lists; reading them accurately is insider knowledge",
+            "inclusionConsideration": "Candidates without that insider context read every bullet as a hard requirement and self-eliminate before the funnel even starts",
+            "opportunity": "Mark which requirements are actually firm and which are wish-list",
+            "priority": "should-fix",
+            "next": "→ click-apply"
+          },
+          "meta": {},
+          "index": 1,
+          "milestone": "discovery",
+          "coverage": {
+            "A": {
+              "count": 5,
+              "fields": [
+                "emotion",
+                "emotionValence",
+                "emotionIntensity",
+                "thinking",
+                "cognitiveLoad"
+              ]
+            },
+            "C": {
+              "count": 1,
+              "fields": [
+                "duration"
+              ]
+            },
+            "I": {
+              "count": 3,
+              "fields": [
+                "painPoint",
+                "opportunity",
+                "priority"
+              ]
+            },
+            "E": {
+              "count": 1,
+              "fields": [
+                "decision"
+              ]
+            },
+            "J": {
+              "count": 3,
+              "fields": [
+                "failureMode",
+                "failureProbability",
+                "failureImpact"
+              ]
+            },
+            "M": {
+              "count": 2,
+              "fields": [
+                "literacyRequirement",
+                "inclusionConsideration"
+              ]
+            },
+            "K": {
+              "count": 1,
+              "fields": [
+                "next"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "application",
+      "fields": {
+        "title": "Application",
+        "description": "Maya creates an account and submits her materials"
+      },
+      "steps": [
+        {
+          "id": "click-apply",
+          "fields": {
+            "persona": [
+              "Maya",
+              "ATS"
+            ],
+            "description": "Clicks Apply and is routed into the company's application portal",
+            "emotion": "Readiness, slight bracing",
+            "emotionValence": "0",
+            "emotionIntensity": "low",
+            "channel": "Careers portal (ATS-hosted)",
+            "touchpoint": "\"Apply\" button, landing her on the portal",
+            "channelTransition": "Employer-branded careers page hands off to a third-party ATS portal with different branding and different UX conventions",
+            "duration": "~10 sec",
+            "systems": [
+              "ATS"
+            ],
+            "backstageAction": "Creates a candidate session and applies the employer's account-gate policy",
+            "automation": "Fully automated; no human involved",
+            "lineOfVisibility": "Maya sees a redirect; the session creation and the account-gate decision behind it are invisible",
+            "backstage": "The ATS opens a candidate session at the redirect and applies the employer's configured account-gate policy",
+            "painPoint": "Redirected to a clunky third-party portal that breaks the flow",
+            "next": "→ create-account"
+          },
+          "meta": {
+            "provenance": {
+              "backstage": "auto-composite"
+            }
+          },
+          "index": 2,
+          "milestone": "application",
+          "coverage": {
+            "A": {
+              "count": 3,
+              "fields": [
+                "emotion",
+                "emotionValence",
+                "emotionIntensity"
+              ]
+            },
+            "B": {
+              "count": 3,
+              "fields": [
+                "channel",
+                "touchpoint",
+                "channelTransition"
+              ]
+            },
+            "C": {
+              "count": 1,
+              "fields": [
+                "duration"
+              ]
+            },
+            "F": {
+              "count": 2,
+              "fields": [
+                "systems",
+                "automation"
+              ]
+            },
+            "E": {
+              "count": 1,
+              "fields": [
+                "backstageAction"
+              ]
+            },
+            "G": {
+              "count": 2,
+              "fields": [
+                "lineOfVisibility",
+                "backstage"
+              ]
+            },
+            "I": {
+              "count": 1,
+              "fields": [
+                "painPoint"
+              ]
+            },
+            "K": {
+              "count": 1,
+              "fields": [
+                "next"
+              ]
+            }
+          }
+        },
+        {
+          "id": "create-account",
+          "fields": {
+            "persona": [
+              "Maya",
+              "ATS"
+            ],
+            "description": "Forced to create an account before she can apply",
+            "emotion": "Mild irritation",
+            "emotionValence": "-1",
+            "emotionIntensity": "medium",
+            "effort": "Yet another login and password to manage",
+            "duration": "~3-5 min",
+            "systems": [
+              "ATS",
+              "Email service"
+            ],
+            "policy": "Employer's ATS configuration requires an account before the form is shown",
+            "painPoint": "Account gate before she's even seen the form",
+            "failureMode": "Abandons here rather than make an account",
+            "failureProbability": "high",
+            "failureImpact": "high",
+            "accessibilityBarrier": "Password rules, CAPTCHA, and an email round-trip stack up as a hard stop before any content is reached",
+            "opportunity": "Let people apply first and create the account at submit — or offer a guest apply",
+            "priority": "must-fix",
+            "exitPoint": "true",
+            "next": "→ fill-application-form"
+          },
+          "meta": {},
+          "index": 3,
+          "milestone": "application",
+          "coverage": {
+            "A": {
+              "count": 4,
+              "fields": [
+                "emotion",
+                "emotionValence",
+                "emotionIntensity",
+                "effort"
+              ]
+            },
+            "C": {
+              "count": 1,
+              "fields": [
+                "duration"
+              ]
+            },
+            "F": {
+              "count": 3,
+              "fields": [
+                "systems",
+                "policy"
+              ]
+            },
+            "I": {
+              "count": 3,
+              "fields": [
+                "painPoint",
+                "opportunity",
+                "priority"
+              ]
+            },
+            "J": {
+              "count": 3,
+              "fields": [
+                "failureMode",
+                "failureProbability",
+                "failureImpact"
+              ]
+            },
+            "M": {
+              "count": 1,
+              "fields": [
+                "accessibilityBarrier"
+              ]
+            },
+            "K": {
+              "count": 2,
+              "fields": [
+                "exitPoint",
+                "next"
+              ]
+            }
+          }
+        },
+        {
+          "id": "fill-application-form",
+          "fields": {
+            "persona": [
+              "Maya",
+              "ATS"
+            ],
+            "description": "Fills out the application form, often re-typing what's on her resume",
+            "emotion": "Tedium, growing frustration",
+            "emotionValence": "-2",
+            "emotionIntensity": "high",
+            "duration": "~20-40 min",
+            "pacing": "stalled",
+            "cognitiveLoad": "high",
+            "doing": "Re-entering work history field by field after uploading a resume",
+            "inputRequired": "Full work history, education, work-authorization answers, EEO/demographic questions",
+            "systems": [
+              "ATS",
+              "Resume parser"
+            ],
+            "dataFlow": "Resume PDF into the parser, parser output into pre-filled form fields, form contents into the candidate record; parse errors propagate into the record Maya never gets to see",
+            "automation": "Parsing is automated; correcting what it got wrong is entirely manual",
+            "painPoint": [
+              "\"I just uploaded my resume — why am I typing it all again?\"",
+              "Parser mangles formatting, she fixes it by hand"
+            ],
+            "failureMode": "Session times out or form errors wipe entries",
+            "failureProbability": "medium",
+            "failureImpact": "high",
+            "recoveryPath": "Start over, often from scratch",
+            "accessibilityBarrier": "Timed session expiry punishes anyone who needs longer — assistive-tech users, people on slow connections, people filling this in between shifts",
+            "momentOfTruth": "Whether the form respects her time or wastes it",
+            "opportunity": "Parse once, show it back for confirmation, never ask for the same fact twice",
+            "priority": "must-fix",
+            "next": "→ submit-application"
+          },
+          "meta": {},
+          "index": 4,
+          "milestone": "application",
+          "coverage": {
+            "A": {
+              "count": 4,
+              "fields": [
+                "emotion",
+                "emotionValence",
+                "emotionIntensity",
+                "cognitiveLoad"
+              ]
+            },
+            "C": {
+              "count": 2,
+              "fields": [
+                "duration",
+                "pacing"
+              ]
+            },
+            "E": {
+              "count": 2,
+              "fields": [
+                "doing",
+                "inputRequired"
+              ]
+            },
+            "F": {
+              "count": 4,
+              "fields": [
+                "systems",
+                "dataFlow",
+                "automation"
+              ]
+            },
+            "I": {
+              "count": 5,
+              "fields": [
+                "painPoint",
+                "momentOfTruth",
+                "opportunity",
+                "priority"
+              ]
+            },
+            "J": {
+              "count": 4,
+              "fields": [
+                "failureMode",
+                "failureProbability",
+                "failureImpact",
+                "recoveryPath"
+              ]
+            },
+            "M": {
+              "count": 1,
+              "fields": [
+                "accessibilityBarrier"
+              ]
+            },
+            "K": {
+              "count": 1,
+              "fields": [
+                "next"
+              ]
+            }
+          }
+        },
+        {
+          "id": "submit-application",
+          "fields": {
+            "persona": [
+              "Maya",
+              "ATS"
+            ],
+            "description": "Reviews and submits the completed application",
+            "emotion": "Relief, hope, a small sense of accomplishment",
+            "emotionValence": "1",
+            "emotionIntensity": "medium",
+            "doing": "Hits Submit",
+            "channel": "Careers portal",
+            "duration": "~1 min",
+            "systems": [
+              "ATS",
+              "Email service",
+              "AI Screener"
+            ],
+            "backstageAction": "Records the submission, fires the automated confirmation email, and enqueues the application for the AI screen",
+            "automation": "Fully automated; the three downstream processes fan out from one tap",
+            "parallelPath": "→ receive-confirmation, → ai-resume-screen (both kick off from the same Submit)",
+            "lineOfVisibility": "Everything past Submit is invisible — record creation, mail send, screening queue",
+            "backstage": "One Submit fans out into three automated processes — the ATS writes the candidate record, the mail service sends a templated acknowledgment, and the application enters the AI screening queue",
+            "valueExchange": "Maya gives 40 minutes of unpaid labour and a complete personal data record; she gets a confirmation screen",
+            "momentOfTruth": "The instant after Submit — did it go through, and what now?",
+            "next": "→ receive-confirmation"
+          },
+          "meta": {
+            "provenance": {
+              "backstage": "auto-composite"
+            }
+          },
+          "index": 5,
+          "milestone": "application",
+          "coverage": {
+            "A": {
+              "count": 3,
+              "fields": [
+                "emotion",
+                "emotionValence",
+                "emotionIntensity"
+              ]
+            },
+            "E": {
+              "count": 2,
+              "fields": [
+                "doing",
+                "backstageAction"
+              ]
+            },
+            "B": {
+              "count": 1,
+              "fields": [
+                "channel"
+              ]
+            },
+            "C": {
+              "count": 1,
+              "fields": [
+                "duration"
+              ]
+            },
+            "F": {
+              "count": 4,
+              "fields": [
+                "systems",
+                "automation"
+              ]
+            },
+            "K": {
+              "count": 2,
+              "fields": [
+                "parallelPath",
+                "next"
+              ]
+            },
+            "G": {
+              "count": 3,
+              "fields": [
+                "lineOfVisibility",
+                "backstage",
+                "valueExchange"
+              ]
+            },
+            "I": {
+              "count": 1,
+              "fields": [
+                "momentOfTruth"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "the-wait",
+      "fields": {
+        "title": "The Wait",
+        "description": "The period after submission where the experience most often breaks down. An AI screen now forks it early — non-matches get a fast 'no' within 24h, but everyone who passes still falls into the same old \"application black hole\""
+      },
+      "steps": [
+        {
+          "id": "receive-confirmation",
+          "fields": {
+            "persona": [
+              "Maya",
+              "ATS"
+            ],
+            "description": "Gets (or doesn't get) an automated \"we received your application\" email",
+            "emotion": "Reassured if it arrives, uneasy if it doesn't",
+            "emotionValence": "0",
+            "emotionIntensity": "low",
+            "channel": "Email",
+            "duration": "Seconds to minutes after submit",
+            "notification": "Automated \"application received\" acknowledgment",
+            "systems": [
+              "ATS",
+              "Email service"
+            ],
+            "backstageAction": "Sends templated confirmation",
+            "message": "\"We've received your application\" — no timeline, no next step, no name",
+            "tone": "Templated, impersonal",
+            "failureMode": "No confirmation configured, or it lands in spam",
+            "failureProbability": "medium",
+            "failureImpact": "medium",
+            "painPoint": "A generic auto-reply with no sense of timeline or next steps",
+            "opportunity": "Say what happens next and by when — the cheapest fix in the whole journey",
+            "priority": "should-fix",
+            "next": "→ ai-resume-screen"
+          },
+          "meta": {},
+          "index": 6,
+          "milestone": "the-wait",
+          "coverage": {
+            "A": {
+              "count": 3,
+              "fields": [
+                "emotion",
+                "emotionValence",
+                "emotionIntensity"
+              ]
+            },
+            "B": {
+              "count": 1,
+              "fields": [
+                "channel"
+              ]
+            },
+            "C": {
+              "count": 1,
+              "fields": [
+                "duration"
+              ]
+            },
+            "F": {
+              "count": 3,
+              "fields": [
+                "notification",
+                "systems"
+              ]
+            },
+            "E": {
+              "count": 1,
+              "fields": [
+                "backstageAction"
+              ]
+            },
+            "L": {
+              "count": 2,
+              "fields": [
+                "message",
+                "tone"
+              ]
+            },
+            "J": {
+              "count": 3,
+              "fields": [
+                "failureMode",
+                "failureProbability",
+                "failureImpact"
+              ]
+            },
+            "I": {
+              "count": 3,
+              "fields": [
+                "painPoint",
+                "opportunity",
+                "priority"
+              ]
+            },
+            "K": {
+              "count": 1,
+              "fields": [
+                "next"
+              ]
+            }
+          }
+        },
+        {
+          "id": "ai-resume-screen",
+          "fields": {
+            "persona": [
+              "ATS",
+              "AI Screener"
+            ],
+            "description": "An AI screening step automatically matches Maya's resume against the role criteria within 24 hours of submission",
+            "channel": "Automated (no visible touchpoint for Maya)",
+            "duration": "Within 24 hours of submission",
+            "systems": [
+              "AI Screener",
+              "ATS"
+            ],
+            "backstageAction": "Scores the application against role criteria; non-matches are auto-rejected, matches pass through to the recruiter queue",
+            "automation": "Fully automated — there is no human review anywhere on the reject path",
+            "dataFlow": "Parsed resume fields and role criteria feed a match score, which decides the routing written back to the candidate record",
+            "policy": "An employer-configured match threshold decides who a human ever sees",
+            "lineOfVisibility": "Maya is never told this step exists",
+            "branchCondition": "AI match vs. no match",
+            "momentOfTruth": "An algorithm now decides — invisibly — whether Maya is fast-rejected or advances into the queue",
+            "failureMode": "A qualified applicant is auto-rejected on a criteria mismatch (keyword/parsing miss) with no human review",
+            "failureProbability": "medium",
+            "failureImpact": "high",
+            "risk": "Criteria proxies (school, keywords, employment gaps) encode bias at scale, invisibly and unappealably",
+            "inclusionConsideration": "Non-linear careers, career breaks, and non-standard resume formats score worst — the people the format serves least are filtered out first",
+            "opportunity": "Disclose that an automated screen made the call, and give one correction loop before it's final",
+            "priority": "must-fix",
+            "next": [
+              "no match → outcome-fast-rejection",
+              "match → wait-in-silence"
+            ]
+          },
+          "meta": {},
+          "index": 7,
+          "milestone": "the-wait",
+          "coverage": {
+            "B": {
+              "count": 1,
+              "fields": [
+                "channel"
+              ]
+            },
+            "C": {
+              "count": 1,
+              "fields": [
+                "duration"
+              ]
+            },
+            "F": {
+              "count": 5,
+              "fields": [
+                "systems",
+                "automation",
+                "dataFlow",
+                "policy"
+              ]
+            },
+            "E": {
+              "count": 1,
+              "fields": [
+                "backstageAction"
+              ]
+            },
+            "G": {
+              "count": 1,
+              "fields": [
+                "lineOfVisibility"
+              ]
+            },
+            "K": {
+              "count": 3,
+              "fields": [
+                "branchCondition",
+                "next"
+              ]
+            },
+            "I": {
+              "count": 3,
+              "fields": [
+                "momentOfTruth",
+                "opportunity",
+                "priority"
+              ]
+            },
+            "J": {
+              "count": 4,
+              "fields": [
+                "failureMode",
+                "failureProbability",
+                "failureImpact",
+                "risk"
+              ]
+            },
+            "M": {
+              "count": 1,
+              "fields": [
+                "inclusionConsideration"
+              ]
+            }
+          }
+        },
+        {
+          "id": "outcome-fast-rejection",
+          "fields": {
+            "persona": [
+              "Maya",
+              "ATS",
+              "AI Screener"
+            ],
+            "description": "Maya gets an automated rejection within ~24 hours because the AI screen flagged her as not matching the criteria",
+            "emotion": "Sting of a fast 'no', but the speed gives real closure — better than weeks of silence",
+            "emotionValence": "-1",
+            "emotionIntensity": "medium",
+            "channel": "Email",
+            "duration": "Within 24 hours of applying",
+            "notification": "Automated rejection, often without saying an AI made the call",
+            "message": "\"We've decided to move forward with other candidates\"",
+            "tone": "Templated, final, no route to reply",
+            "thinking": "\"At least I know now — but did a person ever actually look at this?\"",
+            "painPoint": [
+              "No feedback on why she didn't match; no way to tell if it was a genuine misfit or a parsing miss",
+              "No disclosure that an algorithm made the decision"
+            ],
+            "opportunity": "Fast, honest rejections (with a hint of why) turn the black hole into prompt closure and preserve goodwill",
+            "priority": "should-fix",
+            "exitPoint": "true"
+          },
+          "meta": {},
+          "index": 8,
+          "milestone": "the-wait",
+          "coverage": {
+            "A": {
+              "count": 4,
+              "fields": [
+                "emotion",
+                "emotionValence",
+                "emotionIntensity",
+                "thinking"
+              ]
+            },
+            "B": {
+              "count": 1,
+              "fields": [
+                "channel"
+              ]
+            },
+            "C": {
+              "count": 1,
+              "fields": [
+                "duration"
+              ]
+            },
+            "F": {
+              "count": 1,
+              "fields": [
+                "notification"
+              ]
+            },
+            "L": {
+              "count": 2,
+              "fields": [
+                "message",
+                "tone"
+              ]
+            },
+            "I": {
+              "count": 4,
+              "fields": [
+                "painPoint",
+                "opportunity",
+                "priority"
+              ]
+            },
+            "K": {
+              "count": 1,
+              "fields": [
+                "exitPoint"
+              ]
+            }
+          }
+        },
+        {
+          "id": "wait-in-silence",
+          "fields": {
+            "persona": [
+              "Maya",
+              "Recruiter",
+              "Hiring Manager",
+              "ATS"
+            ],
+            "description": "Having passed the AI screen, Maya's application reaches the recruiter queue — and days then weeks pass with no update. The black hole is unchanged for everyone who clears the AI gate",
+            "emotion": "Hope curdling into anxiety, then resignation",
+            "emotionValence": "-2",
+            "emotionIntensity": "high",
+            "waitTime": "Days to several weeks, often indefinite",
+            "duration": "The longest step in the journey by two orders of magnitude",
+            "pacing": "stalled",
+            "thinking": "\"Did anyone even look at it? Did I do something wrong? Should I follow up or will that annoy them?\"",
+            "systems": [
+              "ATS"
+            ],
+            "backstageAction": "Application sits in a queue; internal status changes are recorded but never surfaced to Maya",
+            "backstageStaff": "Recruiter screens or filters; many applications never get human eyes",
+            "handoff": "Recruiter → Hiring Manager for shortlist review — the transfer where the queue actually stalls",
+            "bottleneck": "Hiring Manager review capacity; a shortlist can sit for weeks behind higher-priority work",
+            "lineOfVisibility": "Status changes exist inside the ATS and are deliberately not exposed to the candidate",
+            "orchestration": "None — nothing connects internal ATS status to candidate communication",
+            "painPoint": [
+              "No acknowledgment that a human ever reviewed it",
+              "No status, no timeline, no closure"
+            ],
+            "momentOfTruth": "This silence is the make-or-break of the whole experience",
+            "failureMode": "Company never sends any further communication at all",
+            "failureProbability": "high",
+            "failureImpact": "high",
+            "opportunity": "Surface the real internal state, even coarsely — \"in recruiter review, typically ~2 weeks\"",
+            "priority": "must-fix",
+            "next": "→ check-status-or-follow-up"
+          },
+          "meta": {},
+          "index": 9,
+          "milestone": "the-wait",
+          "coverage": {
+            "A": {
+              "count": 4,
+              "fields": [
+                "emotion",
+                "emotionValence",
+                "emotionIntensity",
+                "thinking"
+              ]
+            },
+            "C": {
+              "count": 3,
+              "fields": [
+                "waitTime",
+                "duration",
+                "pacing"
+              ]
+            },
+            "F": {
+              "count": 1,
+              "fields": [
+                "systems"
+              ]
+            },
+            "E": {
+              "count": 1,
+              "fields": [
+                "backstageAction"
+              ]
+            },
+            "D": {
+              "count": 2,
+              "fields": [
+                "backstageStaff",
+                "handoff"
+              ]
+            },
+            "J": {
+              "count": 4,
+              "fields": [
+                "bottleneck",
+                "failureMode",
+                "failureProbability",
+                "failureImpact"
+              ]
+            },
+            "G": {
+              "count": 2,
+              "fields": [
+                "lineOfVisibility",
+                "orchestration"
+              ]
+            },
+            "I": {
+              "count": 5,
+              "fields": [
+                "painPoint",
+                "momentOfTruth",
+                "opportunity",
+                "priority"
+              ]
+            },
+            "K": {
+              "count": 1,
+              "fields": [
+                "next"
+              ]
+            }
+          }
+        },
+        {
+          "id": "check-status-or-follow-up",
+          "fields": {
+            "persona": [
+              "Maya"
+            ],
+            "description": "Logs back into the portal or musters the nerve to follow up",
+            "emotion": "Powerlessness, frustration",
+            "emotionValence": "-2",
+            "emotionIntensity": "medium",
+            "channel": "Portal, then email, then LinkedIn",
+            "duration": "~10 min per attempt",
+            "frequency": "Every few days at first, tapering off as hope fades",
+            "effort": "High emotional cost for near-zero information gain",
+            "doing": "Checks portal status (often just \"Submitted\" or \"Under review\" indefinitely)",
+            "workaround": "Emails a recruiter or messages an employee on LinkedIn to get a signal",
+            "painPoint": "Portal status is stale or meaningless; no way to get a real answer",
+            "failureMode": "Follow-ups go unanswered too",
+            "failureProbability": "high",
+            "failureImpact": "medium",
+            "opportunity": "A status that actually means something removes the need for the workaround entirely",
+            "priority": "should-fix",
+            "next": "→ hear-back"
+          },
+          "meta": {},
+          "index": 10,
+          "milestone": "the-wait",
+          "coverage": {
+            "A": {
+              "count": 4,
+              "fields": [
+                "emotion",
+                "emotionValence",
+                "emotionIntensity",
+                "effort"
+              ]
+            },
+            "B": {
+              "count": 1,
+              "fields": [
+                "channel"
+              ]
+            },
+            "C": {
+              "count": 2,
+              "fields": [
+                "duration",
+                "frequency"
+              ]
+            },
+            "E": {
+              "count": 2,
+              "fields": [
+                "doing",
+                "workaround"
+              ]
+            },
+            "I": {
+              "count": 3,
+              "fields": [
+                "painPoint",
+                "opportunity",
+                "priority"
+              ]
+            },
+            "J": {
+              "count": 3,
+              "fields": [
+                "failureMode",
+                "failureProbability",
+                "failureImpact"
+              ]
+            },
+            "K": {
+              "count": 1,
+              "fields": [
+                "next"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "resolution",
+      "fields": {
+        "title": "Resolution",
+        "description": "How (and whether) the journey actually ends"
+      },
+      "steps": [
+        {
+          "id": "hear-back",
+          "fields": {
+            "persona": [
+              "Maya",
+              "Recruiter",
+              "ATS"
+            ],
+            "description": "Eventually receives an outcome — or never does",
+            "emotion": "Depends entirely on what arrives, if anything",
+            "emotionValence": "0",
+            "emotionIntensity": "high",
+            "channel": "Email (rejection or advance), or silence",
+            "waitTime": "Weeks; for many applicants the branch never resolves at all",
+            "branchCondition": "Rejection vs. advance to interview vs. permanent silence (ghosting)",
+            "next": [
+              "rejection → outcome-rejection",
+              "advance → outcome-advance",
+              "no response ever → outcome-ghosted"
+            ]
+          },
+          "meta": {},
+          "index": 11,
+          "milestone": "resolution",
+          "coverage": {
+            "A": {
+              "count": 3,
+              "fields": [
+                "emotion",
+                "emotionValence",
+                "emotionIntensity"
+              ]
+            },
+            "B": {
+              "count": 1,
+              "fields": [
+                "channel"
+              ]
+            },
+            "C": {
+              "count": 1,
+              "fields": [
+                "waitTime"
+              ]
+            },
+            "K": {
+              "count": 4,
+              "fields": [
+                "branchCondition",
+                "next"
+              ]
+            }
+          }
+        },
+        {
+          "id": "outcome-rejection",
+          "fields": {
+            "persona": [
+              "Maya",
+              "ATS"
+            ],
+            "description": "Receives a rejection — best case a clear one, worst case a cold template",
+            "emotion": "Disappointment, but closure is its own relief",
+            "emotionValence": "-1",
+            "emotionIntensity": "medium",
+            "channel": "Email",
+            "notification": "Automated rejection (\"we've decided to move forward with other candidates\")",
+            "duration": "Weeks after applying, sometimes months",
+            "tone": "Form letter, weeks after the fact",
+            "painPoint": "Form-letter rejection with no feedback after weeks of waiting",
+            "opportunity": "A timely, human, even slightly personalized rejection preserves goodwill",
+            "priority": "should-fix",
+            "exitPoint": "true"
+          },
+          "meta": {},
+          "index": 12,
+          "milestone": "resolution",
+          "coverage": {
+            "A": {
+              "count": 3,
+              "fields": [
+                "emotion",
+                "emotionValence",
+                "emotionIntensity"
+              ]
+            },
+            "B": {
+              "count": 1,
+              "fields": [
+                "channel"
+              ]
+            },
+            "F": {
+              "count": 1,
+              "fields": [
+                "notification"
+              ]
+            },
+            "C": {
+              "count": 1,
+              "fields": [
+                "duration"
+              ]
+            },
+            "L": {
+              "count": 1,
+              "fields": [
+                "tone"
+              ]
+            },
+            "I": {
+              "count": 3,
+              "fields": [
+                "painPoint",
+                "opportunity",
+                "priority"
+              ]
+            },
+            "K": {
+              "count": 1,
+              "fields": [
+                "exitPoint"
+              ]
+            }
+          }
+        },
+        {
+          "id": "outcome-ghosted",
+          "fields": {
+            "persona": [
+              "Maya"
+            ],
+            "description": "Never hears anything — the application simply dissolves into silence",
+            "emotion": "Resentment, lasting damage to how she sees the company brand",
+            "emotionValence": "-2",
+            "emotionIntensity": "high",
+            "waitTime": "Indefinite — the journey has no terminating event",
+            "painPoint": "No closure ever; she's left to assume rejection",
+            "momentOfTruth": "Ghosting is the single most corrosive outcome for employer brand",
+            "failureMode": "The journey ends by exhaustion rather than by any decision being communicated",
+            "failureProbability": "high",
+            "failureImpact": "high",
+            "opportunity": "An automatic \"the role is closed\" sweep costs nothing and eliminates this ending entirely",
+            "priority": "must-fix",
+            "exitPoint": "true"
+          },
+          "meta": {},
+          "index": 13,
+          "milestone": "resolution",
+          "coverage": {
+            "A": {
+              "count": 3,
+              "fields": [
+                "emotion",
+                "emotionValence",
+                "emotionIntensity"
+              ]
+            },
+            "C": {
+              "count": 1,
+              "fields": [
+                "waitTime"
+              ]
+            },
+            "I": {
+              "count": 4,
+              "fields": [
+                "painPoint",
+                "momentOfTruth",
+                "opportunity",
+                "priority"
+              ]
+            },
+            "J": {
+              "count": 3,
+              "fields": [
+                "failureMode",
+                "failureProbability",
+                "failureImpact"
+              ]
+            },
+            "K": {
+              "count": 1,
+              "fields": [
+                "exitPoint"
+              ]
+            }
+          }
+        },
+        {
+          "id": "outcome-advance",
+          "fields": {
+            "persona": [
+              "Maya",
+              "Recruiter"
+            ],
+            "description": "Gets invited to a screen or interview — the journey continues into the hiring process",
+            "emotion": "Elation, validation",
+            "emotionValence": "2",
+            "emotionIntensity": "high",
+            "channel": "Email / recruiter call",
+            "duration": "Days to weeks after submission",
+            "next": "→ (interview journey — separate map)",
+            "exitPoint": "true"
+          },
+          "meta": {},
+          "index": 14,
+          "milestone": "resolution",
+          "coverage": {
+            "A": {
+              "count": 3,
+              "fields": [
+                "emotion",
+                "emotionValence",
+                "emotionIntensity"
+              ]
+            },
+            "B": {
+              "count": 1,
+              "fields": [
+                "channel"
+              ]
+            },
+            "C": {
+              "count": 1,
+              "fields": [
+                "duration"
+              ]
+            },
+            "K": {
+              "count": 2,
+              "fields": [
+                "next",
+                "exitPoint"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "journey": "Applying for a job through an online application portal",
+  "created": "2026-06-02",
+  "lastModified": "2026-08-18",
+  "structure": "Journey > Milestone > Step",
+  "stepCount": 15,
+  "categories": [
+    {
+      "letter": "A",
+      "name": "Emotional / Cognitive"
+    },
+    {
+      "letter": "B",
+      "name": "Physical / Spatial / Channel"
+    },
+    {
+      "letter": "C",
+      "name": "Temporal"
+    },
+    {
+      "letter": "D",
+      "name": "People / Actors"
+    },
+    {
+      "letter": "E",
+      "name": "Actions / Behaviors"
+    },
+    {
+      "letter": "F",
+      "name": "Systems / Technology"
+    },
+    {
+      "letter": "G",
+      "name": "Service Design Layers"
+    },
+    {
+      "letter": "H",
+      "name": "Business / Metrics"
+    },
+    {
+      "letter": "I",
+      "name": "Design / Opportunities"
+    },
+    {
+      "letter": "J",
+      "name": "Failure / Risk"
+    },
+    {
+      "letter": "K",
+      "name": "Path / Flow"
+    },
+    {
+      "letter": "L",
+      "name": "Communication / Content"
+    },
+    {
+      "letter": "M",
+      "name": "Accessibility / Inclusion"
+    }
+  ],
+  "fieldCategory": {
+    "emotion": "A",
+    "emotionValence": "A",
+    "emotionIntensity": "A",
+    "thinking": "A",
+    "cognitiveLoad": "A",
+    "motivation": "A",
+    "anxiety": "A",
+    "expectation": "A",
+    "trust": "A",
+    "effort": "A",
+    "confidence": "A",
+    "informationNeed": "A",
+    "channel": "B",
+    "touchpoint": "B",
+    "device": "B",
+    "place": "B",
+    "environment": "B",
+    "physicalEvidence": "B",
+    "channelTransition": "B",
+    "duration": "C",
+    "waitTime": "C",
+    "frequency": "C",
+    "trigger": "C",
+    "deadline": "C",
+    "pacing": "C",
+    "coActors": "D",
+    "frontlineStaff": "D",
+    "backstageStaff": "D",
+    "responsibleTeam": "D",
+    "thirdParty": "D",
+    "handoff": "D",
+    "doing": "E",
+    "frontstageAction": "E",
+    "backstageAction": "E",
+    "supportProcess": "E",
+    "inputRequired": "E",
+    "outputProduced": "E",
+    "workaround": "E",
+    "decision": "E",
+    "systems": "F",
+    "tools": "F",
+    "technology": "F",
+    "dataFlow": "F",
+    "automation": "F",
+    "dependencies": "F",
+    "notification": "F",
+    "policy": "F",
+    "frontstage": "G",
+    "backstage": "G",
+    "supportProcesses": "G",
+    "lineOfVisibility": "G",
+    "valueExchange": "G",
+    "serviceRecovery": "G",
+    "orchestration": "G",
+    "kpi": "H",
+    "metric": "H",
+    "conversionRate": "H",
+    "cost": "H",
+    "revenueImpact": "H",
+    "dropoffRate": "H",
+    "volumePerPeriod": "H",
+    "owner": "H",
+    "painPoint": "I",
+    "opportunity": "I",
+    "momentOfTruth": "I",
+    "insight": "I",
+    "desiredOutcome": "I",
+    "recommendation": "I",
+    "priority": "I",
+    "failureMode": "J",
+    "failureProbability": "J",
+    "failureImpact": "J",
+    "recoveryPath": "J",
+    "escalation": "J",
+    "fallback": "J",
+    "bottleneck": "J",
+    "risk": "J",
+    "next": "K",
+    "previous": "K",
+    "branchCondition": "K",
+    "parallelPath": "K",
+    "entryPoint": "K",
+    "exitPoint": "K",
+    "optionality": "K",
+    "message": "L",
+    "tone": "L",
+    "contentType": "L",
+    "cta": "L",
+    "accessibilityBarrier": "M",
+    "inclusionConsideration": "M",
+    "literacyRequirement": "M",
+    "economicBarrier": "M",
+    "culturalConsideration": "M"
+  },
+  "source": "demos/gallery/job-application-portal.md"
+};
