@@ -389,7 +389,12 @@ cmd_commit() {
 
     insert-milestone)
       [ -n "$anchor" ] || die "insert-milestone requires --after <id> or --before <id>"
-      target="$anchor"
+      # the log target is the milestone being inserted, not the anchor it is placed next to
+      new_id="$(awk 'NF { if ($0 ~ /^## Milestone:/) { sub(/^## Milestone:[ \t]*/,""); gsub(/[ \t]+$/,""); print } exit }' "$blk")"
+      [ -n "$new_id" ] || { rm -f "$blk"; die "insert-milestone: block must start with a '## Milestone: <id>' line"; }
+      [ -z "$target" ] || [ "$target" = "$new_id" ] || { rm -f "$blk"; die "insert-milestone: id argument '$target' does not match the block's '## Milestone: $new_id'"; }
+      grep -qxF "## Milestone: $new_id" "$f" && { rm -f "$blk"; die "insert-milestone: milestone id already exists: $new_id"; }
+      target="$new_id"
       awk -v id="$anchor" -v pos="$pos" -v bf="$blk" '
         BEGIN{ while((getline l<bf)>0) B[++nb]=l }
         function emit(){ print ""; print "---"; print ""; for(i=1;i<=nb;i++) print B[i] }
