@@ -20,7 +20,9 @@ claim the gallery exists to make.
 
 ## Rendering showcase — explore live
 
-**[Explore them live →](https://cguodesign.github.io/customer-journey-map-skill/#demos)**
+Each rendering opens live from the table below. The
+[showcase site](https://cguodesign.github.io/customer-journey-map-skill/examples/) also has
+interactive views of the same journey.
 The interactive HTML lives on the showcase site (kept out of the installed skill so clones
 stay lean); the source journeys stay here.
 

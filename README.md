@@ -91,8 +91,9 @@ comes from **one** journey file — fifteen steps, read for different rooms. (Fu
 > - [ ] An automated rejection states that it was automated, and offers one correction path.
 
 **Interactive HTML** — self-contained, explorable maps. Rendering is a *choice*, not a fixed
-output; you just ask. All nine are live on the
-[showcase site](https://cguodesign.github.io/customer-journey-map-skill/#demos).
+output; you just ask. All nine are live — open each one from
+[`demos/gallery/`](demos/gallery/#rendering-showcase--explore-live), or explore the example journeys on the
+[showcase site](https://cguodesign.github.io/customer-journey-map-skill/examples/).
 
 | Effect | What you say |
 |---|---|
