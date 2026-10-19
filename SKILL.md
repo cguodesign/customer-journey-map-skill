@@ -138,7 +138,8 @@ never inside the shared dataset). Don't ask when git already provides a name.
 
 **Registering a custom field.** When the user confirms a novel field, register it
 deterministically before using it: `scripts/journey.sh commit <journey> register-field
-<prefix_name> "<description>"` (namespace prefix `team_` / `vertical_` / `experiment_`).
+<prefix_name> "<description>"` (namespace prefix `team_` / `vertical_` / `experiment_`, or any
+`<scope>_`; a name without one is refused).
 `validate` rejects both an unregistered custom field and an un-prefixed unknown field — route
 both through this flow.
 

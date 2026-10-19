@@ -389,7 +389,12 @@ cmd_commit() {
 
     insert-milestone)
       [ -n "$anchor" ] || die "insert-milestone requires --after <id> or --before <id>"
-      target="$anchor"
+      # the log target is the milestone being inserted, not the anchor it is placed next to
+      new_id="$(awk 'NF { if ($0 ~ /^## Milestone:/) { sub(/^## Milestone:[ \t]*/,""); gsub(/[ \t]+$/,""); print } exit }' "$blk")"
+      [ -n "$new_id" ] || { rm -f "$blk"; die "insert-milestone: block must start with a '## Milestone: <id>' line"; }
+      [ -z "$target" ] || [ "$target" = "$new_id" ] || { rm -f "$blk"; die "insert-milestone: id argument '$target' does not match the block's '## Milestone: $new_id'"; }
+      grep -qxF "## Milestone: $new_id" "$f" && { rm -f "$blk"; die "insert-milestone: milestone id already exists: $new_id"; }
+      target="$new_id"
       awk -v id="$anchor" -v pos="$pos" -v bf="$blk" '
         BEGIN{ while((getline l<bf)>0) B[++nb]=l }
         function emit(){ print ""; print "---"; print ""; for(i=1;i<=nb;i++) print B[i] }
@@ -419,10 +424,16 @@ cmd_commit() {
       [ -n "$field" ] || die "register-field requires: <field_name> \"<description>\""
       [ -n "$desc" ]  || die "register-field requires a description: register-field $field \"<description>\""
       target="$field"
-      case "$field" in
-        *_*) ;;
-        *) printf 'journey.sh: warning: custom field "%s" has no namespace prefix (team_/vertical_/experiment_); registering as-is (suggested, not enforced).\n' "$field" >&2;;
-      esac
+      # a custom field needs a <scope>_ prefix: validate only accepts a non-schema field
+      # name that has one, so an unprefixed name could be registered but never used
+      if ! printf '%s' "$field" | grep -qE '^[a-zA-Z][a-zA-Z0-9-]*_[a-zA-Z0-9_-]+$'; then
+        rm -f "$tmp"
+        case "$field" in
+          *[!a-zA-Z0-9_-]*|[!a-zA-Z]*) die "register-field: invalid field name \"$field\" — use letters, digits, '-' and '_', starting with a letter, with a namespace prefix (e.g. team_urgency)";;
+          *_) die "register-field: \"$field\" is only a prefix — add the field name after it (e.g. ${field}urgency)";;
+          *) die "register-field: \"$field\" has no namespace prefix — custom fields are <scope>_<name> (team_ / vertical_ / experiment_ / any <scope>_), e.g. team_$field";;
+        esac
+      fi
       # idempotency: already in the preamble custom-fields block?
       if awk -v ff="$field" 'BEGIN{fc=0} /^---$/{fc++} fc==1 && $0 ~ ("^[ \t]*-[ \t]*" ff ":") {print "Y"; exit}' "$f" | grep -q Y; then
         rm -f "$tmp"; die "custom field already registered: $field"
@@ -903,7 +914,7 @@ COMMIT OPS
   remove-step      <id>
   insert-milestone --after <id> | --before <id>    (block from --block-file or stdin)
   remove-milestone <id>
-  register-field   <field_name> "<description>"    (adds to preamble custom-fields)
+  register-field   <scope>_<name> "<description>"  (adds to preamble custom-fields; prefix required)
   common flags: --note <text>  --author <name>
 
 THEME

@@ -5,6 +5,21 @@ All notable changes to the journey skill are listed here. Versions follow
 release adds capability, a major release changes a file format in a way that
 older journey files or logs cannot be read.
 
+## [0.1.2] - 2026-10-19
+
+### Fixed
+- `journey.sh commit … insert-milestone` logs the new milestone as the target
+  and puts the anchor in the default note, so `audit --target <new-id>` shows
+  the insert; it used to log the anchor. The block must start with a
+  `## Milestone: <id>` line, a positional id that disagrees with the block is
+  refused, and an id that already exists is refused with a message naming it.
+- `journey.sh commit … register-field` refuses a name without a namespace
+  prefix and suggests one (`urgency` → `team_urgency`). It used to register
+  the name with a warning, but `validate` rejects any non-schema field without
+  a `<scope>_` prefix, so the field could never be used. A bare prefix such as
+  `team_` and names with spaces or other characters a field line cannot hold
+  are refused too.
+
 ## [0.1.1] - 2026-10-11
 
 ### Fixed
