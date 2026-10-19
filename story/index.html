@@ -1,4 +1,4 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="journey-build" content="cf855afed1"><meta name="description" content="Journey Skill gives your coding agent a map of the human experience. An interactive particle story about building in the right direction.">
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="journey-build" content="bb18f554f7"><meta name="description" content="Journey Skill gives your coding agent a map of the human experience. An interactive particle story about building in the right direction.">
 <title>推门即用 · Journey Skill</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -275,7 +275,7 @@ html[lang="zh-CN"] .feature h3{font:400 clamp(20px,1.9vw,27px)/1.5 var(--f);lett
 @media(max-width:760px){#features{padding-top:112px}.features-heading{padding-bottom:30px}.features-heading h2{font-size:34px}.features-edition{display:none}.features-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.feature{padding:18px 15px;min-height:310px}.feature h3{font-size:25px;min-height:64px;margin-top:23px}html[lang="zh-CN"] .feature h3{font-size:20px}.feature-art{margin-top:9px;margin-bottom:15px}.feature p{font-size:11px;line-height:1.8}.feature-index{font-size:10px}.feature-index .feature-mode{font-size:7px;letter-spacing:.03em}.features-foot{display:block;font-size:11px}.features-foot a{display:inline-block;margin-top:22px;margin-left:37px}}
 @media(max-width:359px){.feature{padding:15px 10px}.feature-index .feature-mode{font-size:6px}html[lang="zh-CN"] .feature h3{font-size:18px}}
 @media(prefers-reduced-motion:reduce){.feature-art{transition:none;transform:none!important}}
-</style><link rel="stylesheet" href="../assets/site.css?v=f73405a584"><style>
+</style><link rel="stylesheet" href="../assets/site.css?v=91a002193d"><style>
 .site-header{right:auto;width:100%;position:fixed;top:0}.site-header nav{position:static;right:auto;top:auto}.site-header .brand-mark:before,.site-header .brand-mark:after{background:var(--ink)}
 #features.story-end{padding:100px var(--gutter);background:var(--bg)}.story-end h2{font-size:clamp(32px,4vw,55px);line-height:1.35;margin-top:25px}#install{background:var(--bg);color:var(--ink);padding:65px var(--gutter)}#install .wrap{padding:0}#install h2{font-size:clamp(34px,4vw,52px)}#install .tcard{max-width:740px}footer.site-footer{background:var(--bg);color:var(--ink);position:relative;z-index:4}body.light-ui .site-header .brand-mark:before,body.light-ui .site-header .brand-mark:after{background:var(--ink)}
 @media(max-width:760px){.site-header nav{position:absolute;top:71px;left:0;right:0}.site-header .header-actions{gap:6px}.site-header .motion-control{display:none}.site-header .reading-toggle{padding:5px}.site-header .brand{font-size:20px}.site-header{gap:8px}}
@@ -477,7 +477,8 @@ commit rejected (no changes written)</span></pre></div>
   const english=[['Need to talk','Walk in','Discuss','Leave'],['Need a whiteboard','Enter an empty room','20 min at the board','Finish early'],['Badge / calendar','Hallway observation','Meeting notes','Door sensor']];
   // The third step has no source annotation in the example; keep that gap visible.
   rows[2][2]='依据待补充';english[2][2]='Source not recorded';
-  [.66,.26,-.54].forEach((y,k)=>xs.forEach((x,j)=>labels.push({x,y,t:rows[k][j],en:english[k][j],small:k>0})));
+  // fit: widest a label may draw, in model units (one cell, with a margin)
+  [.66,.26,-.54].forEach((y,k)=>xs.forEach((x,j)=>labels.push({x,y,t:rows[k][j],en:english[k][j],small:k>0,fit:cw*.9})));
   labels.push({x:-1.54,y:.66,t:'阶段',en:'STAGE'},{x:-1.54,y:.26,t:'行为',en:'ACTION'},{x:-1.54,y:-.19,t:'感受',en:'EMOTION'},{x:-1.54,y:-.54,t:'依据',en:'SOURCE'});
   xs.forEach((x,j)=>labels.push({x,y:ys[j]+.08,t:values[j]>0?'+'+values[j]:'0',en:values[j]>0?'+'+values[j]:'0',small:true}));
   // Two people remain below their map; the visual begins with human experience.
@@ -486,7 +487,7 @@ commit rejected (no changes written)</span></pre></div>
    for(let i=0;i<450;i++){const u=rnd(),side=rnd()>.5?1:-1;dot(x+side*(u<.5?.05:.025)+(rnd()-.5)*.025,-.92-u*.32,.6+rnd()*.4)}
    line(x-.05,-.95,x-.1,-1.1,.6);line(x+.05,-.95,x+.1,-1.1,.6);
   }
-  labels.push({x:.55,y:-1.05,t:'从人的经历，到共同的理解',en:'FROM EXPERIENCE TO SHARED UNDERSTANDING',small:true});
+  labels.push({x:.75,y:-1.05,t:'从人的经历，到共同的理解',en:'FROM EXPERIENCE TO SHARED UNDERSTANDING',small:true,fit:1.4});
   return{points,labels};
  }
  function draw(ctx,w,h,t,{finale=false,still=false,en=false}={}){
@@ -502,7 +503,10 @@ commit rejected (no changes written)</span></pre></div>
   for(let i=0;i<110;i++){const phase=still?i/110:(i/110+t*.055)%1,x=-2.3+phase*1.05,y=Math.sin(i*7.1)*.7;const p=project(x,y);ctx.globalAlpha=Math.sin(phase*Math.PI)*.3;ctx.fillRect(p[0],p[1],1,1)}
   ctx.textAlign='center';ctx.textBaseline='middle';
   const labelOpacity=Math.max(0,(ease-.75)*4);
-  for(const l of m.labels){const p=project(l.x,l.y);ctx.globalAlpha=labelOpacity*(l.small?.72:.95);ctx.font=(mobile?(l.small?8:10):(l.small?11:13))+'px "Noto Sans SC",sans-serif';ctx.fillText(en?l.en:l.t,p[0],p[1])}
+  for(const l of m.labels){const p=project(l.x,l.y);ctx.globalAlpha=labelOpacity*(l.small?.72:.95);const text=en?l.en:l.t;let size=mobile?(l.small?8:10):(l.small?11:13);ctx.font=size+'px "Noto Sans SC",sans-serif';
+   // English runs longer than the Chinese the grid was drawn for: shrink to fit the cell.
+   if(l.fit)while(size>6&&ctx.measureText(text).width>l.fit*scale){size-=.5;ctx.font=size+'px "Noto Sans SC",sans-serif'}
+   ctx.fillText(text,p[0],p[1])}
   ctx.globalAlpha=1;
  }
  const data=model();window.JourneyArt={model,draw};

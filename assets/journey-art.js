@@ -15,7 +15,8 @@
   const english=[['Need to talk','Walk in','Discuss','Leave'],['Need a whiteboard','Enter an empty room','20 min at the board','Finish early'],['Badge / calendar','Hallway observation','Meeting notes','Door sensor']];
   // The third step has no source annotation in the example; keep that gap visible.
   rows[2][2]='依据待补充';english[2][2]='Source not recorded';
-  [.66,.26,-.54].forEach((y,k)=>xs.forEach((x,j)=>labels.push({x,y,t:rows[k][j],en:english[k][j],small:k>0})));
+  // fit: widest a label may draw, in model units (one cell, with a margin)
+  [.66,.26,-.54].forEach((y,k)=>xs.forEach((x,j)=>labels.push({x,y,t:rows[k][j],en:english[k][j],small:k>0,fit:cw*.9})));
   labels.push({x:-1.54,y:.66,t:'阶段',en:'STAGE'},{x:-1.54,y:.26,t:'行为',en:'ACTION'},{x:-1.54,y:-.19,t:'感受',en:'EMOTION'},{x:-1.54,y:-.54,t:'依据',en:'SOURCE'});
   xs.forEach((x,j)=>labels.push({x,y:ys[j]+.08,t:values[j]>0?'+'+values[j]:'0',en:values[j]>0?'+'+values[j]:'0',small:true}));
   // Two people remain below their map; the visual begins with human experience.
@@ -24,7 +25,7 @@
    for(let i=0;i<450;i++){const u=rnd(),side=rnd()>.5?1:-1;dot(x+side*(u<.5?.05:.025)+(rnd()-.5)*.025,-.92-u*.32,.6+rnd()*.4)}
    line(x-.05,-.95,x-.1,-1.1,.6);line(x+.05,-.95,x+.1,-1.1,.6);
   }
-  labels.push({x:.55,y:-1.05,t:'从人的经历，到共同的理解',en:'FROM EXPERIENCE TO SHARED UNDERSTANDING',small:true});
+  labels.push({x:.75,y:-1.05,t:'从人的经历，到共同的理解',en:'FROM EXPERIENCE TO SHARED UNDERSTANDING',small:true,fit:1.4});
   return{points,labels};
  }
  function draw(ctx,w,h,t,{finale=false,still=false,en=false}={}){
@@ -40,7 +41,10 @@
   for(let i=0;i<110;i++){const phase=still?i/110:(i/110+t*.055)%1,x=-2.3+phase*1.05,y=Math.sin(i*7.1)*.7;const p=project(x,y);ctx.globalAlpha=Math.sin(phase*Math.PI)*.3;ctx.fillRect(p[0],p[1],1,1)}
   ctx.textAlign='center';ctx.textBaseline='middle';
   const labelOpacity=Math.max(0,(ease-.75)*4);
-  for(const l of m.labels){const p=project(l.x,l.y);ctx.globalAlpha=labelOpacity*(l.small?.72:.95);ctx.font=(mobile?(l.small?8:10):(l.small?11:13))+'px "Noto Sans SC",sans-serif';ctx.fillText(en?l.en:l.t,p[0],p[1])}
+  for(const l of m.labels){const p=project(l.x,l.y);ctx.globalAlpha=labelOpacity*(l.small?.72:.95);const text=en?l.en:l.t;let size=mobile?(l.small?8:10):(l.small?11:13);ctx.font=size+'px "Noto Sans SC",sans-serif';
+   // English runs longer than the Chinese the grid was drawn for: shrink to fit the cell.
+   if(l.fit)while(size>6&&ctx.measureText(text).width>l.fit*scale){size-=.5;ctx.font=size+'px "Noto Sans SC",sans-serif'}
+   ctx.fillText(text,p[0],p[1])}
   ctx.globalAlpha=1;
  }
  const data=model();window.JourneyArt={model,draw};
