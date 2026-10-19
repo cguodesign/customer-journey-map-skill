@@ -14,8 +14,8 @@ git clone https://github.com/cguodesign/customer-journey-map-skill ~/.claude/ski
 git clone https://github.com/cguodesign/customer-journey-map-skill .claude/skills/journey
 ```
 
-Already working inside this repo? The skill is `remote/SKILL.md`. Start a session from a
-directory where `.claude/skills/journey` resolves to it. Confirm with `/` — you should
+Already working inside a clone of this repo? The skill is the repo itself (`SKILL.md` at its
+root). Start a session from a directory where `.claude/skills/journey` resolves to the clone. Confirm with `/` — you should
 see `journey` in the skill list.
 
 ## 2. Start a fresh session per demo
