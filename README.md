@@ -217,4 +217,4 @@ Diamond.
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
