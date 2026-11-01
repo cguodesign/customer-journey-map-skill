@@ -5,10 +5,10 @@
  const assetBase=new URL('.',document.currentScript.src);
  const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
  const allSeeds=[...new Set(Object.values(presets).flatMap(p=>Object.keys(p.seeds)))];
- let agent='claude',theme='graphite';
+ let agent='claude',theme='default';
  const queryTheme=new URLSearchParams(location.search).get('theme');
  try{theme=localStorage.getItem('journey-example-theme')||theme}catch{}
- if(queryTheme)theme=queryTheme;if(!presets[theme])theme='graphite';
+ if(queryTheme)theme=queryTheme;if(!presets[theme])theme='default';
  const layout=$('[data-template-layout]'),interaction=$('[data-template-interaction]');
  const combos={
   'card-grid':['scroll-driven','focus-context','multi-view'],
@@ -34,7 +34,7 @@
   const dir=agent==='codex'?'$HOME/.agents/skills/journey':'$HOME/.claude/skills/journey';
   const lines=[`JOURNEY_SKILL="${dir}"`];
   if(theme==='graphite')lines.push('# 先下载 graphite.css，再把它装进 skill 的主题目录', 'cp "$HOME/Downloads/graphite.css" "$JOURNEY_SKILL/assets/theme/presets/graphite.css"');
-  lines.push(`bash "$JOURNEY_SKILL/scripts/journey.sh" theme map.html --init --preset ${theme}`);
+  lines.push(theme==='default'?'bash "$JOURNEY_SKILL/scripts/journey.sh" theme map.html --init':`bash "$JOURNEY_SKILL/scripts/journey.sh" theme map.html --init --preset ${theme}`);
   return lines.join('\n');
  }
  function recipe(){
@@ -42,19 +42,19 @@
   $$('[data-theme-command]').forEach(el=>el.textContent=command());
   $$('[data-theme-current]').forEach(el=>el.textContent=presets[theme].label.split(' · ')[0]);
   $$('[data-theme-summary]').forEach(el=>el.textContent=presets[theme].label);
-  $$('[data-theme-note]').forEach(el=>el.textContent=theme==='graphite'?'Graphite 是官网新增主题。先下载下方 CSS；默认从 Downloads 复制，保存到别处时请调整路径。':'这是 skill 内置预设。下面按所选安装目录调用真实的 theme 命令。');
-  $$('[data-preset-download]').forEach(el=>{el.href=new URL(`theme/presets/${theme}.css`,assetBase);el.download=theme+'.css';el.textContent=`下载 ${theme}.css ↓`});
+  $$('[data-theme-note]').forEach(el=>el.textContent=theme==='default'?'这是 skill 自带的默认配色：白纸、近黑的墨、一处红色留给 moment of truth。--init 装好 token 层就是它，不需要 preset。':theme==='graphite'?'Graphite 是官网新增主题。先下载下方 CSS；默认从 Downloads 复制，保存到别处时请调整路径。':'这是 skill 内置预设。下面按所选安装目录调用真实的 theme 命令。');
+  $$('[data-preset-download]').forEach(el=>{if(theme==='default'){el.href=new URL('theme/journey-tokens.css',assetBase);el.download='journey-tokens.css';el.textContent='下载 journey-tokens.css ↓'}else{el.href=new URL(`theme/presets/${theme}.css`,assetBase);el.download=theme+'.css';el.textContent=`下载 ${theme}.css ↓`}});
   $$('[data-theme-example]').forEach(el=>{const u=new URL(el.href);u.searchParams.set('theme',theme);el.href=u});
   if(!layout)return;
   $('[data-template-description]').textContent=descriptions[layout.value];
   $('[data-layout-download]').href=new URL(`template-library/rendering/${layout.value}.html`,assetBase);
   $('[data-interaction-download]').href=new URL(`template-library/interaction/${interaction.value}.html`,assetBase);
   const invocation=agent==='codex'?'$journey':'/journey';
-  $('[data-template-prompt]').textContent=`${invocation}\n读取 .journey/job-application.md，为产品与设计评审生成 map.html。\n使用 Express 的 Interactive HTML 表达：\n- 布局参考：assets/templates/rendering/${layout.value}.html\n- 交互参考：assets/templates/interaction/${interaction.value}.html\n- 目的：${descriptions[layout.value]}\n所有数据来自这份旅程；保留缺失值、分支和来源标记。\n颜色只使用 Journey 语义 token；生成后运行 theme 命令应用 ${theme} 主题。`+(theme==='graphite'?'\nGraphite 若尚未安装，请先使用我下载的 graphite.css。':'');
-  if(en)$('[data-template-prompt]').textContent=`${invocation}\nRead .journey/job-application.md and generate map.html for a product and design review.\nUse Express / Interactive HTML:\n- Layout reference: assets/templates/rendering/${layout.value}.html\n- Interaction reference: assets/templates/interaction/${interaction.value}.html\n- Purpose: ${JourneyDocs.translate(descriptions[layout.value])}\nUse only this journey's data. Preserve missing values, branches and provenance.\nUse Journey semantic colour tokens. After generating the HTML, apply the ${theme} theme with the theme command.`+(theme==='graphite'?'\nIf Graphite is not installed, use my downloaded graphite.css first.':'');
+  $('[data-template-prompt]').textContent=`${invocation}\n读取 .journey/job-application.md，为产品与设计评审生成 map.html。\n使用 Express 的 Interactive HTML 表达：\n- 布局参考：assets/templates/rendering/${layout.value}.html\n- 交互参考：assets/templates/interaction/${interaction.value}.html\n- 目的：${descriptions[layout.value]}\n所有数据来自这份旅程；保留缺失值、分支和来源标记。\n颜色只使用 Journey 语义 token；生成后运行 theme 命令${theme==='default'?'装入默认配色':`应用 ${theme} 主题`}。`+(theme==='graphite'?'\nGraphite 若尚未安装，请先使用我下载的 graphite.css。':'');
+  if(en)$('[data-template-prompt]').textContent=`${invocation}\nRead .journey/job-application.md and generate map.html for a product and design review.\nUse Express / Interactive HTML:\n- Layout reference: assets/templates/rendering/${layout.value}.html\n- Interaction reference: assets/templates/interaction/${interaction.value}.html\n- Purpose: ${JourneyDocs.translate(descriptions[layout.value])}\nUse only this journey's data. Preserve missing values, branches and provenance.\nUse Journey semantic colour tokens. After generating the HTML, ${theme==='default'?'install the default palette':`apply the ${theme} theme`} with the theme command.`+(theme==='graphite'?'\nIf Graphite is not installed, use my downloaded graphite.css first.':'');
  }
  function apply(name,persist=false){
-  theme=presets[name]?name:'graphite';const p=presets[theme];
+  theme=presets[name]?name:'default';const p=presets[theme];
   $$('[data-journey-theme]').forEach(el=>{
    allSeeds.forEach(key=>el.style.removeProperty(key));
    el.dataset.theme=p.mode;el.dataset.preset=theme;
@@ -69,7 +69,7 @@
  }
  $$('[data-theme-picker]').forEach(box=>Object.entries(presets).forEach(([key,p])=>{
   const b=document.createElement('button');b.type='button';b.dataset.themeChoice=key;b.setAttribute('aria-pressed','false');
-  const dot=document.createElement('span');dot.className='theme-swatch';dot.setAttribute('aria-hidden','true');dot.style.setProperty('--swatch-surface',p.seeds['--brand-surface']);dot.style.setProperty('--swatch-accent',p.seeds['--brand-primary']);
+  const dot=document.createElement('span');dot.className='theme-swatch';dot.setAttribute('aria-hidden','true');const sw=p.swatch||{'--brand-surface':p.seeds['--brand-surface'],'--brand-primary':p.seeds['--brand-primary']};dot.style.setProperty('--swatch-surface',sw['--brand-surface']);dot.style.setProperty('--swatch-accent',sw['--brand-primary']);
   const label=document.createElement('span');label.className='theme-name';label.textContent=p.label;b.title=p.label;b.setAttribute('aria-label',p.label);b.append(dot,label);b.addEventListener('click',()=>apply(key,true));box.append(b);
  }));
  function updateInteractions(){const previous=interaction.value;interaction.replaceChildren();combos[layout.value].forEach(key=>{const option=document.createElement('option');option.value=key;option.textContent=interactionNames[key];interaction.append(option)});if(combos[layout.value].includes(previous))interaction.value=previous;recipe()}

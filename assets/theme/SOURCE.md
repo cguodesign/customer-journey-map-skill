@@ -1,9 +1,14 @@
 # Theme source
 
 `journey-tokens.css` and paper / midnight / blueprint / contrast are verbatim
-snapshots from https://github.com/cguodesign/customer-journey-map-skill
-at commit f30cc0bb9a8052d3fd4a0279881f535ab06db599 (2026-10-13 retrieval).
-The rendering and interaction references in ../template-library are from the same commit.
+snapshots from https://github.com/cguodesign/customer-journey-map-skill:
+tokens and the rendering and interaction references in ../template-library
+from master commit 1ce519d (PR #4, the neutral default, squash-merged
+2026-11-01; retrieved from the PR branch the same day).
+
+The picker's first entry, "Default", is not a preset file: it is the skill's own
+shipped palette (white paper, near-black ink, one red for the moment of truth),
+reached with `journey.sh theme map.html --init` and no `--preset`.
 
 Graphite is a new reusable Tier-1 preset, authored for this website.
 The copy here is canonical; it has NOT been published in the skill repository.
