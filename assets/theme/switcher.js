@@ -1,8 +1,8 @@
 /* ==========================================================================
    switcher.js — the theme control every rendering carries.
 
-   A rendering ships dark. What it does NOT ship is a fixed identity: paper,
-   brand and light are one click away, because that is the honest demonstration
+   A rendering ships light, on the neutral default palette. What it does NOT
+   ship is a fixed identity: dark, paper and brand are one click away, because that is the honest demonstration
    of a token layer — the reader re-seeds Tier 1 and watches the whole palette
    re-derive, rather than being shown four files that someone styled four times.
 
@@ -16,8 +16,8 @@
   var root = document.documentElement;
 
   var PRESETS = {
-    dark:  { theme: "dark",  seeds: null, label: "Dark" },
     light: { theme: "light", seeds: null, label: "Light" },
+    dark:  { theme: "dark",  seeds: null, label: "Dark" },
     paper: { theme: "light", label: "Paper", seeds: {
       "--brand-surface":  "oklch(96.5% 0.011 85)",
       "--brand-text":     "oklch(19% 0.006 80)",
@@ -35,7 +35,7 @@
                    "--brand-secondary","--brand-positive","--brand-on-primary","--brand-attention"];
 
   function apply(name) {
-    var p = PRESETS[name] || PRESETS.dark;
+    var p = PRESETS[name] || PRESETS.light;
     SEED_KEYS.forEach(function (k) { root.style.removeProperty(k); });
     if (p.seeds) Object.keys(p.seeds).forEach(function (k) { root.style.setProperty(k, p.seeds[k]); });
     root.setAttribute("data-theme", p.theme);
@@ -77,7 +77,10 @@
     document.body.appendChild(box);
     var saved;
     try { saved = sessionStorage.getItem("journey-theme"); } catch (e) {}
-    apply(saved && PRESETS[saved] ? saved : (root.getAttribute("data-preset") || "dark"));
+    // a file that pins its own mode on <html> (a dark timeline, a paper
+    // storyboard) starts the switch where it already is, not on the default
+    var pinned = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    apply(saved && PRESETS[saved] ? saved : (root.getAttribute("data-preset") || pinned));
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
   else mount();
