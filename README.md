@@ -195,6 +195,7 @@ references/
   journey.format.md               # Canonical markdown format
   modes/                          # Per-mode playbooks (plan, modify, express, review), loaded on demand
   html-rendering-guide.md         # Interactive HTML: rendering matrix, color, data mapping
+  i18n/                           # Language packs (en, fr, ja, zh): field labels and the words people use for each field
 assets/theme/                     # journey-tokens.css (3-tier colour system) + presets; installed by `journey.sh theme`
 assets/templates/                 # 5 rendering modes (card, timeline, swimlane, emotion, storyboard) + interaction + wireframe templates
 examples/                         # Golden examples

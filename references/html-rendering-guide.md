@@ -224,6 +224,11 @@ the surface colour and writes the matching selector; hand-edit and you own this.
 
 How journey schema fields map to visual elements in the HTML output.
 
+**Field labels.** Wherever a field's name is shown (card sections, lane headers, legends,
+tooltips), use the **Label** column of the language pack for the user's language,
+`references/i18n/<lang>.md`; `en.md` holds the English labels. Set `<html lang>` to match.
+Field values are shown as written.
+
 ### Card Collapsed State
 
 | Schema field | Visual |
