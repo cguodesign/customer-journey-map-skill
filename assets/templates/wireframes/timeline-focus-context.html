@@ -19,6 +19,13 @@
    Themes: base = light. Dark re-derives (never inverts) via prefers-color-scheme
    and [data-theme], so a manual toggle wins in both directions.
 
+   The shipped seed is deliberately neutral: white paper, near-black ink, a grey
+   scale between them, and ONE hue (attention) for the moment of truth. Emotion
+   valence is a lightness ramp from paper (positive, drawn hollow) to ink
+   (negative, drawn solid), never a red/green pair, so the one hue on the page
+   is always the one thing to look at. Presets and brand reseeds may bring hue
+   back; the default does not.
+
    OVERRIDING TIER 1 (brand themes, paper artifacts): the dark blocks below are
    selected by :root:not([data-theme="light"]) and :root[data-theme="dark"],
    both of which out-specify a bare :root. So an artifact that reseeds Tier 1
@@ -34,18 +41,22 @@
 
 /* ── Tier 1 · brand seed ───────────────────────────────────────────────── */
 :root{
-  --brand-primary:    oklch(70% 0.148 52);      /* chrome, accent, selection   */
-  --brand-secondary:  oklch(63% 0.115 248);     /* second categorical hue      */
-  --brand-surface:    oklch(98.6% 0.006 80);    /* page ground                 */
-  --brand-text:       oklch(21% 0.014 62);      /* body ink                    */
-  --brand-positive:   oklch(64% 0.118 158);     /* semantic good               */
-  --brand-negative:   oklch(58% 0.168 25);      /* semantic bad                */
-  --brand-machine:    oklch(60% 0.096 285);     /* automated / no-human paths  */
-  --brand-on-primary: oklch(22% 0.014 70);      /* text that sits ON the primary */
-  --brand-attention:  oklch(72% 0.152 62);      /* momentOfTruth — NOT the brand:
-                                                   a marker that repaints itself
-                                                   when the logo changes is not a
-                                                   marker (guide § colour) */
+  --brand-primary:    #09090b;                  /* chrome, accent, selection — the
+                                                   focal colour IS the ink       */
+  --brand-secondary:  #52525b;                  /* second categorical tone      */
+  --brand-surface:    #ffffff;                  /* page ground                  */
+  --brand-text:       #09090b;                  /* body ink                     */
+  --brand-positive:   #ffffff;                  /* semantic good = the paper end
+                                                   of the valence ramp (hollow)  */
+  --brand-negative:   #09090b;                  /* semantic bad = the ink end
+                                                   of the valence ramp (solid)   */
+  --brand-machine:    #71717a;                  /* automated / no-human paths   */
+  --brand-on-primary: #ffffff;                  /* text that sits ON the primary */
+  --brand-attention:  #dc2626;                  /* momentOfTruth — the ONE hue.
+                                                   NOT the brand: a marker that
+                                                   repaints itself when the logo
+                                                   changes is not a marker
+                                                   (guide § colour) */
   /* categorical seed — Okabe-Ito, distinguishable under all three common
      colour-vision deficiencies. Independent of brand on purpose (see
      html-rendering-guide § accessibility); override only if the brand's own
@@ -55,21 +66,22 @@
   --brand-cat-3:      oklch(60% 0.098 168);     /* bluish green    */
   --brand-cat-4:      oklch(72% 0.145 78);      /* orange          */
   --brand-cat-5:      oklch(56% 0.112 340);     /* reddish purple  */
-  --brand-font:       "Söhne","Inter var",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,sans-serif;
-  --brand-font-mono:  ui-monospace,"SF Mono","Berkeley Mono",Menlo,Consolas,monospace;
-  --brand-radius:     3px;
+  --brand-font:       "Geist","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --brand-font-mono:  "Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --brand-radius:     6px;
 }
 
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --brand-primary:   oklch(76% 0.138 55);
-    --brand-secondary: oklch(70% 0.105 248);
-    --brand-surface:   oklch(17.5% 0.008 66);
-    --brand-text:      oklch(94% 0.008 80);
-    --brand-positive:  oklch(72% 0.108 158);
-    --brand-negative:  oklch(67% 0.150 26);
-    --brand-machine:   oklch(70% 0.088 285);
-    --brand-attention: oklch(78% 0.140 64);
+    --brand-primary:   #fafafa;
+    --brand-secondary: #a1a1aa;
+    --brand-surface:   #09090b;
+    --brand-text:      #fafafa;
+    --brand-positive:  #09090b;
+    --brand-negative:  #fafafa;
+    --brand-machine:   #a1a1aa;
+    --brand-on-primary:#09090b;
+    --brand-attention: #f87171;
     --brand-cat-1:     oklch(70% 0.098 248);
     --brand-cat-2:     oklch(72% 0.140 42);
     --brand-cat-3:     oklch(70% 0.090 168);
@@ -78,14 +90,15 @@
   }
 }
 :root[data-theme="dark"]{
-  --brand-primary:   oklch(76% 0.138 55);
-  --brand-secondary: oklch(70% 0.105 248);
-  --brand-surface:   oklch(17.5% 0.008 66);
-  --brand-text:      oklch(94% 0.008 80);
-  --brand-positive:  oklch(72% 0.108 158);
-  --brand-negative:  oklch(67% 0.150 26);
-  --brand-machine:   oklch(70% 0.088 285);
-  --brand-attention: oklch(78% 0.140 64);
+  --brand-primary:   #fafafa;
+  --brand-secondary: #a1a1aa;
+  --brand-surface:   #09090b;
+  --brand-text:      #fafafa;
+  --brand-positive:  #09090b;
+  --brand-negative:  #fafafa;
+  --brand-machine:   #a1a1aa;
+  --brand-on-primary:#09090b;
+  --brand-attention: #f87171;
   --brand-cat-1:     oklch(70% 0.098 248);
   --brand-cat-2:     oklch(72% 0.140 42);
   --brand-cat-3:     oklch(70% 0.090 168);
@@ -133,15 +146,18 @@
   /* markers */
   --marker-critical:    var(--brand-attention);   /* momentOfTruth   */
   --marker-fail:        var(--brand-negative);    /* failureMode     */
-  --marker-opportunity: var(--brand-positive);    /* opportunity     */
+  --marker-opportunity: color-mix(in oklab, var(--brand-positive) 60%, var(--brand-text)); /* opportunity —
+                                                     darker than the valence fill it
+                                                     shares a seed with, so it reads
+                                                     as a line, not a tint */
   --marker-machine:     var(--brand-machine);     /* automation      */
   --marker-pain:        color-mix(in oklab, var(--brand-negative) 62%, var(--brand-primary)); /* painPoint */
 
   /* Two colours that pair with *data*, not with the page, so they must NOT flip
      with the theme: text sitting on a saturated fill, and the colour a shadow is
      cast in. Inverting either is the classic dark-mode bug. */
-  --ink-on-fill: oklch(22% 0.014 70);
-  --shadow-ink:  oklch(12% 0.010 60);
+  --ink-on-fill: #09090b;
+  --shadow-ink:  #09090b;
 
   /* actor kinds (categorical — limit to 4, per the guide's 6–8 hue ceiling) */
   --actor-primary:   var(--brand-primary);
