@@ -108,9 +108,11 @@ output; you just ask. All nine are live — open each one from
 Plus a dark timeline where the weeks-long wait dwarfs every step, and the whole service
 blueprint on a pannable canvas.
 
-**Your colours, in one line.** Every rendering opens dark and carries a **Dark · Light · Paper ·
-Brand** switch, so you can see the palette re-derive before you commit to anything. Renderings
-contain no literal colours — only token names — so re-theming isn't a rewrite either:
+**Your colours, in one line.** Every rendering opens on a neutral palette — white paper,
+near-black ink, greys between, and a single red reserved for the *moment of truth* — and carries a
+**Light · Dark · Paper · Brand** switch, so you can see the palette re-derive before you commit to
+anything. Renderings contain no literal colours — only token names — so re-theming isn't a rewrite
+either:
 
 ```bash
 journey.sh theme map.html --primary '#6C2BD9' --surface '#fff' --text '#1a1320'
@@ -118,8 +120,9 @@ journey.sh theme map.html --preset paper     # or: midnight, blueprint, contrast
 ```
 
 Four seed values re-derive the whole palette: lane tints, valence scale, rules, shadows,
-dark mode. Semantic colours stay put on purpose — a *moment of truth* marker that repaints
-itself when your logo changes isn't a marker.
+dark mode. Emotion is a lightness ramp (hollow for positive, solid for negative), so a brand
+colour never has to fight a red/green pair. Semantic colours stay put on purpose — a *moment of
+truth* marker that repaints itself when your logo changes isn't a marker.
 
 > Across all of them: nobody quotes a hard drop-off percentage. The map carries no measured
 > metrics, so the brief says so out loud and recommends instrumenting instead. The one number
