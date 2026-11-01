@@ -113,6 +113,8 @@ if audience is mixed (multiple needs):
 
 5. **Respect natural semantic associations.** Red = negative/hot/danger, green = positive/growth, orange = warning, blue = neutral/cold/trust. Violating these (e.g., green for loss) creates cognitive friction. When brand colors conflict with semantic expectations, use brand for chrome/identity and semantic colors for data.
 
+6. **One hue on the page by default.** The shipped palette is neutral: white paper, near-black ink, a grey scale between, and a single red that belongs to the moment of truth. Emotion valence is encoded by **lightness and fill**, not by hue — positive points are hollow (paper), negative points are solid (ink), neutral sits between — so the one colour on the page is always the one thing to look at. A preset or a brand reseed may bring a positive/negative hue pair back; the default does not, and a rendering must still read when it is switched to one that does not.
+
 ### The token layer — where colour actually comes from
 
 **Renderings do not contain colours. They contain token names.** The palette ships as
@@ -125,15 +127,15 @@ survive being emailed, so it cannot link a stylesheet). Two marked regions carry
 ```
 
 A third region, `<!-- switcher:begin -->`, carries the in-page theme control that ships with
-the tokens: **Dark · Light · Paper · Brand**. A rendering opens dark and the reader re-seeds
-it live — the control writes Tier-1 values as inline properties on `<html>`, which beats every
+the tokens: **Light · Dark · Paper · Brand**. A rendering opens light, on the neutral default
+palette, and the reader re-seeds it live — the control writes Tier-1 values as inline properties on `<html>`, which beats every
 stylesheet rule and so sidesteps the specificity trap below entirely. Pass `--no-switcher`
 only for artifacts that must carry no chrome.
 
 Never write these regions by hand. `journey.sh theme <file>` owns them:
 
 ```
-journey.sh theme map.html --init                 # tokens + switcher; opens dark
+journey.sh theme map.html --init                 # tokens + switcher; opens light
 journey.sh theme map.html --preset paper         # paper | midnight | blueprint | contrast
 journey.sh theme map.html --primary '#6C2BD9' --surface '#fff' --text '#1a1320'
 journey.sh theme map.html --clear                # back to default

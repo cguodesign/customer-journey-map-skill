@@ -53,13 +53,13 @@ brand seed values, Tier 2 derives the semantic palette from them in OKLab, Tier 
 to each file. The renderings themselves contain **no literal colour values at all**, except where an
 artifact reseeds Tier 1 on purpose — which is the whole point of Tier 1:
 
-Every rendering **opens dark and carries a switch** — Dark · Light · Paper · Brand — so the
+Every rendering **opens light, on the neutral palette, and carries a switch** — Light · Dark · Paper · Brand — so the
 palette is something the reader tries rather than something the gallery asserts. None of them
 ships a fixed identity any more:
 
 | What the switch does | Mechanism |
 |---|---|
-| Dark (default) / Light | sets `data-theme`; the shipped palette re-derives |
+| Light (default) / Dark | sets `data-theme`; the shipped palette re-derives |
 | Paper | re-seeds 4 Tier-1 values — warm paper, the printed-artifact look |
 | Brand | re-seeds 4 Tier-1 values — a purple brand, dark |
 

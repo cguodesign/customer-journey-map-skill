@@ -5,6 +5,30 @@ All notable changes to the journey skill are listed here. Versions follow
 release adds capability, a major release changes a file format in a way that
 older journey files or logs cannot be read.
 
+## [Unreleased]
+
+### Changed
+- The default palette is neutral: white paper, near-black ink, a grey scale
+  between them, and one red reserved for the moment of truth. Emotion valence
+  is drawn as a lightness ramp (hollow points for positive, solid for negative)
+  instead of a green/red pair, and automation is a grey dashed line. The old
+  warm dark seed with an orange accent is gone. The in-page **Dark** switch
+  gives the neutral dark; `theme --preset midnight` keeps its own blue-black
+  palette.
+- Renderings open light. The in-page switch reads **Light · Dark · Paper ·
+  Brand**, with Light selected; it used to open dark.
+- Dark mode re-derives from the same neutral seed (zinc-950 paper, zinc-50
+  ink, a lighter red), including `--brand-on-primary`, which the dark blocks
+  did not set before.
+- The `opportunity` marker is derived darker than the positive valence fill it
+  shares a seed with, so a dashed opportunity border stays visible on a light
+  fill.
+- Templates take their typeface from the `--font` token instead of a
+  hard-coded system stack, and the emotion-curve template draws a flat ink
+  tint under the curve instead of a green-to-red gradient.
+- Default type stack prefers Geist / Geist Mono when installed, falling back
+  to the system faces; default radius is 6px.
+
 ## [0.1.2] - 2026-10-19
 
 ### Fixed
