@@ -5,9 +5,24 @@ All notable changes to the journey skill are listed here. Versions follow
 release adds capability, a major release changes a file format in a way that
 older journey files or logs cannot be read.
 
-## [Unreleased]
+## [0.2.0] - 2026-11-01
+
+### Added
+- Language packs: `references/i18n/en.md`, `fr.md`, `ja.md` and `zh.md` list
+  every schema field with its display label in that language and the words
+  people use for it. The skill reads the pack for the conversation language
+  to match the user's words to an existing field instead of inventing a
+  custom one, and to label fields the same way in every rendering. Field
+  keys in journey files stay the English schema names.
+- `journey.sh validate` suggests the field to use for an unknown key:
+  `unknown field (not in schema): "waitingTime" — did you mean "waitTime"?`.
+  It catches case and separator variants, small typos, near-misses of a
+  registered custom field, and labels or synonyms from the language packs.
 
 ### Changed
+- `journey.sh validate` rejects a step line whose key is not a field name at
+  all, such as `- Wait time: 3 days` or `- 等待时间: 3 天`, and names the
+  field it most likely means. These lines used to pass without being checked.
 - The default palette is neutral: white paper, near-black ink, a grey scale
   between them, and one red reserved for the moment of truth. Emotion valence
   is drawn as a lightness ramp (hollow points for positive, solid for negative)

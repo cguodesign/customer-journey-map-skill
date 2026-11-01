@@ -39,6 +39,7 @@ that mode needs, surface the affordances for the user's phase.
 | has a mature map, or asks "what's missing / what next" | Review | `references/modes/review.md`; every file in `./.journey/`; `journey.schema.md` (category coverage); `html-rendering-guide.md` if visualizing | health review + adjacent journeys |
 | introduces a novel concept needing a field | (current mode) | `journey.schema.md` → "Custom field conventions" | propose a namespace, register it in the preamble |
 | pre-sets which dimensions to track | Plan | `journey.schema.md` → "Category activation" | honor `active-categories`; suggest within them |
+| converses in a language that has a pack: `en` `fr` `ja` `zh` | (any) | `references/i18n/<lang>.md` | map their words to fields; label fields in their language |
 | has more than one journey in `./.journey/` | (any) | list them; ask which if intent is ambiguous | disambiguate before loading |
 | has no storage available | Express / Modify | — | paste-back flow (see Storage) |
 
@@ -52,6 +53,15 @@ high-level summary of detail already captured **on a step** (frontstage / backst
 support), use that **composite field** with `_provenance: auto-composite` instead of
 inventing one; the schema has no milestone-level composite, so a cross-step rollup is either
 a registered custom field or a step-level composite — never an unregistered ad-hoc field.
+
+**Fields in the user's language.** Field keys in a journey file are always the English schema
+names. When the conversation is in another language, the language pack
+`references/i18n/<lang>.md` maps the user's words to those keys (its **Label** and **Also called**
+columns) and gives the display name to use for each field in every expression, so a rendering
+says 痛点 or Point de friction the same way each time. Check the pack before calling a concept
+novel: a word listed there is an existing field, not a custom one. Values stay in the user's
+words. With no pack for the language, translate labels from the schema descriptions and keep
+them consistent within the file.
 
 ---
 
@@ -141,7 +151,8 @@ deterministically before using it: `scripts/journey.sh commit <journey> register
 <prefix_name> "<description>"` (namespace prefix `team_` / `vertical_` / `experiment_`, or any
 `<scope>_`; a name without one is refused).
 `validate` rejects both an unregistered custom field and an un-prefixed unknown field — route
-both through this flow.
+both through this flow. When it says `did you mean "<field>"`, the concept already exists:
+use that field, and register a custom one only if the user confirms it is different.
 
 This script is the local / Codex adapter's write path; Notion/Drive adapters keep their MCP
 flow. Rendering stays model-side (there is no `render` command).

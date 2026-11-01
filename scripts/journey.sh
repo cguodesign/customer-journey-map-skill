@@ -29,6 +29,10 @@ JOURNEY_DIR="${JOURNEY_DIR:-./.journey}"
 # script under references/; override with JOURNEY_SCHEMA.
 JOURNEY_SCHEMA="${JOURNEY_SCHEMA:-$SCRIPT_DIR/../references/journey.schema.md}"
 
+# Language packs (references/i18n/<lang>.md): localized labels and synonyms per
+# field. validate reads them to suggest the schema name for a localized key.
+JOURNEY_I18N_DIR="${JOURNEY_I18N_DIR:-$SCRIPT_DIR/../references/i18n}"
+
 # Cache dir for the extracted field list (keyed on schema mtime).
 CACHE_DIR="${TMPDIR:-/tmp}/journey-sh-cache"
 
@@ -105,12 +109,62 @@ _field_list() {
 # provenance notation + id rules + cross-ref integrity.
 # Exit 0 = OK (prints summary unless quiet), 1 = errors (always printed).
 _validate_path() {
-  local f="$1" disp="$2" quiet="$3" fields
+  local f="$1" disp="$2" quiet="$3" fields packs
   fields="$(_field_list)"
-  awk -v FNAME="$disp" -v quiet="$quiet" '
-    NR==FNR { if ($0!="") vocab[$0]=1; next }
+  shopt -s nullglob
+  packs=("$JOURNEY_I18N_DIR"/*.md)
+  shopt -u nullglob
+  LC_ALL=C awk -v FNAME="$disp" -v quiet="$quiet" -v VF="$fields" -v JF="$f" '
+    FILENAME==VF { if ($0!="") { vocab[$0]=1; vnorm[norm($0)]=$0 } next }
+    # language-pack rows: | `field` | Label | synonym, synonym |
+    FILENAME!=JF {
+      if ($0 !~ /^\|[ \t]*`[^`]+`[ \t]*\|/) next
+      nf=split($0,C,"|"); fld=C[2]; gsub(/[ \t`]/,"",fld)
+      if (!(fld in vocab)) next
+      terms=C[3] "," C[4]
+      nt=split(terms,T,/,|，|、/)
+      for (i=1;i<=nt;i++) { t=norm(T[i]); if (t!="" && !(t in term)) term[t]=fld }
+      next
+    }
 
     function add(l,m){ NE++; EL[NE]=l; EM[NE]=m }
+    # normalized form for lookups: ASCII lowercase, no spaces/_/-/./apostrophes
+    function norm(s){ s=tolower(s); gsub(/[ \t_.\047-]/,"",s); gsub(/’/,"",s); return s }
+    function lev(a,b,   la,lb,i,j,c,d,P,Q){
+      la=length(a); lb=length(b)
+      for (j=0;j<=lb;j++) P[j]=j
+      for (i=1;i<=la;i++) {
+        Q[0]=i
+        for (j=1;j<=lb;j++) {
+          c=(substr(a,i,1)==substr(b,j,1))?0:1
+          d=P[j]+1; if (Q[j-1]+1<d) d=Q[j-1]+1; if (P[j-1]+c<d) d=P[j-1]+c
+          Q[j]=d
+        }
+        for (j=0;j<=lb;j++) P[j]=Q[j]
+      }
+      return P[lb]
+    }
+    # closest schema (or registered custom) field for a name that is not one
+    function suggest(k,   n,best,bd,lim,c,d,lc){
+      n=norm(k)
+      if (n=="") return ""
+      if (n in vnorm) return vnorm[n]
+      if (n in term)  return term[n]
+      if (k !~ /^[A-Za-z0-9 _.\047-]+$/) return ""
+      lim=(length(n)<=4)?1:((length(n)<=8)?2:3)
+      bd=lim+1; best=""
+      for (c in vnorm) {
+        if (length(c)-length(n)>lim || length(n)-length(c)>lim) continue
+        d=lev(n,c); if (d<bd || (d==bd && vnorm[c]<best)) { bd=d; best=vnorm[c] }
+      }
+      for (c in reg) {
+        lc=tolower(c)
+        if (length(lc)-length(n)>lim || length(n)-length(lc)>lim) continue
+        d=lev(n,lc); if (d<bd || (d==bd && c<best)) { bd=d; best=c }
+      }
+      return best
+    }
+    function dym(k,   s){ s=suggest(k); return (s=="" || s==k) ? "" : " — did you mean \"" s "\"?" }
     function flush(){
       if (ctx=="milestone") {
         if (!hT) add(bl,"milestone \"" cid "\": missing required field: title")
@@ -190,10 +244,24 @@ _validate_path() {
           if (!(fname in vocab)) {
             if (fname ~ /_/) {
               if (!(fname in reg))
-                add(FNR,"custom field not registered in preamble: \"" fname "\" — run: journey.sh commit <journey> register-field " fname " \"<description>\"")
+                add(FNR,"custom field not registered in preamble: \"" fname "\"" dym(fname) " — run: journey.sh commit <journey> register-field " fname " \"<description>\"")
             } else {
-              add(FNR,"unknown field (not in schema): \"" fname "\" — if user-confirmed, register it as a custom field with a namespace prefix (e.g. team_" fname ") via register-field")
+              add(FNR,"unknown field (not in schema): \"" fname "\"" dym(fname) " — if user-confirmed, register it as a custom field with a namespace prefix (e.g. team_" fname ") via register-field")
             }
+          }
+        }
+      }
+      # --- a step line keyed by something that is not a field name at all
+      #     (a localized label, words with spaces): "- 等待时间: …", "- Wait time: …"
+      else if (ctx=="step" && $0 ~ /^- [^ ]/) {
+        p=index($0,":"); q=index($0,"：")
+        if (q>0 && (p==0 || q<p)) p=q
+        if (p>3) {
+          key=substr($0,3,p-3); gsub(/[ \t]+$/,"",key)
+          if (key!="" && length(key)<=60 && key !~ /[`"*()[]/ && index(key,"]")==0 && index(key,"→")==0) {
+            s=suggest(key)
+            if (s!="") add(FNR,"field key is not a schema field name: \"" key "\" — did you mean \"" s "\"? (keys stay the English schema names; labels are for display)")
+            else       add(FNR,"field key is not a schema field name: \"" key "\" — keys stay the English schema names; look the word up in references/i18n/<lang>.md, or register a custom field")
           }
         }
       }
@@ -222,7 +290,7 @@ _validate_path() {
       if (!quiet) printf "FAILED: %d error(s)\n", NE
       exit 1
     }
-  ' "$fields" "$f"
+  ' "$fields" ${packs[@]+"${packs[@]}"} "$f"
 }
 
 cmd_validate() {
@@ -933,6 +1001,7 @@ QUERY FILTERS
 ENV
   JOURNEY_DIR          dataset dir (default ./.journey)
   JOURNEY_SCHEMA       schema file (default <script>/../references/journey.schema.md)
+  JOURNEY_I18N_DIR     language packs validate reads for suggestions (default <script>/../references/i18n)
   JOURNEY_AUTHOR_FILE  saved-author file (default $XDG_CONFIG_HOME/journey-skill/author)
 EOF
 }

@@ -13,7 +13,7 @@ stays with the model; mechanical/correctness work is deterministic here.
 | # | `journey.sh …` | Does | Status |
 |---|----------------|------|--------|
 | 1 | `commit` | Block-level node CRUD (`insert`/`replace`/`remove` a step or milestone by id) → place + validate + log. **The write path.** | ✅ built + tested |
-| 2 | `validate` | Well-formed file + field names ∈ schema (field list awk-extracted from `references/journey.schema.md`). Called by `commit`; also standalone. | ✅ built + tested |
+| 2 | `validate` | Well-formed file + field names ∈ schema (field list awk-extracted from `references/journey.schema.md`). An unknown key gets `did you mean` with the closest field: a case or separator variant, a small typo, or a label or synonym from `references/i18n/*.md`. Called by `commit`; also standalone. | ✅ built + tested |
 | 3 | `query` / `search` / `audit` | Filter/search across `./.journey/*.md`; `audit` reads the changelogs. | ✅ built + tested |
 | 4 | `theme` | Install / re-seed the colour token layer inside a rendering; pins `data-theme` and writes the selector the specificity rules demand. | ✅ built + tested |
 | 5 | `render` | LLM picks mode/params; a fill step produces HTML. Lower priority (LLM does it today). | ⬜ stays LLM-side (no command) |
