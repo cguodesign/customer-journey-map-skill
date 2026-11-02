@@ -5,6 +5,16 @@ All notable changes to the journey skill are listed here. Versions follow
 release adds capability, a major release changes a file format in a way that
 older journey files or logs cannot be read.
 
+## [0.2.1] - 2026-11-01
+
+### Fixed
+- `journey.sh validate` no longer reports a dangling cross-ref for `→` used
+  as ordinary text, as in `emotion: Confusion → overwhelm` or
+  `branchCondition: If paid → happy path`. Step links are read from `next`,
+  `previous`, `recoveryPath`, `branchCondition` and `parallelPath`; the
+  format reference describes which targets count. The plan-express example
+  journey now validates.
+
 ## [0.2.0] - 2026-11-01
 
 ### Added

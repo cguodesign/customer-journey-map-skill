@@ -128,6 +128,7 @@ _validate_path() {
     }
 
     function add(l,m){ NE++; EL[NE]=l; EM[NE]=m }
+    BEGIN { split("next previous recoveryPath branchCondition parallelPath",LF," "); for (i in LF) linkf[LF[i]]=1 }
     # normalized form for lookups: ASCII lowercase, no spaces/_/-/./apostrophes
     function norm(s){ s=tolower(s); gsub(/[ \t_.\047-]/,"",s); gsub(/’/,"",s); return s }
     function lev(a,b,   la,lb,i,j,c,d,P,Q){
@@ -205,7 +206,7 @@ _validate_path() {
       # --- milestone header ---
       if ($0 ~ /^## Milestone:/) {
         flush()
-        ctx="milestone"; bl=FNR; hT=0; hD=0
+        ctx="milestone"; bl=FNR; hT=0; hD=0; lk=""
         id=$0; sub(/^## Milestone:[ \t]*/,"",id); gsub(/[ \t]+$/,"",id); cid=id
         if (id !~ /^[a-z0-9]+(-[a-z0-9]+)*$/) add(FNR,"milestone id not kebab-case: \"" id "\"")
         if (id in mseen) add(FNR,"duplicate milestone id: \"" id "\""); mseen[id]=1
@@ -214,7 +215,7 @@ _validate_path() {
       # --- step header ---
       if ($0 ~ /^### Step:/) {
         flush()
-        ctx="step"; bl=FNR; hP=0; hD=0
+        ctx="step"; bl=FNR; hP=0; hD=0; lk=""
         id=$0; sub(/^### Step:[ \t]*/,"",id); gsub(/[ \t]+$/,"",id); cid=id
         if (id !~ /^[a-z0-9]+(-[a-z0-9]+)*$/) add(FNR,"step id not kebab-case: \"" id "\"")
         if (id in sseen) add(FNR,"duplicate step id: \"" id "\""); sseen[id]=1
@@ -267,12 +268,21 @@ _validate_path() {
       }
 
       # --- collect cross-references (→ step-id) ---
-      if (index($0,"→")>0) {
+      # Only link fields carry step references; elsewhere → is prose
+      # ("emotion: Confusion → overwhelm"). In next/previous every target is a
+      # step id. In the other link fields a target counts when it is
+      # hyphenated, ends the value, or is followed by , ; . ) or " (" — so
+      # "branchCondition: If paid → happy path" stays prose.
+      if (match($0,/^[ \t]*- [A-Za-z][A-Za-z0-9_-]*:/)) { lk=substr($0,1,RLENGTH); sub(/^[ \t]*- /,"",lk); sub(/:$/,"",lk) }
+      if (index($0,"→")>0 && (lk in linkf)) {
         n=split($0,P,"→")
         for (i=2;i<=n;i++) {
           t=P[i]; sub(/^[ \t]+/,"",t)
-          if (match(t,/^[a-z0-9][a-z0-9-]*/)) {
-            NR2++; RT[NR2]=substr(t,1,RLENGTH); RL[NR2]=FNR
+          if (match(t,/^[a-z0-9]+(-[a-z0-9]+)*/)) {
+            tok=substr(t,1,RLENGTH); rest=substr(t,RLENGTH+1)
+            if (lk=="next" || lk=="previous" || index(tok,"-")>0 || rest ~ /^[ \t]*$/ || rest ~ /^[,;.)]/ || rest ~ /^[ \t]+\(/) {
+              NR2++; RT[NR2]=tok; RL[NR2]=FNR
+            }
           }
         }
       }
