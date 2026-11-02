@@ -180,6 +180,13 @@ Use `→ <step-id>` syntax for references to other steps:
 - branchCondition: If config fails → abandon-flow
 ```
 
+Step links live in `next`, `previous`, `recoveryPath`, `branchCondition` and `parallelPath`.
+In `next` and `previous` every `→` target is a step id. In the other three, write a step id
+as a kebab-case id that ends the value or is followed by `,` `;` `.` `)` or a ` (note)`; a
+hyphenated id always counts. Anywhere else `→` is ordinary text (`emotion: Confusion →
+overwhelm`), and so is a plain word after it (`→ happy path`). `validate` reports a link
+whose step does not exist.
+
 ---
 
 ## Provenance notation
@@ -399,7 +406,7 @@ When reading a journey file:
 3. Identify steps by `### Step: <id>` headings.
 4. For each step, parse bullet items as fields. First-level bullets are field names; indented bullets are nested values or provenance.
 5. `_provenance` sub-bullets always attach to the field on the line directly above them.
-6. `→ <step-id>` is a cross-reference to another step in the file.
+6. `→ <step-id>` in a link field is a cross-reference to another step in the file (see "Cross-references").
 7. Fields not in the pre-defined vocabulary are treated as custom fields.
 
 When writing a journey file:
